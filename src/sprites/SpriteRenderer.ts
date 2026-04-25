@@ -1,480 +1,253 @@
 // ==========================================
-// SPRITE RENDERER - RPG Character Style
-// Based on reference art - anime-style RPG characters
+// SPRITE RENDERER - Using actual reference art sheets
+// Reference: 6f01f97c-f64d-4839-954f-8e64d58e4995.png and 2302f2f7-cafe-4266-b127-8b0b63dadd60.png
 // ==========================================
 
-export type BuddyType = 'slime' | 'fairy' | 'angel' | 'demon' | 'shadow' | 'crystal' | 'nature' | 'fire' | 'golden';
+export type BuddyType = 'buddy1' | 'buddy2' | 'buddy3' | 'buddy4' | 'buddy5' | 'buddy6';
 export type RarityType = 'common' | 'rare' | 'epic' | 'legendary';
 
-// Character configurations matching the UI reference
-interface CharacterConfig {
+// Character roster with actual reference art mapping
+export interface CharacterConfig {
+  id: string;
   name: string;
   type: BuddyType;
-  bodyColor: string;
-  accentColor: string;
-  hairColor?: string;
-  outfitColor: string;
-  hasWings: boolean;
-  hasHorns: boolean;
-  hasTail: boolean;
-  expression: 'happy' | 'cool' | 'cute';
+  rarity: RarityType;
+  sheet: number;        // 1 or 2 (which reference image)
+  row: number;          // 1 or 2 (top or bottom row within sheet)
+  col: number;          // Column position in the row
+  description: string;
+  stats: { hp: number; atk: number; def: number; spd: number };
 }
 
-const CHARACTER_CONFIGS: Record<BuddyType, CharacterConfig> = {
-  slime: {
-    name: 'Bubbleslime',
-    type: 'slime',
-    bodyColor: '#87CEEB',
-    accentColor: '#B0E0E6',
-    outfitColor: '#5F9EA0',
-    hasWings: false,
-    hasHorns: false,
-    hasTail: false,
-    expression: 'happy',
-  },
-  fairy: {
-    name: 'Petalfairy',
-    type: 'fairy',
-    bodyColor: '#FFE4E1',
-    accentColor: '#FFB6C1',
-    hairColor: '#FF69B4',
-    outfitColor: '#FF69B4',
-    hasWings: true,
-    hasHorns: false,
-    hasTail: false,
-    expression: 'happy',
-  },
-  angel: {
-    name: 'Cloudangel',
-    type: 'angel',
-    bodyColor: '#FFFFFF',
-    accentColor: '#E0E7FF',
-    hairColor: '#87CEEB',
-    outfitColor: '#E0E7FF',
-    hasWings: true,
-    hasHorns: false,
-    hasTail: false,
-    expression: 'happy',
-  },
-  demon: {
-    name: 'Nightdemon',
-    type: 'demon',
-    bodyColor: '#E6E6FA',
-    accentColor: '#9370DB',
-    hairColor: '#4B0082',
-    outfitColor: '#9370DB',
-    hasWings: true,
-    hasHorns: true,
-    hasTail: true,
-    expression: 'cool',
-  },
-  shadow: {
-    name: 'Darkpuff',
-    type: 'shadow',
-    bodyColor: '#4B0082',
-    accentColor: '#8B008B',
-    hairColor: '#2E0854',
-    outfitColor: '#4B0082',
-    hasWings: false,
-    hasHorns: false,
-    hasTail: false,
-    expression: 'cool',
-  },
-  crystal: {
-    name: 'Shimmerpuff',
-    type: 'crystal',
-    bodyColor: '#E0FFFF',
-    accentColor: '#00CED1',
-    hairColor: '#40E0D0',
-    outfitColor: '#20B2AA',
-    hasWings: false,
-    hasHorns: false,
-    hasTail: false,
-    expression: 'happy',
-  },
-  nature: {
-    name: 'Leafsprout',
-    type: 'nature',
-    bodyColor: '#98FB98',
-    accentColor: '#90EE90',
-    hairColor: '#228B22',
-    outfitColor: '#228B22',
-    hasWings: false,
-    hasHorns: false,
-    hasTail: false,
-    expression: 'happy',
-  },
-  fire: {
-    name: 'Blazefire',
-    type: 'fire',
-    bodyColor: '#FFDAB9',
-    accentColor: '#FFA07A',
-    hairColor: '#FF4500',
-    outfitColor: '#FF4500',
-    hasWings: true,
-    hasHorns: true,
-    hasTail: true,
-    expression: 'cool',
-  },
-  golden: {
-    name: 'Goldpuff',
-    type: 'golden',
-    bodyColor: '#FFD700',
-    accentColor: '#FFF8DC',
-    hairColor: '#FFD700',
-    outfitColor: '#FFD700',
-    hasWings: true,
-    hasHorns: true,
-    hasTail: true,
-    expression: 'happy',
-  },
-};
+// Characters extracted from reference art sheets
+// Each sheet has 2 rows of characters, 3 columns each
+const CHARACTER_ROSTER: CharacterConfig[] = [
+  // Sheet 1 - Row 1 (top) - 3 characters
+  { id: 'buddy1', name: 'Starbloom', type: 'buddy1', rarity: 'common', sheet: 1, row: 1, col: 1, description: 'A cheerful buddy with star patterns.', stats: { hp: 75, atk: 14, def: 8, spd: 15 } },
+  { id: 'buddy2', name: 'Moonpuff', type: 'buddy2', rarity: 'common', sheet: 1, row: 1, col: 2, description: 'A dreamy buddy with moon-shaped spots.', stats: { hp: 70, atk: 12, def: 10, spd: 14 } },
+  { id: 'buddy3', name: 'Crystalwisp', type: 'buddy3', rarity: 'rare', sheet: 1, row: 1, col: 3, description: 'A mystical buddy with crystal accents.', stats: { hp: 80, atk: 16, def: 12, spd: 13 } },
+  // Sheet 1 - Row 2 (bottom) - 3 characters  
+  { id: 'buddy4', name: 'Shadowleaf', type: 'buddy4', rarity: 'rare', sheet: 1, row: 2, col: 1, description: 'A nature spirit from the dark woods.', stats: { hp: 85, atk: 14, def: 14, spd: 12 } },
+  { id: 'buddy5', name: 'Frostwing', type: 'buddy5', rarity: 'epic', sheet: 1, row: 2, col: 2, description: 'An icy buddy with delicate wings.', stats: { hp: 78, atk: 20, def: 10, spd: 18 } },
+  { id: 'buddy6', name: 'Goldenheart', type: 'buddy6', rarity: 'legendary', sheet: 1, row: 2, col: 3, description: 'A royal buddy radiating golden light.', stats: { hp: 100, atk: 22, def: 18, spd: 16 } },
+  // Sheet 2 would have more characters if needed
+];
 
 // Rarity styles
-const RARITY_STYLES: Record<RarityType, { border: string; glow: string; badge: string }> = {
-  common: { border: '#87CEEB', glow: 'rgba(135, 206, 235, 0.3)', badge: '#87CEEB' },
-  rare: { border: '#9370DB', glow: 'rgba(147, 112, 219, 0.4)', badge: '#9370DB' },
-  epic: { border: '#FF69B4', glow: 'rgba(255, 105, 180, 0.5)', badge: '#FF69B4' },
-  legendary: { border: '#FFD700', glow: 'rgba(255, 215, 0, 0.6)', badge: '#FFD700' },
+const RARITY_STYLES: Record<RarityType, { border: number; glow: number; badge: number; label: string }> = {
+  common: { border: 0x87CEEB, glow: 0x87CEEB33, badge: 0x87CEEB, label: 'C' },
+  rare: { border: 0x9370DB, glow: 0x9370DB44, badge: 0x9370DB, label: 'R' },
+  epic: { border: 0xFF69B4, glow: 0xFF69B455, badge: 0xFF69B4, label: 'E' },
+  legendary: { border: 0xFFD700, glow: 0xFFD70066, badge: 0xFFD700, label: 'L' },
 };
 
-// Generate sprite matching the anime RPG style
-export function createCharacterSprite(
-  type: BuddyType,
-  rarity: RarityType,
-  size: number = 128
-): HTMLCanvasElement {
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  
-  const config = CHARACTER_CONFIGS[type];
-  const rarityStyle = RARITY_STYLES[rarity];
-  
-  const centerX = size / 2;
-  const centerY = size / 2;
-  
-  ctx.save();
-  
-  // 1. Background glow (for rare+)
-  if (rarity !== 'common') {
-    const gradient = ctx.createRadialGradient(centerX, centerY, size * 0.3, centerX, centerY, size * 0.5);
-    gradient.addColorStop(0, rarityStyle.glow);
-    gradient.addColorStop(1, 'transparent');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
-  }
-  
-  // 2. Wings (if character has wings)
-  if (config.hasWings) {
-    drawWings(ctx, centerX, centerY, size, config.bodyColor);
-  }
-  
-  // 3. Body/Torso
-  drawBody(ctx, centerX, centerY, size, config);
-  
-  // 4. Head and face
-  drawHead(ctx, centerX, centerY, size, config);
-  
-  // 5. Hair
-  if (config.hairColor) {
-    drawHair(ctx, centerX, centerY, size, config.hairColor);
-  }
-  
-  // 6. Outfit details
-  drawOutfit(ctx, centerX, centerY, size, config.outfitColor);
-  
-  // 7. Accessories (horns, tail)
-  if (config.hasHorns) drawHorns(ctx, centerX, centerY, size);
-  if (config.hasTail) drawTail(ctx, centerX, centerY, size, config.accentColor);
-  
-  // 8. Expression (eyes, mouth)
-  drawExpression(ctx, centerX, centerY, size, config.expression);
-  
-  // 9. Rarity indicator
-  drawRarityBadge(ctx, centerX, centerY, size, rarityStyle.badge);
-  
-  ctx.restore();
-  
-  return canvas;
+// Get character config by type
+export function getCharacterConfig(type: BuddyType): CharacterConfig | undefined {
+  return CHARACTER_ROSTER.find(c => c.type === type);
 }
 
-// Draw anime-style wings
-function drawWings(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, color: string): void {
-  ctx.fillStyle = color;
-  ctx.globalAlpha = 0.8;
-  
-  // Left wing
-  ctx.beginPath();
-  ctx.ellipse(cx - size * 0.45, cy - size * 0.1, size * 0.15, size * 0.25, -0.2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(cx - size * 0.5, cy + size * 0.05, size * 0.1, size * 0.18, -0.4, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Right wing
-  ctx.beginPath();
-  ctx.ellipse(cx + size * 0.45, cy - size * 0.1, size * 0.15, size * 0.25, 0.2, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(cx + size * 0.5, cy + size * 0.05, size * 0.1, size * 0.18, 0.4, 0, Math.PI * 2);
-  ctx.fill();
-  
-  ctx.globalAlpha = 1;
+// Get all character types
+export function getAllCharacterTypes(): BuddyType[] {
+  return CHARACTER_ROSTER.map(c => c.type);
 }
 
-// Draw anime body (torso)
-function drawBody(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, config: CharacterConfig): void {
-  const gradient = ctx.createLinearGradient(cx - size * 0.2, cy, cx + size * 0.2, cy + size * 0.3);
-  gradient.addColorStop(0, config.bodyColor);
-  gradient.addColorStop(1, config.accentColor);
+// Get character image path (using the full character sheet)
+export function getCharacterImagePath(type: BuddyType): string {
+  const config = getCharacterConfig(type);
+  if (!config) return '/images/sheets/sheet1.png';
   
-  ctx.fillStyle = gradient;
-  
-  // Body shape (rounded torso)
-  ctx.beginPath();
-  ctx.moveTo(cx - size * 0.25, cy + size * 0.1);
-  ctx.quadraticCurveTo(cx - size * 0.3, cy + size * 0.25, cx - size * 0.2, cy + size * 0.4);
-  ctx.lineTo(cx + size * 0.2, cy + size * 0.4);
-  ctx.quadraticCurveTo(cx + size * 0.3, cy + size * 0.25, cx + size * 0.25, cy + size * 0.1);
-  ctx.quadraticCurveTo(cx, cy, cx - size * 0.25, cy + size * 0.1);
-  ctx.fill();
+  // Use the correct sheet based on character
+  return `/images/sheets/sheet${config.sheet}.png`;
 }
 
-// Draw anime head
-function drawHead(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, config: CharacterConfig): void {
-  // Head circle
-  ctx.fillStyle = config.bodyColor;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy - size * 0.15, size * 0.22, size * 0.25, 0, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Face highlight
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-  ctx.beginPath();
-  ctx.ellipse(cx - size * 0.08, cy - size * 0.22, size * 0.06, size * 0.08, -0.3, 0, Math.PI * 2);
-  ctx.fill();
+// Get sheet image path
+export function getSheetImagePath(sheet: number): string {
+  return `/images/sheets/sheet${sheet}.png`;
 }
 
-// Draw anime hair
-function drawHair(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, color: string): void {
-  ctx.fillStyle = color;
-  
-  // Main hair
-  ctx.beginPath();
-  ctx.moveTo(cx - size * 0.25, cy - size * 0.15);
-  ctx.quadraticCurveTo(cx - size * 0.3, cy - size * 0.45, cx - size * 0.15, cy - size * 0.4);
-  ctx.lineTo(cx, cy - size * 0.45);
-  ctx.lineTo(cx + size * 0.15, cy - size * 0.4);
-  ctx.quadraticCurveTo(cx + size * 0.3, cy - size * 0.45, cx + size * 0.25, cy - size * 0.15);
-  ctx.quadraticCurveTo(cx, cy - size * 0.25, cx - size * 0.25, cy - size * 0.15);
-  ctx.fill();
-  
-  // Side hair strands
-  ctx.beginPath();
-  ctx.moveTo(cx - size * 0.25, cy - size * 0.15);
-  ctx.quadraticCurveTo(cx - size * 0.35, cy, cx - size * 0.28, cy + size * 0.1);
-  ctx.lineTo(cx - size * 0.2, cy - size * 0.05);
-  ctx.fill();
-  
-  ctx.beginPath();
-  ctx.moveTo(cx + size * 0.25, cy - size * 0.15);
-  ctx.quadraticCurveTo(cx + size * 0.35, cy, cx + size * 0.28, cy + size * 0.1);
-  ctx.lineTo(cx + size * 0.2, cy - size * 0.05);
-  ctx.fill();
+// Get all sheets
+export function getAllSheets(): string[] {
+  return [
+    '/images/sheets/sheet1.png',
+    '/images/sheets/sheet2.png',
+    '/images/sheets/character_select.png',
+    '/images/sheets/roster.png',
+  ];
 }
 
-// Draw outfit/clothing
-function drawOutfit(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, color: string): void {
-  ctx.fillStyle = color;
-  
-  // Collar/cape
-  ctx.beginPath();
-  ctx.moveTo(cx - size * 0.2, cy + size * 0.1);
-  ctx.quadraticCurveTo(cx - size * 0.25, cy + size * 0.2, cx - size * 0.15, cy + size * 0.3);
-  ctx.lineTo(cx, cy + size * 0.25);
-  ctx.lineTo(cx + size * 0.15, cy + size * 0.3);
-  ctx.quadraticCurveTo(cx + size * 0.25, cy + size * 0.2, cx + size * 0.2, cy + size * 0.1);
-  ctx.quadraticCurveTo(cx, cy + size * 0.15, cx - size * 0.2, cy + size * 0.1);
-  ctx.fill();
-  
-  // Decorative pattern
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(cx - size * 0.1, cy + size * 0.18);
-  ctx.lineTo(cx, cy + size * 0.22);
-  ctx.lineTo(cx + size * 0.1, cy + size * 0.18);
-  ctx.stroke();
-}
-
-// Draw anime horns
-function drawHorns(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number): void {
-  const hornColor = '#4B0082';
-  ctx.fillStyle = hornColor;
-  
-  // Left horn
-  ctx.beginPath();
-  ctx.moveTo(cx - size * 0.18, cy - size * 0.35);
-  ctx.lineTo(cx - size * 0.28, cy - size * 0.55);
-  ctx.lineTo(cx - size * 0.12, cy - size * 0.42);
-  ctx.closePath();
-  ctx.fill();
-  
-  // Right horn
-  ctx.beginPath();
-  ctx.moveTo(cx + size * 0.18, cy - size * 0.35);
-  ctx.lineTo(cx + size * 0.28, cy - size * 0.55);
-  ctx.lineTo(cx + size * 0.12, cy - size * 0.42);
-  ctx.closePath();
-  ctx.fill();
-}
-
-// Draw tail
-function drawTail(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, color: string): void {
-  ctx.fillStyle = color;
-  
-  ctx.beginPath();
-  ctx.moveTo(cx + size * 0.22, cy + size * 0.3);
-  ctx.quadraticCurveTo(cx + size * 0.45, cy + size * 0.4, cx + size * 0.4, cy + size * 0.2);
-  ctx.quadraticCurveTo(cx + size * 0.35, cy + size * 0.35, cx + size * 0.22, cy + size * 0.32);
-  ctx.fill();
-}
-
-// Draw anime expression
-function drawExpression(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, expression: string): void {
-  const eyeY = cy - size * 0.12;
-  const eyeSpacing = size * 0.1;
-  const eyeSize = size * 0.05;
-  
-  // Eyes (anime style - large, expressive)
-  ctx.fillStyle = '#FFFFFF';
-  
-  // Left eye
-  ctx.beginPath();
-  ctx.ellipse(cx - eyeSpacing, eyeY, eyeSize * 1.5, eyeSize * 2, 0, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Right eye
-  ctx.beginPath();
-  ctx.ellipse(cx + eyeSpacing, eyeY, eyeSize * 1.5, eyeSize * 2, 0, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Pupils
-  ctx.fillStyle = '#1a1a2e';
-  ctx.beginPath();
-  ctx.arc(cx - eyeSpacing + 1, eyeY + 2, eyeSize * 0.6, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(cx + eyeSpacing + 1, eyeY + 2, eyeSize * 0.6, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Eye shine
-  ctx.fillStyle = '#FFFFFF';
-  ctx.beginPath();
-  ctx.arc(cx - eyeSpacing - 2, eyeY - 3, eyeSize * 0.4, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.arc(cx + eyeSpacing - 2, eyeY - 3, eyeSize * 0.4, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Blush
-  ctx.fillStyle = 'rgba(255, 182, 193, 0.6)';
-  ctx.beginPath();
-  ctx.ellipse(cx - size * 0.15, cy + size * 0.02, size * 0.04, size * 0.02, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(cx + size * 0.15, cy + size * 0.02, size * 0.04, size * 0.02, 0, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Mouth based on expression
-  ctx.strokeStyle = '#1a1a2e';
-  ctx.lineWidth = 1.5;
-  ctx.lineCap = 'round';
-  
-  if (expression === 'happy') {
-    ctx.beginPath();
-    ctx.arc(cx, cy + size * 0.08, size * 0.06, 0.2 * Math.PI, 0.8 * Math.PI);
-    ctx.stroke();
-  } else if (expression === 'cool') {
-    ctx.beginPath();
-    ctx.moveTo(cx - size * 0.08, cy + size * 0.08);
-    ctx.lineTo(cx + size * 0.08, cy + size * 0.06);
-    ctx.stroke();
-  } else {
-    ctx.beginPath();
-    ctx.arc(cx, cy + size * 0.06, size * 0.04, 0, Math.PI * 2);
-    ctx.fillStyle = '#1a1a2e';
-    ctx.fill();
-  }
-}
-
-// Draw rarity badge
-function drawRarityBadge(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, color: string): void {
-  ctx.fillStyle = color;
-  
-  // Badge circle
-  ctx.beginPath();
-  ctx.arc(cx + size * 0.28, cy - size * 0.3, size * 0.06, 0, Math.PI * 2);
-  ctx.fill();
-  
-  // Badge border
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  
-  // Badge text placeholder (initials)
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = `${size * 0.05}px Arial`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-}
-
-// Create Phaser texture
-export function createPhaserTexture(
-  scene: Phaser.Scene,
-  key: string,
-  type: BuddyType,
-  rarity: RarityType,
-  size: number = 128
-): void {
-  const canvas = createCharacterSprite(type, rarity, size);
-  const texture = scene.textures.createCanvas(key, size, size);
-  if (texture) {
-    texture.context.drawImage(canvas, 0, 0);
-    texture.refresh();
-  }
-}
-
-// Generate all character textures
-export function generateAllCharacters(scene: Phaser.Scene): void {
-  const types: BuddyType[] = ['slime', 'fairy', 'angel', 'demon', 'shadow', 'crystal', 'nature', 'fire', 'golden'];
-  const rarities: RarityType[] = ['common', 'rare', 'epic', 'legendary'];
-  
-  types.forEach(type => {
-    rarities.forEach(rarity => {
-      createPhaserTexture(scene, `char_${type}_${rarity}`, type, rarity);
-    });
-  });
+// Get rarity style
+export function getRarityStyle(rarity: RarityType) {
+  return RARITY_STYLES[rarity];
 }
 
 // Get character name
 export function getCharacterName(type: BuddyType): string {
-  return CHARACTER_CONFIGS[type]?.name || type;
+  const config = getCharacterConfig(type);
+  return config?.name || type;
 }
 
-// Get all types
-export function getAllTypes(): BuddyType[] {
-  return Object.keys(CHARACTER_CONFIGS) as BuddyType[];
+// Get all characters
+export function getAllCharacters(): CharacterConfig[] {
+  return [...CHARACTER_ROSTER];
 }
 
-// Generate random name
-const NAME_PREFIXES = ['Bubbles', 'Sparkle', 'Glimmer', 'Shimmer', 'Twinkle', 'Glow', 'Moon', 'Star', 'Nova', 'Luna', 'Riley', 'Sage', 'Finn', 'Aria', 'Zephyr'];
-const NAME_SUFFIXES = ['kin', 'po', 'puff', 'star', 'beam', 'dew', 'mist', 'spark', 'glow', 'wing'];
+// Load all character sheets
+export function loadCharacterSheets(scene: Phaser.Scene): void {
+  // Load the main character sheets
+  scene.load.image('sheet1', '/images/sheets/sheet1.png');
+  scene.load.image('sheet2', '/images/sheets/sheet2.png');
+  scene.load.image('character_select', '/images/sheets/character_select.png');
+  scene.load.image('roster', '/images/sheets/roster.png');
+}
+
+// Create a sprite from the character sheet
+// x, y = position in the sheet, w, h = size of character cell
+export function createSpriteFromSheet(
+  scene: Phaser.Scene,
+  type: BuddyType,
+  x: number,
+  y: number,
+  w: number = 512,
+  h: number = 512
+): Phaser.GameObjects.Sprite {
+  const config = getCharacterConfig(type);
+  const sheetKey = config ? `sheet${config.sheet}` : 'sheet1';
+  
+  // Create the sprite from the sheet
+  const sprite = scene.add.sprite(x, y, sheetKey);
+  
+  // Set origin to center for easier positioning
+  sprite.setOrigin(0.5, 0.5);
+  
+  return sprite;
+}
+
+// Generate random buddy name
+const NAME_PREFIXES = ['Star', 'Moon', 'Crystal', 'Shadow', 'Frost', 'Golden', 'Sun', 'Cloud', 'Dream', 'Spark'];
+const NAME_SUFFIXES = ['bloom', 'puff', 'wisp', 'leaf', 'wing', 'heart', 'dust', 'glow', 'mist', 'shade'];
 
 export function generateName(): string {
   const prefix = NAME_PREFIXES[Math.floor(Math.random() * NAME_PREFIXES.length)];
   const suffix = NAME_SUFFIXES[Math.floor(Math.random() * NAME_SUFFIXES.length)];
   return `${prefix}${suffix}`;
+}
+
+// Get character by ID
+export function getCharacterById(id: string): CharacterConfig | undefined {
+  return CHARACTER_ROSTER.find(c => c.id === id);
+}
+
+// Get characters by rarity
+export function getCharactersByRarity(rarity: RarityType): CharacterConfig[] {
+  return CHARACTER_ROSTER.filter(c => c.rarity === rarity);
+}
+
+// Create a cropped sprite for a specific character from the sheet
+export function createCharacterSprite(
+  scene: Phaser.Scene,
+  type: BuddyType,
+  x: number,
+  y: number,
+  targetWidth: number = 256,
+  targetHeight: number = 256
+): Phaser.GameObjects.Sprite | null {
+  const config = getCharacterConfig(type);
+  if (!config) return null;
+  
+  // Calculate source position in the sheet
+  // Sheet is 1536x1024, divided into 2 rows and 3 columns
+  const colWidth = 512;  // 1536 / 3
+  const rowHeight = 512; // 1024 / 2
+  
+  const sourceX = (config.col - 1) * colWidth;
+  const sourceY = (config.row - 1) * rowHeight;
+  
+  // Create a texture for this specific character
+  const textureKey = `char_${type}`;
+  
+  // Check if texture already exists
+  if (scene.textures.exists(textureKey)) {
+    return scene.add.sprite(x, y, textureKey);
+  }
+  
+  // Create the cropped texture from the sheet
+  const sheetKey = `sheet${config.sheet}`;
+  
+  // Generate the cropped texture
+  const sourceTexture = scene.textures.get(sheetKey);
+  if (!sourceTexture) return null;
+  
+  // Create canvas for cropping
+  const canvas = document.createElement('canvas');
+  canvas.width = colWidth;
+  canvas.height = rowHeight;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  
+  // Get the source image
+  const sourceImage = sourceTexture.getSourceImage() as HTMLImageElement;
+  ctx.drawImage(
+    sourceImage,
+    sourceX, sourceY, colWidth, rowHeight,
+    0, 0, colWidth, rowHeight
+  );
+  
+  // Create texture from canvas
+  const texture = scene.textures.createCanvas(textureKey, colWidth, rowHeight);
+  if (!texture) return null;
+  
+  texture.context.drawImage(canvas, 0, 0);
+  texture.refresh();
+  
+  // Create sprite
+  const sprite = scene.add.sprite(x, y, textureKey);
+  sprite.setScale(targetWidth / colWidth, targetHeight / rowHeight);
+  sprite.setOrigin(0.5, 0.5);
+  
+  return sprite;
+}
+
+// Pre-generate all character textures
+export function preloadCharacterTextures(scene: Phaser.Scene): Promise<void> {
+  return new Promise((resolve) => {
+    // Wait for sheets to load
+    scene.load.once('complete', () => {
+      // Create cropped textures for all characters
+      CHARACTER_ROSTER.forEach(config => {
+        const textureKey = `char_${config.type}`;
+        if (scene.textures.exists(textureKey)) return;
+        
+        const sheetKey = `sheet${config.sheet}`;
+        const sourceTexture = scene.textures.get(sheetKey);
+        if (!sourceTexture) return;
+        
+        const colWidth = 512;
+        const rowHeight = 512;
+        const sourceX = (config.col - 1) * colWidth;
+        const sourceY = (config.row - 1) * rowHeight;
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = colWidth;
+        canvas.height = rowHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        const sourceImage = sourceTexture.getSourceImage() as HTMLImageElement;
+        ctx.drawImage(sourceImage, sourceX, sourceY, colWidth, rowHeight, 0, 0, colWidth, rowHeight);
+        
+        const texture = scene.textures.createCanvas(textureKey, colWidth, rowHeight);
+        if (texture) {
+          texture.context.drawImage(canvas, 0, 0);
+          texture.refresh();
+        }
+      });
+      resolve();
+    });
+    
+    // Start loading if not already
+    if (!scene.load.isLoading()) {
+      loadCharacterSheets(scene);
+      scene.load.start();
+    }
+  });
 }

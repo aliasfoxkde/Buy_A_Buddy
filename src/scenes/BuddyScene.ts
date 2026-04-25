@@ -6,7 +6,7 @@ import Phaser from 'phaser';
 import { COLORS } from '../config/constants';
 import { audioManager } from '../audio/AudioManager';
 import { GameStateService } from '../services/GameStateService';
-import { getCharacterName, getAllTypes, generateName } from '../sprites/SpriteRenderer';
+import { getCharacterName, getAllCharacterTypes, generateName } from '../sprites/SpriteRenderer';
 import type { BuddyType, RarityType } from '../sprites/SpriteRenderer';
 
 export class BuddyScene extends Phaser.Scene {
@@ -225,7 +225,7 @@ export class BuddyScene extends Phaser.Scene {
   }
 
   private addTestBuddy(): void {
-    const types: BuddyType[] = ['slime', 'fairy', 'angel', 'demon', 'shadow', 'crystal', 'nature', 'fire'];
+    const types: BuddyType[] = ['buddy1', 'buddy2', 'buddy3', 'buddy4', 'buddy5', 'buddy6'];
     const rarities: RarityType[] = ['common', 'rare', 'epic', 'legendary'];
     const weights = [60, 25, 12, 3];
     
