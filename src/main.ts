@@ -1,24 +1,27 @@
 // ==========================================
-// MAIN ENTRY POINT - Fullscreen responsive game
+// BUY A BUDDY - Complete RPG Game Engine
 // ==========================================
 
-import { Game, Scale } from 'phaser';
+import { Game, Scale, Types } from 'phaser';
 import { BootScene } from './scenes/BootScene';
-import { MenuScene } from './scenes/MenuSceneResponsive';
-import { GameScene } from './scenes/GameSceneResponsive';
+import { MainMenuScene } from './scenes/MainMenuScene';
+import { CharacterSelectScene } from './scenes/CharacterSelectScene';
+import { WorldScene } from './scenes/WorldScene';
+import { BattleScene } from './scenes/BattleScene';
+import { BuddyScene } from './scenes/BuddyScene';
+import { QuestScene } from './scenes/QuestScene';
+import { SettingsScene } from './scenes/SettingsScene';
 
-// Base game dimensions (internal resolution for assets)
+// ==========================================
+// GAME CONFIGURATION
+// ==========================================
+
 export const BASE_WIDTH = 400;
 export const BASE_HEIGHT = 700;
 
-// Scale mode
-type ScaleModeType = 'FIT' | 'RESIZE' | 'EXACT_FIT' | 'NO_BORDER';
-let currentScaleMode: ScaleModeType = 'FIT';
-let isFullscreen = false;
-
-// Game configuration
-const config: Phaser.Types.Core.GameConfig = {
+const GAME_CONFIG: Types.Core.GameConfig = {
   type: Phaser.AUTO,
+  backgroundColor: '#0d0d1a',
   scale: {
     mode: Scale.FIT,
     width: '100%',
@@ -27,182 +30,158 @@ const config: Phaser.Types.Core.GameConfig = {
     zoom: 1,
   },
   parent: 'game',
-  backgroundColor: '#0d0d1a',
+  dom: {
+    createContainer: false,
+  },
   physics: {
     default: 'arcade',
     arcade: {
+      gravity: { x: 0, y: 0 },
       debug: false,
     },
   },
   render: {
     pixelArt: false,
     antialias: true,
+    antialiasGL: true,
   },
 };
 
 // Create game instance
-const game = new Game(config);
+const GAME = new Game(GAME_CONFIG);
 
-// Get scale manager
-const scale = game.scale;
+// ==========================================
+// SCENE REGISTRATION
+// ==========================================
 
-// Register scenes
-game.scene.add('BootScene', BootScene);
-game.scene.add('MenuScene', MenuScene);
-game.scene.add('GameScene', GameScene);
+GAME.scene.add('BootScene', BootScene);
+GAME.scene.add('MainMenuScene', MainMenuScene);
+GAME.scene.add('CharacterSelectScene', CharacterSelectScene);
+GAME.scene.add('WorldScene', WorldScene);
+GAME.scene.add('BattleScene', BattleScene);
+GAME.scene.add('BuddyScene', BuddyScene);
+GAME.scene.add('QuestScene', QuestScene);
+GAME.scene.add('SettingsScene', SettingsScene);
 
 // Start with boot scene
-game.scene.start('BootScene');
+GAME.scene.start('BootScene');
 
 // ==========================================
-// FULLSCREEN & SCALE CONTROLS
+// FULLSCREEN CONTROL
 // ==========================================
+
+let isFullscreen = false;
 
 export function toggleFullscreen(): void {
   if (!document.fullscreenElement) {
     document.documentElement.requestFullscreen().then(() => {
       isFullscreen = true;
-      scale.scaleMode = Scale.RESIZE;
-      scale.refresh();
-    }).catch(err => {
-      console.log('Fullscreen not available:', err);
-    });
+      GAME.scale.scaleMode = Scale.RESIZE;
+      GAME.scale.refresh();
+    }).catch(() => {});
   } else {
     document.exitFullscreen().then(() => {
       isFullscreen = false;
-      scale.scaleMode = Scale.FIT;
-      scale.refresh();
+      GAME.scale.scaleMode = Scale.FIT;
+      GAME.scale.refresh();
     });
   }
-}
-
-export function setScaleMode(mode: ScaleModeType): void {
-  currentScaleMode = mode;
-  scale.scaleMode = Scale[mode];
-  scale.refresh();
-}
-
-export function zoomIn(): void {
-  const currentZoom = scale.zoom;
-  if (currentZoom < 2) {
-    scale.setZoom(Math.min(currentZoom + 0.25, 2));
-  }
-}
-
-export function zoomOut(): void {
-  const currentZoom = scale.zoom;
-  if (currentZoom > 0.5) {
-    scale.setZoom(Math.max(currentZoom - 0.25, 0.5));
-  }
-}
-
-export function resetZoom(): void {
-  scale.setZoom(1);
 }
 
 export function isFullscreenActive(): boolean {
   return isFullscreen;
 }
 
-export function getZoomLevel(): number {
-  return scale.zoom;
+export function getGame(): Game {
+  return GAME;
 }
 
 // ==========================================
-// WINDOW & RESIZE HANDLING
+// GLOBAL KEYBOARD SHORTCUTS
 // ==========================================
 
-let resizeTimeout: number;
-window.addEventListener('resize', () => {
-  clearTimeout(resizeTimeout);
-  resizeTimeout = window.setTimeout(() => {
-    scale.refresh();
-    window.dispatchEvent(new CustomEvent('gameResize', {
-      detail: {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        zoom: scale.zoom,
+// Type assertion for scene manager
+const sceneManager = GAME.scene as any;
+
+document.addEventListener('keydown', (e) => {
+  switch (e.key.toUpperCase()) {
+    case 'F':
+      toggleFullscreen();
+      break;
+    case 'ESC':
+      if (isFullscreen) {
+        toggleFullscreen();
+      } else {
+        sceneManager.stop('SettingsScene');
       }
-    }));
-  }, 100);
+      break;
+    case 'I':
+      if (!GAME.scene.isActive('SettingsScene')) {
+        sceneManager.launch('BuddyScene');
+      }
+      break;
+    case 'M':
+      if (!GAME.scene.isActive('SettingsScene')) {
+        sceneManager.launch('QuestScene');
+      }
+      break;
+  }
 });
+
+// ==========================================
+// VISIBILITY HANDLING
+// ==========================================
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) {
-    game.scene.pause('GameScene');
-    game.scene.pause('GameSceneResponsive');
+    GAME.scene.pause('WorldScene');
+    GAME.scene.pause('BattleScene');
   } else {
-    game.scene.resume('GameScene');
-    game.scene.resume('GameSceneResponsive');
-  }
-});
-
-// ==========================================
-// KEYBOARD SHORTCUTS
-// ==========================================
-
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'F' || e.key === 'f') {
-    toggleFullscreen();
-  }
-  if (e.key === 'Escape' && isFullscreen) {
-    toggleFullscreen();
-  }
-  if (e.key === '+' || e.key === '=') {
-    zoomIn();
-  }
-  if (e.key === '-' || e.key === '_') {
-    zoomOut();
-  }
-  if (e.key === '0') {
-    resetZoom();
+    GAME.scene.resume('WorldScene');
+    GAME.scene.resume('BattleScene');
   }
 });
 
 document.addEventListener('contextmenu', (e) => e.preventDefault());
 
 // ==========================================
-// EXPORTS FOR DEBUG & GAME ACCESS
+// DEBUG EXPORTS
 // ==========================================
 
-(window as any).game = game;
-(window as any).BASE_WIDTH = BASE_WIDTH;
-(window as any).BASE_HEIGHT = BASE_HEIGHT;
+(window as any).GAME = GAME;
 (window as any).toggleFullscreen = toggleFullscreen;
-(window as any).setScaleMode = setScaleMode;
-(window as any).zoomIn = zoomIn;
-(window as any).zoomOut = zoomOut;
-(window as any).resetZoom = resetZoom;
 (window as any).isFullscreen = isFullscreenActive;
-(window as any).getZoom = getZoomLevel;
 
 console.log(`
-╔══════════════════════════════════════════════════════════╗
-║                                                          ║
-║   🎮 Buy a Buddy                                        ║
-║   An immersive 2D RPG with mini-games                   ║
-║                                                          ║
-║   Base: ${BASE_WIDTH}x${BASE_HEIGHT} | Scales to fill screen
-║                                                          ║
-║   ┌─────────────────────────────────────┐               ║
-║   │ KEYBOARD SHORTCUTS                   │               ║
-║   ├─────────────────────────────────────┤               ║
-║   │ F        - Toggle Fullscreen        │               ║
-║   │ ESC      - Exit Fullscreen          │               ║
-║   │ +/-      - Zoom In/Out               │               ║
-║   │ 0        - Reset Zoom                │               ║
-║   ├─────────────────────────────────────┤               ║
-║   │ CONTROLS                            │               ║
-║   │ • WASD / Arrow Keys - Move          │               ║
-║   │ • Space / Enter - Confirm           │               ║
-║   │ • Click/Tap - Interact              │               ║
-║   ├─────────────────────────────────────┤               ║
-║   │ MOBILE                              │               ║
-║   │ • Left side - Virtual Joystick      │               ║
-║   │ • Tap buttons to interact           │               ║
-║   └─────────────────────────────────────┘               ║
-║                                                          ║
-║   📱 Auto-detects: Mobile | Tablet | Desktop | TV       ║
-║                                                          ║
-╚══════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║    ██████╗ ███████╗███╗   ██╗ ██████╗  ██████╗ ██████╗ ██╗    ║
+║    ██╔══██╗██╔════╝████╗  ██║██╔════╝ ██╔═══██╗██╔══██╗██║    ║
+║    ██████╔╝███████╗██╔██╗ ██║██║  ███╗██║   ██║██████╔╝██║    ║
+║    ██╔═══╝ ╚════██║██║╚██╗██║██║   ██║██║   ██║██╔══██╗██║    ║
+║    ██║     ███████║██║ ╚████║╚██████╔╝╚██████╔╝██║  ██║██║    ║
+║    ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝    ║
+║                                                               ║
+║    ███████╗██╗   ██╗███████╗████████╗███████╗███╗   ███╗███████╗
+║    ██╔════╝╚██╗ ██╔╝██╔════╝╚══██╔══╝██╔════╝████╗ ████║██╔════╝
+║    ███████╗ ╚████╔╝ ███████╗   ██║   █████╗  ██╔████╔██║███████╗
+║    ╚════██║  ╚██╔╝  ╚════██║   ██║   ██╔══╝  ██║╚██╔╝██║╚════██║
+║    ███████║   ██║   ███████║   ██║   ███████╗██║ ╚═╝ ██║███████║
+║    ╚══════╝   ╚═╝   ╚══════╝   ╚═╝   ╚══════╝╚═╝     ╚═╝╚══════╝
+║                                                               ║
+╠═══════════════════════════════════════════════════════════════╣
+║   ~ The Shadow King has scattered the Golden Buddies! ~       ║
+║   ~ Your journey to find them begins... ~                   ║
+╠═══════════════════════════════════════════════════════════════╣
+║   📋 CONTROLS                                                  ║
+╠═══════════════════════════════════════════════════════════════╣
+║   F         - Toggle Fullscreen (⛶)                          ║
+║   ESC       - Pause / Exit Fullscreen                         ║
+║   I         - Open Buddies (🐾)                               ║
+║   M         - Open Quests (📜)                               ║
+║   WASD      - Move                                             ║
+║   E         - Interact                                        ║
+╠═══════════════════════════════════════════════════════════════╣
+║   🎮 Good luck, Buddy Trainer!                                ║
+╚═══════════════════════════════════════════════════════════════╝
 `);

@@ -48,6 +48,8 @@ export class GameStateService {
   // Process game actions
   processAction(action: any): ActionResult {
     switch (action.type) {
+      case 'ADD_BUDDY':
+        return this.addBuddy(action.payload);
       case 'SPAWN_BUDDY':
         return this.spawnBuddy(action.forcedRarity);
       case 'ASSIGN_BUDDY':
@@ -103,6 +105,31 @@ export class GameStateService {
     this.notify();
 
     return { action: { type: 'SPAWN_BUDDY' }, success: true, result: buddy };
+  }
+
+  private addBuddy(buddyData: any): ActionResult {
+    // Add a pre-defined buddy (from character select or tutorial)
+    const buddy: Buddy = {
+      id: buddyData.id || `buddy-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      name: buddyData.name,
+      rarity: buddyData.rarity || 'common',
+      level: buddyData.level || 1,
+      xp: buddyData.xp || 0,
+      baseIncome: buddyData.baseIncome || 1,
+      stats: buddyData.stats || { attack: 10, defense: 5, speed: 10, hp: 50 },
+      equipment: { hat: null, accessory: null, badge: null },
+      traits: buddyData.traits || [],
+      positionX: 0,
+      positionY: 0,
+      isWorking: false,
+      workPlotId: null,
+      createdAt: Date.now(),
+    };
+
+    this.state.buddies.push(buddy);
+    this.notify();
+
+    return { action: { type: 'ADD_BUDDY' }, success: true, result: buddy };
   }
 
   private assignBuddy(buddyId: string, plotId: string): ActionResult {
