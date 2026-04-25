@@ -164,6 +164,12 @@ export class WorldScene extends Phaser.Scene {
       
       // Add shadow
       this.add.ellipse(pos.x, pos.y + 40, 80, 30, 0x000000, 0.2);
+      
+      // Add collision body for tree
+      const treeBody = this.add.rectangle(pos.x, pos.y + 20, 60, 80);
+      treeBody.setFillStyle(0x000000, 0);
+      this.physics.add.existing(treeBody, true);
+      this.physics.add.collider(this.player, treeBody);
     }
     
     // Rocks
@@ -176,7 +182,41 @@ export class WorldScene extends Phaser.Scene {
       const rock = this.add.sprite(pos.x, pos.y, 'environment');
       rock.setFrame(18); // Stone
       rock.setScale(0.8);
+      
+      // Add collision body for rock
+      const rockBody = this.add.rectangle(pos.x, pos.y, 50, 50);
+      rockBody.setFillStyle(0x000000, 0);
+      this.physics.add.existing(rockBody, true);
+      this.physics.add.collider(this.player, rockBody);
     }
+    
+    // Add world boundary walls
+    this.addWorldBounds();
+  }
+  
+  private addWorldBounds(): void {
+    const worldWidth = 20 * 128;  // 2560
+    const worldHeight = 15 * 128; // 1920
+    
+    // Left wall
+    const leftWall = this.add.rectangle(-30, worldHeight / 2, 60, worldHeight);
+    this.physics.add.existing(leftWall, true);
+    this.physics.add.collider(this.player, leftWall);
+    
+    // Right wall
+    const rightWall = this.add.rectangle(worldWidth + 30, worldHeight / 2, 60, worldHeight);
+    this.physics.add.existing(rightWall, true);
+    this.physics.add.collider(this.player, rightWall);
+    
+    // Top wall
+    const topWall = this.add.rectangle(worldWidth / 2, -30, worldWidth, 60);
+    this.physics.add.existing(topWall, true);
+    this.physics.add.collider(this.player, topWall);
+    
+    // Bottom wall
+    const bottomWall = this.add.rectangle(worldWidth / 2, worldHeight + 30, worldWidth, 60);
+    this.physics.add.existing(bottomWall, true);
+    this.physics.add.collider(this.player, bottomWall);
   }
   
   private createNPCs(): void {

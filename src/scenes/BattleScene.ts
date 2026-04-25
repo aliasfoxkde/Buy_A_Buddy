@@ -6,16 +6,19 @@ import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
 import { audioManager } from '../audio/AudioManager';
 import { VisualEffects } from '../utils/VisualEffects';
+import { getRandomEnemy, scaleEnemyStats, EnemyType } from '../data/enemies';
 
 export class BattleScene extends Phaser.Scene {
   private playerEntity: any = null;
   private enemyEntity: any = null;
+  private currentEnemy!: EnemyType;
   
   private uiElements: {
     playerHp: Phaser.GameObjects.Rectangle;
     playerHpText: Phaser.GameObjects.Text;
     enemyHp: Phaser.GameObjects.Rectangle;
     enemyHpText: Phaser.GameObjects.Text;
+    enemyName: Phaser.GameObjects.Text;
     playerMp: Phaser.GameObjects.Rectangle;
     playerMpText: Phaser.GameObjects.Text;
     actionButtons: Phaser.GameObjects.Container[];
@@ -31,6 +34,7 @@ export class BattleScene extends Phaser.Scene {
   private playerMaxMp: number = 50;
   private enemyMaxHp: number = 40;
   private enemyHp: number = 40;
+  private enemyDamage: number = 8;
   private battleMusicStarted: boolean = false;
   private vfx!: VisualEffects;
   
@@ -98,6 +102,31 @@ export class BattleScene extends Phaser.Scene {
     if (stats) {
       this.playerMaxHp = stats.maxHealth;
       this.playerHp = stats.health;
+    }
+    
+    // Select random enemy based on player level
+    const playerLevel = stats?.level || 1;
+    this.currentEnemy = getRandomEnemy(playerLevel);
+    
+    // Scale enemy stats
+    const scaledEnemy = scaleEnemyStats(this.currentEnemy, playerLevel);
+    this.enemyMaxHp = scaledEnemy.maxHp;
+    this.enemyHp = scaledEnemy.maxHp;
+    this.enemyDamage = scaledEnemy.damage;
+    
+    // Set enemy sprite based on type
+    const enemySprite = this.add.sprite(900, 280, 'enemies');
+    enemySprite.setFrame(this.currentEnemy.spriteIndex);
+    enemySprite.setScale(1.5);
+    
+    // Add enemy name to UI
+    if (this.uiElements) {
+      this.uiElements.enemyName?.destroy();
+      this.uiElements.enemyName = this.add.text(this.scale.width - 250, 160, this.currentEnemy.name, {
+        fontSize: '20px',
+        fontFamily: 'Arial Black, sans-serif',
+        color: '#ef4444'
+      }).setOrigin(0.5);
     }
   }
   
@@ -291,7 +320,6 @@ export class BattleScene extends Phaser.Scene {
     
     this.isPlayerTurn = false;
     this.updateTurnIndicator();
-    
     this.checkBattleEnd();
   }
   
@@ -303,8 +331,7 @@ export class BattleScene extends Phaser.Scene {
     
     this.isPlayerTurn = false;
     this.updateTurnIndicator();
-    
-    this.time.delayedCall(1000, () => this.enemyTurn());
+    this.checkBattleEnd();
   }
   
   private useItem(): void {
@@ -347,8 +374,7 @@ export class BattleScene extends Phaser.Scene {
     
     this.isPlayerTurn = false;
     this.updateTurnIndicator();
-    
-    this.time.delayedCall(1000, () => this.enemyTurn());
+    this.checkBattleEnd();
   }
   
   private attemptFlee(): void {
@@ -362,15 +388,15 @@ export class BattleScene extends Phaser.Scene {
       this.addBattleLog('Failed to escape!');
       this.isPlayerTurn = false;
       this.updateTurnIndicator();
-      this.time.delayedCall(1000, () => this.enemyTurn());
+      this.checkBattleEnd();
     }
   }
   
   private enemyTurn(): void {
     if (this.isBattleOver) return;
     
-    // Simple enemy AI - always attacks
-    const baseDamage = 8;
+    // Use scaled enemy damage
+    const baseDamage = this.enemyDamage;
     const damage = Math.max(1, baseDamage + Math.floor(Math.random() * 5) - 3);
     
     this.playerHp = Math.max(0, this.playerHp - damage);
@@ -384,10 +410,27 @@ export class BattleScene extends Phaser.Scene {
     this.vfx.flash(0xff0000, 100);
     this.vfx.showHitParticles(300, 300, 0xffaa00);
     
-    this.isPlayerTurn = true;
-    this.updateTurnIndicator();
+    const enemyName = this.currentEnemy?.name || 'Enemy';
+    this.addBattleLog(`${enemyName} attacks for ${damage} damage!`);
+    if (this.enemyHp <= 0) {
+      this.isBattleOver = true;
+      this.addBattleLog('VICTORY!');
+      gameSystems.eventBus.emit('battle:end', { victory: true });
+      this.time.delayedCall(2000, () => this.endBattle(true));
+      return;
+    }
     
-    this.checkBattleEnd();
+    if (this.playerHp <= 0) {
+      this.isBattleOver = true;
+      this.addBattleLog('DEFEAT...');
+      this.time.delayedCall(2000, () => this.endBattle(false));
+      return;
+    }
+    
+    // Schedule next enemy turn
+    if (!this.isPlayerTurn && !this.isBattleOver) {
+      this.time.delayedCall(1500, () => this.enemyTurn());
+    }
   }
   
   private checkBattleEnd(): void {
@@ -406,7 +449,7 @@ export class BattleScene extends Phaser.Scene {
       return;
     }
     
-    // Schedule next enemy turn
+    // Continue to enemy turn if not player turn
     if (!this.isPlayerTurn && !this.isBattleOver) {
       this.time.delayedCall(1500, () => this.enemyTurn());
     }
@@ -462,9 +505,9 @@ export class BattleScene extends Phaser.Scene {
     audioManager.stopMusic();
     
     // Give rewards if victory
-    if (victory) {
-      const expGain = 25;
-      const goldGain = 15;
+    if (victory && this.currentEnemy) {
+      const expGain = scaleEnemyStats(this.currentEnemy, gameSystems.getPlayerStats()?.level || 1).xpReward;
+      const goldGain = scaleEnemyStats(this.currentEnemy, gameSystems.getPlayerStats()?.level || 1).goldReward;
       
       // Add gold
       gameSystems.inventory.addGold(goldGain);
@@ -475,10 +518,13 @@ export class BattleScene extends Phaser.Scene {
       // Victory particles
       this.vfx.showLevelUpBurst(640, 300);
       
-      this.addBattleLog(`+${expGain} EXP, +${goldGain} Gold`);
+      this.addBattleLog(`Victory! +${expGain} EXP, +${goldGain} Gold`);
     } else if (!fled) {
       // Play defeat sound
       audioManager.playDefeat();
+      this.addBattleLog('Defeated... Better luck next time!');
+    } else {
+      this.addBattleLog('Escaped safely!');
     }
     
     // Fade out and return

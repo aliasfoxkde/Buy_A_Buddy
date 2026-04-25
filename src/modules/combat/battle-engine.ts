@@ -81,19 +81,19 @@ export function createEnemyEntity(enemy: EnemyDefinition, level: number = 1): Co
     id: enemy.id + '_' + Date.now(),
     name: enemy.name,
     
-    maxHealth: Math.floor(enemy.maxHealth * levelScale),
-    currentHealth: Math.floor(enemy.maxHealth * levelScale),
+    maxHealth: Math.floor((enemy.maxHealth || enemy.maxHp) * levelScale),
+    currentHealth: Math.floor((enemy.maxHealth || enemy.maxHp) * levelScale),
     maxMana: 0,
     currentMana: 0,
     
-    attack: Math.floor(enemy.attack * levelScale),
+    attack: Math.floor((enemy.attack || enemy.damage) * levelScale),
     defense: Math.floor(enemy.defense * levelScale),
-    speed: enemy.speed,
+    speed: enemy.speed || 5,
     
-    critChance: enemy.critChance,
-    critMultiplier: enemy.critMultiplier,
+    critChance: enemy.critChance || 0.1,
+    critMultiplier: enemy.critMultiplier || 1.5,
     
-    element: enemy.element,
+    element: (enemy.element as Element) || 'neutral',
     
     bonusAttack: 0,
     bonusDefense: 0,
@@ -372,10 +372,11 @@ export function calculateRewards(
       // Get base rewards from enemy definition
       const enemyDef = getEnemy(enemy.id.replace(/_\\d+$/, ''));
       if (enemyDef) {
+        const goldRange = enemyDef.gold || { min: 10, max: 20 };
         totalGold += Math.floor(
-          enemyDef.gold.min + Math.random() * (enemyDef.gold.max - enemyDef.gold.min)
+          goldRange.min + Math.random() * (goldRange.max - goldRange.min)
         );
-        totalExp += enemyDef.experience;
+        totalExp += enemyDef.experience || enemyDef.xpReward;
       }
     }
   }

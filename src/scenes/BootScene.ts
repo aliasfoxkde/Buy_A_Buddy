@@ -174,6 +174,12 @@ export class BootScene extends Phaser.Scene {
       frameWidth: 256,
       frameHeight: 256
     });
+    
+    // Enemy spritesheet (6 cols x 4 rows = 24 frames)
+    this.load.spritesheet('enemies', '/images/sprites/enemies.png', {
+      frameWidth: 256,
+      frameHeight: 256
+    });
   }
   
   private initGameSystems(): void {
