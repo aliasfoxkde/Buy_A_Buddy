@@ -2,7 +2,7 @@
 // API TYPES - Type definitions for API
 // ==========================================
 
-import { GameState, Buddy, Plot, Upgrade } from '../../game/types';
+import { GameState, Buddy, Plot, Upgrade } from '../game/types';
 
 // API Response wrapper
 export interface ApiResponse<T> {

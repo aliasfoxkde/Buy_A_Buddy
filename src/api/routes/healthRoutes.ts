@@ -3,7 +3,7 @@
 // ==========================================
 
 import { Router, Request, Response } from 'express';
-import { ApiResponse, HealthResponse } from './types';
+import { ApiResponse, HealthResponse } from '../types';
 
 const router = Router();
 const startTime = Date.now();

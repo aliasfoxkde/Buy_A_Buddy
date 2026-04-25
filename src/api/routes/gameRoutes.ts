@@ -3,10 +3,10 @@
 // ==========================================
 
 import { Router, Request, Response } from 'express';
-import { GameState } from '../game/types';
-import { getSpawnCost, getBuddyUpgradeCost, getPlotUpgradeCost, createBuddy } from '../systems/spawner';
-import { calculateIncomePerSecond } from '../systems/economy';
-import { ApiResponse, GameStateDto, toGameStateDto, ApiErrorCode } from './types';
+import { GameState } from '../../game/types';
+import { getSpawnCost, getBuddyUpgradeCost, getPlotUpgradeCost, createBuddy } from '../../systems/spawner';
+import { calculateIncomePerSecond } from '../../systems/economy';
+import { ApiResponse, GameStateDto, toGameStateDto, ApiErrorCode } from '../types';
 
 const router = Router();
 
@@ -473,7 +473,7 @@ router.post('/admin/reset', (_req: Request, res: Response) => {
 });
 
 // Helper to create buddy for spawner (uses rarity system)
-import { RARITY_CONFIG, BUDDY_NAMES, Rarity } from '../game/types';
+import { RARITY_CONFIG, BUDDY_NAMES, Rarity } from '../../game/types';
 
 function createBuddyForSpawner(): any {
   const roll = Math.random() * 100;

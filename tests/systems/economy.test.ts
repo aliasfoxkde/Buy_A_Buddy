@@ -156,19 +156,24 @@ describe('Economy System', () => {
 
   describe('getPlotMultiplierBonus', () => {
     it('should return 1 with no plot boost upgrade', () => {
-      const state = createMockGameState({
-        upgrades: state => state.upgrades.map(u => 
-          u.id === 'plot-boost' ? { ...u, currentLevel: 0 } : u
-        )
-      } as any);
-      
-      // Need to set upgrade correctly
-      const stateWithNoBoost = createMockGameState();
-      stateWithNoBoost.upgrades = stateWithNoBoost.upgrades.map(u => 
-        u.id === 'plot-boost' ? { ...u, currentLevel: 0 } : u
+      // Level 1 has 0 boost
+      // Formula: 1 + (level - 1) * 0.5 = 1 + (1-1) * 0.5 = 1
+      const state = createMockGameState();
+      state.upgrades = state.upgrades.map(u => 
+        u.id === 'plot-boost' ? { ...u, currentLevel: 1 } : u
       );
       
-      expect(getPlotMultiplierBonus(stateWithNoBoost)).toBe(1);
+      expect(getPlotMultiplierBonus(state)).toBe(1);
+    });
+
+    it('should return 1.5 with plot boost level 2', () => {
+      // 1 + (2-1) * 0.5 = 1.5
+      const state = createMockGameState();
+      state.upgrades = state.upgrades.map(u => 
+        u.id === 'plot-boost' ? { ...u, currentLevel: 2 } : u
+      );
+      
+      expect(getPlotMultiplierBonus(state)).toBe(1.5);
     });
 
     it('should increase with plot boost level', () => {
