@@ -53,8 +53,8 @@ export class BootScene extends Phaser.Scene {
     // Create sprite textures programmatically
     this.createSpriteTextures();
     
-    // Start menu scene
-    this.scene.start('MenuScene');
+    // Start with responsive menu scene
+    this.scene.start('MenuSceneResponsive');
   }
 
   private createPlaceholderAssets(): void {

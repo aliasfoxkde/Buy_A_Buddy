@@ -7,24 +7,91 @@
     <meta name="description" content="Buy a Buddy - An immersive 2D RPG with mini-games" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
     
     <title>Buy a Buddy</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     
-    <!-- Preconnect -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     
     <!-- PWA -->
     <link rel="manifest" href="/manifest.webmanifest" />
+    
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #0d0d1a;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      
+      #game {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      
+      /* Fullscreen loading state */
+      #loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0d0d1a 0%, #1a0a2e 50%, #0d0d1a 100%);
+        color: #a855f7;
+        font-size: 24px;
+        z-index: 9999;
+      }
+      
+      #loading.hidden {
+        display: none;
+      }
+      
+      .loader {
+        width: 60px;
+        height: 60px;
+        border: 4px solid #2d1b4e;
+        border-top-color: #a855f7;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body>
+    <div id="loading">
+      <div class="loader"></div>
+      <span>Loading Buy a Buddy...</span>
+    </div>
     <div id="game"></div>
     <script type="module" src="/src/main.ts"></script>
+    <script>
+      // Hide loading screen when game is ready
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const loading = document.getElementById('loading');
+          if (loading) loading.classList.add('hidden');
+        }, 1000);
+      });
+    </script>
   </body>
 </html>
