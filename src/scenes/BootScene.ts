@@ -122,7 +122,7 @@ export class BootScene extends Phaser.Scene {
       this.load.image(sprite.key, sprite.path);
     }
     
-    // Load tile spritesheets
+    // Load tile spritesheets (6 cols x 4 rows = 24 frames)
     this.load.spritesheet('tiles_ground', '/images/sprites/tiles_ground.png', {
       frameWidth: 128,
       frameHeight: 128
@@ -142,6 +142,37 @@ export class BootScene extends Phaser.Scene {
     this.load.spritesheet('ui_bars', '/images/sprites/ui/bars.png', {
       frameWidth: 300,
       frameHeight: 30
+    });
+    
+    // Environment spritesheets (6 cols x 4 rows)
+    this.load.spritesheet('nature', '/images/sprites/nature.png', {
+      frameWidth: 256,
+      frameHeight: 256
+    });
+    
+    this.load.spritesheet('environment', '/images/sprites/environment.png', {
+      frameWidth: 256,
+      frameHeight: 256
+    });
+    
+    this.load.spritesheet('npc', '/images/sprites/npc.png', {
+      frameWidth: 256,
+      frameHeight: 256
+    });
+    
+    this.load.spritesheet('skills', '/images/sprites/skills.png', {
+      frameWidth: 256,
+      frameHeight: 256
+    });
+    
+    this.load.spritesheet('effects', '/images/sprites/effects.png', {
+      frameWidth: 256,
+      frameHeight: 256
+    });
+    
+    this.load.spritesheet('buildings', '/images/sprites/buildings.png', {
+      frameWidth: 256,
+      frameHeight: 256
     });
   }
   

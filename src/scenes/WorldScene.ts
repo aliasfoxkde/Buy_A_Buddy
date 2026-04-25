@@ -6,6 +6,7 @@ import Phaser from 'phaser';
 import { gameSystems, SpriteConfig } from '../systems/GameSystems';
 import { DialogueUI } from '../ui/DialogueUI';
 import { audioManager } from '../audio/AudioManager';
+import { getCharacterFrame, getBuddyFrame, getNPCFrame, getTileFrame } from '../utils/spriteUtils';
 
 export class WorldScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Sprite;
@@ -115,8 +116,8 @@ export class WorldScene extends Phaser.Scene {
           'tiles_ground'
         );
         
-        // Random tile frame
-        const frame = Phaser.Math.Between(0, 63);
+        // Use valid tile frame (0-23 for 6x4 grid)
+        const frame = Phaser.Math.Between(0, 23);
         tile.setFrame(frame);
         tile.setTint(Phaser.Math.RND.pick([0xffffff, 0xf0f0f0, 0xe0e0e0]));
       }
@@ -167,7 +168,7 @@ export class WorldScene extends Phaser.Scene {
     
     for (const npc of npcData) {
       const sprite = this.add.sprite(npc.position.x, npc.position.y, 'npc');
-      sprite.setFrame(npc.spriteIndex);
+      sprite.setFrame(getNPCFrame(npc.spriteIndex));
       sprite.setScale(1);
       
       // Add name above
@@ -259,11 +260,12 @@ export class WorldScene extends Phaser.Scene {
     }
     
     const pos = gameSystems.player!.position;
+    const spriteIndex = gameSystems.player!.spriteIndex;
     
-    // Create player sprite
+    // Create player sprite with correct frame
     this.player = this.add.sprite(pos.x, pos.y, 'characters');
-    this.player.setFrame(0);
-    this.player.setScale(1);
+    this.player.setFrame(getCharacterFrame(spriteIndex));
+    this.player.setScale(0.8);
     
     // Add shadow
     this.add.ellipse(pos.x, pos.y + 60, 60, 20, 0x000000, 0.3);
@@ -280,6 +282,7 @@ export class WorldScene extends Phaser.Scene {
   
   private createBuddies(): void {
     const buddyCount = 1; // Start with 1 buddy
+    const buddySpriteIndex = 0; // Default to first buddy sprite
     
     for (let i = 0; i < buddyCount; i++) {
       const buddy = this.add.sprite(
@@ -287,7 +290,7 @@ export class WorldScene extends Phaser.Scene {
         this.player.y + 20,
         'buddies'
       );
-      buddy.setFrame(i);
+      buddy.setFrame(getBuddyFrame(buddySpriteIndex + i));
       buddy.setScale(0.6);
       
       // Animation
