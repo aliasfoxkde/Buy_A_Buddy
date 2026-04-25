@@ -469,10 +469,7 @@ export class SpriteConfig {
       { key: 'npc', path: '/images/sprites/npc.png' },
       { key: 'ui_menu', path: '/images/sprites/ui/menu.png' },
       { key: 'ui_inventory', path: '/images/sprites/ui/inventory.png' },
-      { key: 'ui_bars', path: '/images/sprites/ui/bars.png' },
-      { key: 'ui_buttons', path: '/images/sprites/ui/buttons.png' },
-      { key: 'tiles_ground', path: '/images/sprites/tiles_ground.png' },
-      { key: 'tiles_walls', path: '/images/sprites/tiles_walls.png' }
+
     ];
   }
 }
