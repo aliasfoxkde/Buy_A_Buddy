@@ -1,44 +1,121 @@
 // ==========================================
-// SPRITE RENDERER - Using actual reference art sheets
-// Reference: 6f01f97c-f64d-4839-954f-8e64d58e4995.png and 2302f2f7-cafe-4266-b127-8b0b63dadd60.png
+// SPRITE RENDERER - Fixed implementation
+// Using properly extracted character sprites from reference sheets
+// Sheet 1 (6f01f97c): buddy_1_1 through buddy_1_3 (row 1), buddy_2_1 through buddy_2_3 (row 2)
+// Sheet 2 (2302f2f7): char_1_1 through char_1_3 (row 1), char_2_1 through char_2_3 (row 2)
 // ==========================================
 
-export type BuddyType = 'buddy1' | 'buddy2' | 'buddy3' | 'buddy4' | 'buddy5' | 'buddy6';
+export type BuddyType = 
+  | 'buddy_1_1' | 'buddy_1_2' | 'buddy_1_3'   // Sheet 1, Row 1
+  | 'buddy_2_1' | 'buddy_2_2' | 'buddy_2_3'   // Sheet 1, Row 2
+  | 'char_1_1' | 'char_1_2' | 'char_1_3'       // Sheet 2, Row 1
+  | 'char_2_1' | 'char_2_2' | 'char_2_3';     // Sheet 2, Row 2
+
 export type RarityType = 'common' | 'rare' | 'epic' | 'legendary';
 
-// Character roster with actual reference art mapping
 export interface CharacterConfig {
   id: string;
   name: string;
   type: BuddyType;
   rarity: RarityType;
-  sheet: number;        // 1 or 2 (which reference image)
-  row: number;          // 1 or 2 (top or bottom row within sheet)
-  col: number;          // Column position in the row
   description: string;
   stats: { hp: number; atk: number; def: number; spd: number };
 }
 
-// Characters extracted from reference art sheets
-// Each sheet has 2 rows of characters, 3 columns each
+// Character roster matching the actual extracted sprites
+// Each sprite shows anime-style characters with unique outfits
 const CHARACTER_ROSTER: CharacterConfig[] = [
-  // Sheet 1 - Row 1 (top) - 3 characters
-  { id: 'buddy1', name: 'Starbloom', type: 'buddy1', rarity: 'common', sheet: 1, row: 1, col: 1, description: 'A cheerful buddy with star patterns.', stats: { hp: 75, atk: 14, def: 8, spd: 15 } },
-  { id: 'buddy2', name: 'Moonpuff', type: 'buddy2', rarity: 'common', sheet: 1, row: 1, col: 2, description: 'A dreamy buddy with moon-shaped spots.', stats: { hp: 70, atk: 12, def: 10, spd: 14 } },
-  { id: 'buddy3', name: 'Crystalwisp', type: 'buddy3', rarity: 'rare', sheet: 1, row: 1, col: 3, description: 'A mystical buddy with crystal accents.', stats: { hp: 80, atk: 16, def: 12, spd: 13 } },
-  // Sheet 1 - Row 2 (bottom) - 3 characters  
-  { id: 'buddy4', name: 'Shadowleaf', type: 'buddy4', rarity: 'rare', sheet: 1, row: 2, col: 1, description: 'A nature spirit from the dark woods.', stats: { hp: 85, atk: 14, def: 14, spd: 12 } },
-  { id: 'buddy5', name: 'Frostwing', type: 'buddy5', rarity: 'epic', sheet: 1, row: 2, col: 2, description: 'An icy buddy with delicate wings.', stats: { hp: 78, atk: 20, def: 10, spd: 18 } },
-  { id: 'buddy6', name: 'Goldenheart', type: 'buddy6', rarity: 'legendary', sheet: 1, row: 2, col: 3, description: 'A royal buddy radiating golden light.', stats: { hp: 100, atk: 22, def: 18, spd: 16 } },
-  // Sheet 2 would have more characters if needed
+  // === SHEET 1 - First row (buddy_1_1 to buddy_1_3) ===
+  { 
+    id: 'buddy_1_1', name: 'Twilight Petal', type: 'buddy_1_1', rarity: 'rare',
+    description: 'A purple-dressed angel with pink twin-tails and delicate wings.',
+    stats: { hp: 85, atk: 18, def: 12, spd: 16 }
+  },
+  { 
+    id: 'buddy_1_2', name: 'Crystal Bloom', type: 'buddy_1_2', rarity: 'common', 
+    description: 'A cheerful character with sparkling accessories.',
+    stats: { hp: 75, atk: 14, def: 10, spd: 15 }
+  },
+  { 
+    id: 'buddy_1_3', name: 'Star Whisper', type: 'buddy_1_3', rarity: 'common',
+    description: 'A friendly buddy with a warm smile.',
+    stats: { hp: 70, atk: 12, def: 8, spd: 18 }
+  },
+  
+  // === SHEET 1 - Second row (buddy_2_1 to buddy_2_3) ===
+  { 
+    id: 'buddy_2_1', name: 'Crimson Shadow', type: 'buddy_2_1', rarity: 'epic',
+    description: 'A fierce demon character in a red dress with dark accents.',
+    stats: { hp: 80, atk: 24, def: 10, spd: 14 }
+  },
+  { 
+    id: 'buddy_2_2', name: 'Moonbeam Spirit', type: 'buddy_2_2', rarity: 'rare',
+    description: 'A mysterious figure with flowing drapes.',
+    stats: { hp: 78, atk: 16, def: 14, spd: 12 }
+  },
+  { 
+    id: 'buddy_2_3', name: 'Azure Dream', type: 'buddy_2_3', rarity: 'common',
+    description: 'A cool character with blue undertones.',
+    stats: { hp: 72, atk: 14, def: 9, spd: 17 }
+  },
+  
+  // === SHEET 2 - First row (char_1_1 to char_1_3) ===
+  { 
+    id: 'char_1_1', name: 'Golden Sunrise', type: 'char_1_1', rarity: 'legendary',
+    description: 'A majestic golden character radiating light!',
+    stats: { hp: 100, atk: 22, def: 18, spd: 15 }
+  },
+  { 
+    id: 'char_1_2', name: 'Rose Petal', type: 'char_1_2', rarity: 'common',
+    description: 'A gentle character in soft pinks.',
+    stats: { hp: 68, atk: 11, def: 12, spd: 14 }
+  },
+  { 
+    id: 'char_1_3', name: 'Shadow Weaver', type: 'char_1_3', rarity: 'rare',
+    description: 'A mysterious shadow entity.',
+    stats: { hp: 74, atk: 18, def: 11, spd: 16 }
+  },
+  
+  // === SHEET 2 - Second row (char_2_1 to char_2_3) ===
+  { 
+    id: 'char_2_1', name: 'Emerald Leaf', type: 'char_2_1', rarity: 'common',
+    description: 'A nature spirit with green tones.',
+    stats: { hp: 80, atk: 10, def: 14, spd: 12 }
+  },
+  { 
+    id: 'char_2_2', name: 'Violet Storm', type: 'char_2_2', rarity: 'epic',
+    description: 'An electrifying character with purple energy.',
+    stats: { hp: 82, atk: 20, def: 10, spd: 16 }
+  },
+  { 
+    id: 'char_2_3', name: 'Frost Fairy', type: 'char_2_3', rarity: 'rare',
+    description: 'An icy enchantress with frozen beauty.',
+    stats: { hp: 76, atk: 16, def: 14, spd: 14 }
+  },
 ];
 
 // Rarity styles
-const RARITY_STYLES: Record<RarityType, { border: number; glow: number; badge: number; label: string }> = {
-  common: { border: 0x87CEEB, glow: 0x87CEEB33, badge: 0x87CEEB, label: 'C' },
-  rare: { border: 0x9370DB, glow: 0x9370DB44, badge: 0x9370DB, label: 'R' },
-  epic: { border: 0xFF69B4, glow: 0xFF69B455, badge: 0xFF69B4, label: 'E' },
-  legendary: { border: 0xFFD700, glow: 0xFFD70066, badge: 0xFFD700, label: 'L' },
+const RARITY_STYLES: Record<RarityType, { border: number; badge: number; label: string }> = {
+  common: { border: 0x87CEEB, badge: 0x87CEEB, label: 'C' },
+  rare: { border: 0x9370DB, badge: 0x9370DB, label: 'R' },
+  epic: { border: 0xFF69B4, badge: 0xFF69B4, label: 'E' },
+  legendary: { border: 0xFFD700, badge: 0xFFD700, label: 'L' },
+};
+
+// Image paths for each character sprite
+const CHARACTER_IMAGES: Record<BuddyType, string> = {
+  'buddy_1_1': '/images/buddies/buddy_1_1.png',
+  'buddy_1_2': '/images/buddies/buddy_1_2.png',
+  'buddy_1_3': '/images/buddies/buddy_1_3.png',
+  'buddy_2_1': '/images/buddies/buddy_2_1.png',
+  'buddy_2_2': '/images/buddies/buddy_2_2.png',
+  'buddy_2_3': '/images/buddies/buddy_2_3.png',
+  'char_1_1': '/images/buddies/char_1_1.png',
+  'char_1_2': '/images/buddies/char_1_2.png',
+  'char_1_3': '/images/buddies/char_1_3.png',
+  'char_2_1': '/images/buddies/char_2_1.png',
+  'char_2_2': '/images/buddies/char_2_2.png',
+  'char_2_3': '/images/buddies/char_2_3.png',
 };
 
 // Get character config by type
@@ -51,28 +128,9 @@ export function getAllCharacterTypes(): BuddyType[] {
   return CHARACTER_ROSTER.map(c => c.type);
 }
 
-// Get character image path (using the full character sheet)
+// Get character image path
 export function getCharacterImagePath(type: BuddyType): string {
-  const config = getCharacterConfig(type);
-  if (!config) return '/images/sheets/sheet1.png';
-  
-  // Use the correct sheet based on character
-  return `/images/sheets/sheet${config.sheet}.png`;
-}
-
-// Get sheet image path
-export function getSheetImagePath(sheet: number): string {
-  return `/images/sheets/sheet${sheet}.png`;
-}
-
-// Get all sheets
-export function getAllSheets(): string[] {
-  return [
-    '/images/sheets/sheet1.png',
-    '/images/sheets/sheet2.png',
-    '/images/sheets/character_select.png',
-    '/images/sheets/roster.png',
-  ];
+  return CHARACTER_IMAGES[type] || '/images/buddies/buddy_1_1.png';
 }
 
 // Get rarity style
@@ -91,45 +149,49 @@ export function getAllCharacters(): CharacterConfig[] {
   return [...CHARACTER_ROSTER];
 }
 
-// Load all character sheets
-export function loadCharacterSheets(scene: Phaser.Scene): void {
-  // Load the main character sheets
-  scene.load.image('sheet1', '/images/sheets/sheet1.png');
-  scene.load.image('sheet2', '/images/sheets/sheet2.png');
-  scene.load.image('character_select', '/images/sheets/character_select.png');
-  scene.load.image('roster', '/images/sheets/roster.png');
+// Load all character sprites
+export function loadCharacterSprites(scene: Phaser.Scene): void {
+  CHARACTER_ROSTER.forEach(char => {
+    const path = getCharacterImagePath(char.type);
+    scene.load.image(`char_${char.type}`, path);
+  });
+  
+  // Also load the character select UI
+  scene.load.image('character_select', '/images/assets/character_select.png');
 }
 
-// Create a sprite from the character sheet
-// x, y = position in the sheet, w, h = size of character cell
-export function createSpriteFromSheet(
+// Create sprite for a character
+export function createCharacterSprite(
   scene: Phaser.Scene,
   type: BuddyType,
-  x: number,
-  y: number,
-  w: number = 512,
-  h: number = 512
-): Phaser.GameObjects.Sprite {
-  const config = getCharacterConfig(type);
-  const sheetKey = config ? `sheet${config.sheet}` : 'sheet1';
+  x: number = 0,
+  y: number = 0,
+  scale: number = 0.5
+): Phaser.GameObjects.Sprite | null {
+  const key = `char_${type}`;
   
-  // Create the sprite from the sheet
-  const sprite = scene.add.sprite(x, y, sheetKey);
+  if (scene.textures.exists(key)) {
+    return scene.add.sprite(x, y, key).setScale(scale);
+  }
   
-  // Set origin to center for easier positioning
-  sprite.setOrigin(0.5, 0.5);
+  // Fallback: try loading
+  const path = getCharacterImagePath(type);
+  if (scene.textures.exists(key)) {
+    return scene.add.sprite(x, y, key).setScale(scale);
+  }
   
-  return sprite;
+  console.warn(`Character sprite not found: ${key}`);
+  return null;
 }
 
 // Generate random buddy name
-const NAME_PREFIXES = ['Star', 'Moon', 'Crystal', 'Shadow', 'Frost', 'Golden', 'Sun', 'Cloud', 'Dream', 'Spark'];
-const NAME_SUFFIXES = ['bloom', 'puff', 'wisp', 'leaf', 'wing', 'heart', 'dust', 'glow', 'mist', 'shade'];
+const NAME_PREFIXES = ['Twilight', 'Crystal', 'Star', 'Moon', 'Sun', 'Shadow', 'Frost', 'Ember', 'Nova', 'Luna'];
+const NAME_SUFFIXES = ['Petal', 'Bloom', 'Whisper', 'Spirit', 'Dream', 'Spark', 'Glow', 'Mist', 'Beam', 'Leaf'];
 
 export function generateName(): string {
   const prefix = NAME_PREFIXES[Math.floor(Math.random() * NAME_PREFIXES.length)];
   const suffix = NAME_SUFFIXES[Math.floor(Math.random() * NAME_SUFFIXES.length)];
-  return `${prefix}${suffix}`;
+  return `${prefix} ${suffix}`;
 }
 
 // Get character by ID
@@ -142,112 +204,7 @@ export function getCharactersByRarity(rarity: RarityType): CharacterConfig[] {
   return CHARACTER_ROSTER.filter(c => c.rarity === rarity);
 }
 
-// Create a cropped sprite for a specific character from the sheet
-export function createCharacterSprite(
-  scene: Phaser.Scene,
-  type: BuddyType,
-  x: number,
-  y: number,
-  targetWidth: number = 256,
-  targetHeight: number = 256
-): Phaser.GameObjects.Sprite | null {
-  const config = getCharacterConfig(type);
-  if (!config) return null;
-  
-  // Calculate source position in the sheet
-  // Sheet is 1536x1024, divided into 2 rows and 3 columns
-  const colWidth = 512;  // 1536 / 3
-  const rowHeight = 512; // 1024 / 2
-  
-  const sourceX = (config.col - 1) * colWidth;
-  const sourceY = (config.row - 1) * rowHeight;
-  
-  // Create a texture for this specific character
-  const textureKey = `char_${type}`;
-  
-  // Check if texture already exists
-  if (scene.textures.exists(textureKey)) {
-    return scene.add.sprite(x, y, textureKey);
-  }
-  
-  // Create the cropped texture from the sheet
-  const sheetKey = `sheet${config.sheet}`;
-  
-  // Generate the cropped texture
-  const sourceTexture = scene.textures.get(sheetKey);
-  if (!sourceTexture) return null;
-  
-  // Create canvas for cropping
-  const canvas = document.createElement('canvas');
-  canvas.width = colWidth;
-  canvas.height = rowHeight;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
-  
-  // Get the source image
-  const sourceImage = sourceTexture.getSourceImage() as HTMLImageElement;
-  ctx.drawImage(
-    sourceImage,
-    sourceX, sourceY, colWidth, rowHeight,
-    0, 0, colWidth, rowHeight
-  );
-  
-  // Create texture from canvas
-  const texture = scene.textures.createCanvas(textureKey, colWidth, rowHeight);
-  if (!texture) return null;
-  
-  texture.context.drawImage(canvas, 0, 0);
-  texture.refresh();
-  
-  // Create sprite
-  const sprite = scene.add.sprite(x, y, textureKey);
-  sprite.setScale(targetWidth / colWidth, targetHeight / rowHeight);
-  sprite.setOrigin(0.5, 0.5);
-  
-  return sprite;
-}
-
-// Pre-generate all character textures
-export function preloadCharacterTextures(scene: Phaser.Scene): Promise<void> {
-  return new Promise((resolve) => {
-    // Wait for sheets to load
-    scene.load.once('complete', () => {
-      // Create cropped textures for all characters
-      CHARACTER_ROSTER.forEach(config => {
-        const textureKey = `char_${config.type}`;
-        if (scene.textures.exists(textureKey)) return;
-        
-        const sheetKey = `sheet${config.sheet}`;
-        const sourceTexture = scene.textures.get(sheetKey);
-        if (!sourceTexture) return;
-        
-        const colWidth = 512;
-        const rowHeight = 512;
-        const sourceX = (config.col - 1) * colWidth;
-        const sourceY = (config.row - 1) * rowHeight;
-        
-        const canvas = document.createElement('canvas');
-        canvas.width = colWidth;
-        canvas.height = rowHeight;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        
-        const sourceImage = sourceTexture.getSourceImage() as HTMLImageElement;
-        ctx.drawImage(sourceImage, sourceX, sourceY, colWidth, rowHeight, 0, 0, colWidth, rowHeight);
-        
-        const texture = scene.textures.createCanvas(textureKey, colWidth, rowHeight);
-        if (texture) {
-          texture.context.drawImage(canvas, 0, 0);
-          texture.refresh();
-        }
-      });
-      resolve();
-    });
-    
-    // Start loading if not already
-    if (!scene.load.isLoading()) {
-      loadCharacterSheets(scene);
-      scene.load.start();
-    }
-  });
+// Get total character count
+export function getCharacterCount(): number {
+  return CHARACTER_ROSTER.length;
 }

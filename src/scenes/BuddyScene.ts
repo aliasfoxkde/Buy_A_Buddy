@@ -225,7 +225,7 @@ export class BuddyScene extends Phaser.Scene {
   }
 
   private addTestBuddy(): void {
-    const types: BuddyType[] = ['buddy1', 'buddy2', 'buddy3', 'buddy4', 'buddy5', 'buddy6'];
+    const types: BuddyType[] = ['buddy_1_1', 'buddy_1_2', 'buddy_1_3', 'buddy_2_1', 'buddy_2_2', 'buddy_2_3', 'char_1_1', 'char_1_2', 'char_1_3', 'char_2_1', 'char_2_2', 'char_2_3'];
     const rarities: RarityType[] = ['common', 'rare', 'epic', 'legendary'];
     const weights = [60, 25, 12, 3];
     

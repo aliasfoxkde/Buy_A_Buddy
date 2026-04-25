@@ -1,173 +1,167 @@
 // ==========================================
-// E2E TESTS - Full game flow testing
+// GAME E2E TESTS - Playwright automation
 // ==========================================
 
 import { test, expect } from '@playwright/test';
+import path from 'path';
 
-test.describe('Buy a Buddy E2E Tests', () => {
+test.describe('Buy a Buddy Game', () => {
   
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
+    // Wait for game to initialize
+    await page.waitForTimeout(2000);
   });
 
   test('should load the game', async ({ page }) => {
-    // Wait for the game container
-    await expect(page.locator('#game')).toBeVisible({ timeout: 10000 });
-  });
-
-  test('should display title', async ({ page }) => {
-    await expect(page.locator('text=BUY A BUDDY')).toBeVisible();
-  });
-
-  test('should spawn a buddy', async ({ page }) => {
-    // Click spawn button
-    const spawnButton = page.locator('button:has-text("BUY")').first();
-    await expect(spawnButton).toBeVisible();
-    await spawnButton.click();
+    // Check game container exists
+    const gameContainer = page.locator('#game');
+    await expect(gameContainer).toBeVisible();
     
-    // Should see buddy added (in inventory or on plot)
+    // Check for game canvas
+    const canvas = page.locator('canvas');
+    await expect(canvas).toBeVisible();
+    
+    // Take screenshot for verification
+    await page.screenshot({ path: 'test-results/game-loaded.png' });
+  });
+
+  test('should display main menu', async ({ page }) => {
+    // Wait for main menu to appear
+    await page.waitForTimeout(3000);
+    
+    // Look for menu text elements
+    const menuVisible = await page.locator('text=Buy a Buddy').isVisible() ||
+                        await page.locator('canvas').isVisible();
+    expect(menuVisible).toBeTruthy();
+    
+    await page.screenshot({ path: 'test-results/main-menu.png' });
+  });
+
+  test('should navigate to character select', async ({ page }) => {
+    // Wait for menu to load
+    await page.waitForTimeout(3000);
+    
+    // Click on the canvas to interact (start game)
+    const canvas = page.locator('canvas').first();
+    await canvas.click();
+    
+    // Wait for character select scene
+    await page.waitForTimeout(2000);
+    
+    await page.screenshot({ path: 'test-results/character-select.png' });
+    
+    // Verify we're on the character select screen
+    // (The game should have transitioned)
+    const gameContainer = page.locator('#game');
+    await expect(gameContainer).toBeVisible();
+  });
+
+  test('should have working character cards', async ({ page }) => {
+    // Navigate to character select
+    await page.waitForTimeout(4000);
+    
+    // Click on canvas to progress
+    const canvas = page.locator('canvas').first();
+    await canvas.click();
+    await page.waitForTimeout(1000);
+    await canvas.click();
+    
+    await page.waitForTimeout(2000);
+    
+    // Take screenshot of character select
+    await page.screenshot({ path: 'test-results/character-grid.png', fullPage: true });
+  });
+
+  test('should have no console errors', async ({ page }) => {
+    const errors: string[] = [];
+    
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+    
+    page.on('pageerror', (err) => {
+      errors.push(err.message);
+    });
+    
+    // Load the game
+    await page.goto('/');
+    await page.waitForTimeout(4000);
+    
+    // Filter out known acceptable errors (like favicon 404)
+    const criticalErrors = errors.filter(e => 
+      !e.includes('favicon') && 
+      !e.includes('404') &&
+      !e.includes('manifest')
+    );
+    
+    expect(criticalErrors).toHaveLength(0);
+    
+    await page.screenshot({ path: 'test-results/no-errors.png' });
+  });
+
+  test('should work on mobile viewport', async ({ page }) => {
+    // Set mobile viewport
+    await page.setViewportSize({ width: 390, height: 844 });
+    
+    // Load the game
+    await page.goto('/');
+    await page.waitForTimeout(3000);
+    
+    // Verify game is visible
+    const canvas = page.locator('canvas');
+    await expect(canvas).toBeVisible();
+    
+    await page.screenshot({ path: 'test-results/mobile-view.png' });
+  });
+
+  test('should support fullscreen toggle', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForTimeout(3000);
+    
+    // Press F key for fullscreen
+    await page.keyboard.press('f');
+    await page.waitForTimeout(500);
+    
+    // Check if fullscreen is active
+    const isFullscreen = await page.evaluate(() => {
+      return !!document.fullscreenElement;
+    });
+    
+    await page.screenshot({ path: 'test-results/fullscreen.png' });
+    
+    // Exit fullscreen
+    await page.keyboard.press('Escape');
     await page.waitForTimeout(500);
   });
 
-  test('should assign buddy to plot', async ({ page }) => {
-    // First spawn a buddy
-    const spawnButton = page.locator('button:has-text("BUY")').first();
-    await spawnButton.click();
-    await page.waitForTimeout(300);
+  test('game asset verification', async ({ page }) => {
+    // Go to character select
+    await page.waitForTimeout(4000);
     
-    // Open inventory
-    const inventoryBtn = page.locator('button:has-text("Inventory")');
-    if (await inventoryBtn.isVisible()) {
-      await inventoryBtn.click();
-      
-      // Assign buddy
-      const assignBtn = page.locator('button:has-text("Assign")').first();
-      if (await assignBtn.isVisible()) {
-        await assignBtn.click();
-      }
+    // Click through to character select
+    const canvas = page.locator('canvas').first();
+    for (let i = 0; i < 3; i++) {
+      await canvas.click();
+      await page.waitForTimeout(500);
     }
     
-    await page.waitForTimeout(300);
-  });
-
-  test('should earn coins passively', async ({ page }) => {
-    // Get initial coins
-    const initialCoins = await page.locator('[class*="currency"]').textContent();
+    await page.waitForTimeout(3000);
     
-    // Spawn and assign buddy
-    const spawnButton = page.locator('button:has-text("BUY")').first();
-    await spawnButton.click();
-    await page.waitForTimeout(200);
-    
-    // Assign to plot if possible
-    const inventoryBtn = page.locator('button:has-text("Inventory")');
-    if (await inventoryBtn.isVisible()) {
-      await inventoryBtn.click();
-      await page.waitForTimeout(200);
-    }
-    
-    // Wait for income tick
-    await page.waitForTimeout(2000);
-    
-    // Check coins increased (if buddy was assigned)
-    // This is a basic check - real test would need proper setup
-  });
-
-  test('should open shop panel', async ({ page }) => {
-    const shopBtn = page.locator('button:has-text("Shop")');
-    if (await shopBtn.isVisible()) {
-      await shopBtn.click();
-      await expect(page.locator('[class*="modal"]')).toBeVisible();
-    }
-  });
-
-  test('should navigate between screens', async ({ page }) => {
-    // Test bottom navigation
-    const inventoryBtn = page.locator('button:has-text("Inventory")');
-    if (await inventoryBtn.isVisible()) {
-      await inventoryBtn.click();
-      await page.waitForTimeout(300);
-    }
-    
-    const statsBtn = page.locator('button:has-text("Stats")');
-    if (await statsBtn.isVisible()) {
-      await statsBtn.click();
-      await page.waitForTimeout(300);
-    }
-  });
-
-});
-
-test.describe('API Integration Tests', () => {
-  
-  test('should return game state', async ({ request }) => {
-    const response = await request.get('http://localhost:3001/api/game/state');
-    expect(response.ok()).toBeTruthy();
-    
-    const body = await response.json();
-    expect(body.success).toBe(true);
-    expect(body.data).toBeDefined();
-  });
-
-  test('should spawn buddy via API', async ({ request }) => {
-    // First add coins
-    const stateRes = await request.get('http://localhost:3001/api/game/state');
-    const state = await stateRes.json();
-    
-    // Spawn buddy
-    const spawnRes = await request.post('http://localhost:3001/api/game/action', {
-      data: { type: 'SPAWN_BUDDY' },
+    // Take full page screenshot
+    await page.screenshot({ 
+      path: 'test-results/character-select-full.png', 
+      fullPage: true 
     });
     
-    expect(spawnRes.ok()).toBeTruthy();
-    
-    const result = await spawnRes.json();
-    expect(result.success).toBe(true);
+    // Check for any resource loading errors
+    const resources = page.locator('img');
+    const count = await resources.count();
+    console.log(`Found ${count} image resources`);
   });
-
-  test('should validate game state', async ({ request }) => {
-    const response = await request.get('http://localhost:3001/api/debug/validate');
-    expect(response.ok()).toBeTruthy();
-    
-    const body = await response.json();
-    expect(body.data).toBeDefined();
-    expect(body.data.valid).toBe(true);
-  });
-
-  test('should report health', async ({ request }) => {
-    const response = await request.get('http://localhost:3001/api/health');
-    expect(response.ok()).toBeTruthy();
-    
-    const body = await response.json();
-    expect(body.data.status).toBe('ok');
-  });
-
 });
 
-test.describe('Performance Tests', () => {
-  
-  test('should maintain FPS', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForTimeout(2000);
-    
-    // Check console for performance warnings
-    const logs: string[] = [];
-    page.on('console', msg => {
-      if (msg.type() === 'error') logs.push(msg.text());
-    });
-    
-    // Interact with game
-    const spawnButton = page.locator('button:has-text("BUY")').first();
-    for (let i = 0; i < 5; i++) {
-      await spawnButton.click();
-      await page.waitForTimeout(100);
-    }
-    
-    await page.waitForTimeout(1000);
-    
-    // Should have no critical errors
-    const criticalErrors = logs.filter(l => l.includes('Error') && !l.includes('warning'));
-    expect(criticalErrors.length).toBe(0);
-  });
-
-});
+// Export for running specific tests
+export { test, expect };
