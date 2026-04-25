@@ -1,3 +1,6 @@
+# Pi CLI logs (may contain secrets)
+.pi/
+
 # Dependencies
 node_modules/
 
