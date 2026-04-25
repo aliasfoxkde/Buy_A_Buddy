@@ -1,5 +1,5 @@
 // ==========================================
-// GAME SCENE - Main gameplay
+// GAME SCENE - Main gameplay with responsive UI
 // ==========================================
 
 import Phaser from 'phaser';
@@ -8,11 +8,12 @@ import {
   getSpawnCost, formatNumber, type RarityType 
 } from '../config/constants';
 import { GameStateService } from '../services/GameStateService';
-import { DebugOverlay, PerformanceMonitor } from '../debug/DebugTools';
+import { DeviceDetector, isMobile, isTablet, isTV, getScaleFactor, getMinTouchTarget } from '../utils/deviceDetector';
+import { audioManager } from '../audio/AudioManager';
+import { PerformanceMonitor } from '../debug/DebugTools';
 
 export class GameScene extends Phaser.Scene {
   private stateService!: GameStateService;
-  private debugOverlay?: DebugOverlay;
   private performanceMonitor!: PerformanceMonitor;
   
   // Player
@@ -25,6 +26,8 @@ export class GameScene extends Phaser.Scene {
   private coinText!: Phaser.GameObjects.Text;
   private incomeText!: Phaser.GameObjects.Text;
   private spawnButton!: Phaser.GameObjects.Container;
+  private spawnButtonText!: Phaser.GameObjects.Text;
+  private spawnButtonCost!: Phaser.GameObjects.Text;
   
   // Game state
   private gameState: any;
@@ -34,45 +37,22 @@ export class GameScene extends Phaser.Scene {
   // Map
   private mapGraphics!: Phaser.GameObjects.Graphics;
   private plots: { x: number; y: number; buddyId: string | null }[] = [];
+  
+  // Responsive
+  private deviceInfo = DeviceDetector.getInstance();
+  private isTouch = false;
 
   constructor() {
     super({ key: 'GameScene' });
   }
 
   create(): void {
+    // Check if touch device
+    this.isTouch = this.deviceInfo.isTouchDevice();
+    
     // Initialize services
     this.stateService = GameStateService.getInstance();
     this.gameState = this.stateService.getState();
-    
-    // Create debug overlay
-    if (import.meta.env.DEV) {
-      this.debugOverlay = new DebugOverlay(() => {
-        const pm = this.performanceMonitor.getMetrics();
-        return {
-          fps: pm.fps,
-          frameTime: pm.frameTime,
-          memory: pm.memory,
-          entities: pm.entities,
-          drawCalls: pm.drawCalls,
-        };
-      });
-      
-      // Debug hotkeys
-      (window as any).__debugAddCoins = (amount: number) => {
-        this.gameState.player.coins += amount;
-        this.updateUI();
-      };
-      
-      (window as any).__debugSpawnBuddy = () => {
-        this.stateService.processAction({ type: 'SPAWN_BUDDY' });
-        this.gameState = this.stateService.getState();
-        this.updateUI();
-      };
-      
-      (window as any).__debugResetGame = () => {
-        location.reload();
-      };
-    }
     
     // Initialize performance monitor
     this.performanceMonitor = new PerformanceMonitor();
@@ -80,29 +60,27 @@ export class GameScene extends Phaser.Scene {
     // Background
     this.cameras.main.setBackgroundColor(COLORS.background);
     
-    // Create starfield
+    // Create game elements
     this.createStarfield();
-    
-    // Create map
     this.createMap();
-    
-    // Create plots
     this.createPlots();
-    
-    // Create player
     this.createPlayer();
-    
-    // Create UI
     this.createUI();
-    
-    // Create spawn button
     this.createSpawnButton();
     
-    // Setup input
-    this.setupInput();
+    // Setup input based on device
+    if (this.isTouch) {
+      this.setupTouchControls();
+    } else {
+      this.setupKeyboardControls();
+    }
     
-    // Setup mobile controls
-    this.setupMobileControls();
+    // Setup mobile joystick
+    this.setupMobileJoystick();
+    
+    // Camera bounds
+    this.cameras.main.setBounds(0, 0, this.worldWidth, this.worldHeight);
+    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
     
     // Subscribe to state changes
     this.stateService.subscribe((state) => {
@@ -110,48 +88,26 @@ export class GameScene extends Phaser.Scene {
       this.updateUI();
     });
     
-    // Camera bounds
-    this.cameras.main.setBounds(0, 0, this.worldWidth, this.worldHeight);
-    this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+    console.log(`🎮 GameScene created (${this.deviceInfo.getDeviceType()}, ${this.isTouch ? 'touch' : 'keyboard/mouse'})`);
   }
 
   update(): void {
     this.performanceMonitor.startFrame();
     
-    // Handle keyboard input
-    this.handleMovement();
-    
-    // Update performance metrics
-    const rawMetrics = this.performanceMonitor.getMetrics();
-    const metrics = {
-      fps: rawMetrics.fps,
-      frameTime: rawMetrics.frameTime,
-      memory: rawMetrics.memory,
-      entities: rawMetrics.entities,
-      drawCalls: rawMetrics.drawCalls,
-    };
-    this.performanceMonitor.endFrame();
-    
-    if (this.debugOverlay && import.meta.env.DEV) {
-      this.debugOverlay.updateFromReport({
-        timestamp: Date.now(),
-        player: { name: this.gameState.player.name, level: this.gameState.player.level, coins: Math.floor(this.gameState.player.coins) },
-        buddies: this.gameState.buddies.length,
-        working: this.gameState.buddies.filter((b: any) => b.isWorking).length,
-        plots: this.gameState.plots.length,
-        occupied: this.gameState.plots.filter((p: any) => p.buddyId).length,
-        quests: this.gameState.quests.length,
-        inventory: this.gameState.inventory.length,
-        statistics: this.gameState.statistics,
-        metrics: metrics,
-      });
+    // Handle movement based on device
+    if (this.isTouch) {
+      this.handleTouchMovement();
+    } else {
+      this.handleKeyboardMovement();
     }
+    
+    this.performanceMonitor.endFrame();
   }
 
   private createStarfield(): void {
     const graphics = this.add.graphics();
     
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 120; i++) {
       const x = Phaser.Math.Between(0, this.worldWidth);
       const y = Phaser.Math.Between(0, this.worldHeight);
       const size = Phaser.Math.FloatBetween(0.5, 2);
@@ -164,6 +120,7 @@ export class GameScene extends Phaser.Scene {
 
   private createMap(): void {
     this.mapGraphics = this.add.graphics();
+    const scaleFactor = getScaleFactor();
     
     // Draw floor tiles
     for (let y = 0; y < MAP_HEIGHT; y++) {
@@ -183,16 +140,17 @@ export class GameScene extends Phaser.Scene {
     
     // Draw border walls
     this.mapGraphics.fillStyle(0x3d2b5e, 1);
-    this.mapGraphics.fillRect(0, 0, this.worldWidth, TILE_SIZE); // Top
-    this.mapGraphics.fillRect(0, this.worldHeight - TILE_SIZE, this.worldWidth, TILE_SIZE); // Bottom
-    this.mapGraphics.fillRect(0, 0, TILE_SIZE, this.worldHeight); // Left
-    this.mapGraphics.fillRect(this.worldWidth - TILE_SIZE, 0, TILE_SIZE, this.worldHeight); // Right
+    this.mapGraphics.fillRect(0, 0, this.worldWidth, TILE_SIZE);
+    this.mapGraphics.fillRect(0, this.worldHeight - TILE_SIZE, this.worldWidth, TILE_SIZE);
+    this.mapGraphics.fillRect(0, 0, TILE_SIZE, this.worldHeight);
+    this.mapGraphics.fillRect(this.worldWidth - TILE_SIZE, 0, TILE_SIZE, this.worldHeight);
   }
 
   private createPlots(): void {
+    const scaleFactor = getScaleFactor();
+    const spacing = 100 * scaleFactor;
     const startX = 100;
     const startY = 150;
-    const spacing = 100;
     
     for (let i = 0; i < 9; i++) {
       const col = i % 3;
@@ -200,135 +158,166 @@ export class GameScene extends Phaser.Scene {
       const x = startX + col * spacing;
       const y = startY + row * spacing;
       
-      this.plots.push({
-        x,
-        y,
-        buddyId: null,
-      });
-      
-      this.createPlotGraphic(x, y, i + 1);
+      this.plots.push({ x, y, buddyId: null });
+      this.createPlotGraphic(x, y, i + 1, scaleFactor);
     }
   }
 
-  private createPlotGraphic(x: number, y: number, number: number): void {
+  private createPlotGraphic(x: number, y: number, number: number, scaleFactor: number): void {
+    const size = 80 * scaleFactor;
+    const radius = 12;
+    
     // Plot base
     const plot = this.add.graphics();
     plot.fillStyle(0x3d2b5e, 1);
-    plot.fillRoundedRect(x - 40, y - 40, 80, 80, 12);
+    plot.fillRoundedRect(x - size/2, y - size/2, size, size, radius);
     plot.lineStyle(2, 0xa855f7, 0.5);
-    plot.strokeRoundedRect(x - 40, y - 40, 80, 80, 12);
+    plot.strokeRoundedRect(x - size/2, y - size/2, size, size, radius);
     
     // Plot number
-    this.add.text(x, y - 25, `P${number}`, {
-      fontSize: '12px',
+    this.add.text(x, y - size/4, `P${number}`, {
+      fontSize: `${Math.round(12 * scaleFactor)}px`,
       color: COLORS.textSecondary,
     }).setOrigin(0.5);
     
     // Empty indicator
     this.add.text(x, y + 5, '+', {
-      fontSize: '24px',
+      fontSize: `${Math.round(24 * scaleFactor)}px`,
       color: '#4d3b6e',
     }).setOrigin(0.5).setName(`plot-${number}`);
   }
 
   private createPlayer(): void {
+    const scaleFactor = getScaleFactor();
+    
     this.player = this.add.container(200, 300);
     
     // Player glow
     const glow = this.add.graphics();
     glow.fillStyle(0x06b6d4, 0.4);
-    glow.fillCircle(0, 0, 20);
+    glow.fillCircle(0, 0, 20 * scaleFactor);
     this.player.add(glow);
     
     // Player body
     const body = this.add.graphics();
     body.fillStyle(0x06b6d4, 1);
-    body.fillCircle(0, -5, 14);
+    body.fillCircle(0, -5, 14 * scaleFactor);
     body.fillStyle(0x67e8f9, 0.6);
-    body.fillCircle(-4, -9, 6);
+    body.fillCircle(-4 * scaleFactor, -9 * scaleFactor, 6 * scaleFactor);
     body.fillStyle(0xffffff, 1);
-    body.fillCircle(-5, -5, 4);
-    body.fillCircle(5, -5, 4);
+    body.fillCircle(-5 * scaleFactor, -5, 4 * scaleFactor);
+    body.fillCircle(5 * scaleFactor, -5, 4 * scaleFactor);
     body.fillStyle(0x1a1a2e, 1);
-    body.fillCircle(-4, -4, 2);
-    body.fillCircle(6, -4, 2);
+    body.fillCircle(-4 * scaleFactor, -4, 2 * scaleFactor);
+    body.fillCircle(6 * scaleFactor, -4, 2 * scaleFactor);
     this.player.add(body);
     
     // Player shadow
     this.mapGraphics.fillStyle(0x000000, 0.3);
     this.mapGraphics.fillEllipse(200, 310, 20, 8);
     
-    // Size for physics
-    this.player.setSize(28, 28);
-    (this.player as any).body = { x: 200, y: 300 };
+    this.player.setSize(28 * scaleFactor, 28 * scaleFactor);
   }
 
   private createUI(): void {
+    const scaleFactor = getScaleFactor();
+    const isMobileDevice = isMobile();
+    const isTVDevice = isTV();
+    
+    // Top bar height based on device
+    const topBarHeight = isTVDevice ? 60 : isMobileDevice ? 44 : 50;
+    
     // Top bar background
     const topBar = this.add.graphics();
-    topBar.fillStyle(0x0d0d1a, 0.9);
-    topBar.fillRect(0, 0, GAME_WIDTH, 50);
+    topBar.fillStyle(0x0d0d1a, 0.95);
+    topBar.fillRect(0, 0, GAME_WIDTH, topBarHeight);
     
     // Coin display
-    this.coinText = this.add.text(20, 15, `${formatNumber(this.gameState.player.coins)}`, {
-      fontSize: '20px',
-      fontFamily: 'Arial Black',
+    const coinSize = Math.round(20 * scaleFactor);
+    this.coinText = this.add.text(20, topBarHeight / 2, `${formatNumber(this.gameState.player.coins)}`, {
+      fontSize: `${coinSize}px`,
+      fontFamily: 'Arial Black, Arial',
       color: COLORS.gold,
-    });
+    }).setOrigin(0, 0.5);
     
     // Income display
-    this.incomeText = this.add.text(100, 18, '📈 0/s', {
-      fontSize: '14px',
+    this.incomeText = this.add.text(100 * scaleFactor, topBarHeight / 2, '📈 0/s', {
+      fontSize: `${Math.round(14 * scaleFactor)}px`,
       color: COLORS.accent,
-    });
+    }).setOrigin(0, 0.5);
     
-    // Menu button
-    const menuBtn = this.add.text(GAME_WIDTH - 20, 15, '☰', {
-      fontSize: '24px',
-    }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
-    
-    menuBtn.on('pointerdown', () => {
-      this.scene.pause();
-      this.scene.launch('MenuScene');
-    });
+    // Menu button (desktop only - for mobile, use swipe)
+    if (!isMobileDevice && !isTVDevice) {
+      const menuBtn = this.add.text(GAME_WIDTH - 20, topBarHeight / 2, '☰', {
+        fontSize: '24px',
+      }).setOrigin(1, 0.5).setInteractive({ useHandCursor: true });
+      
+      menuBtn.on('pointerdown', () => {
+        audioManager.playClick();
+        this.scene.pause();
+        this.scene.launch('MenuScene');
+      });
+    }
     
     this.updateUI();
   }
 
   private createSpawnButton(): void {
     const cost = getSpawnCost(this.gameState.buddies.length);
+    const scaleFactor = getScaleFactor();
+    const isMobileDevice = isMobile();
     
-    this.spawnButton = this.add.container(GAME_WIDTH / 2, GAME_HEIGHT - 80);
+    // Button positioning
+    const buttonY = isMobileDevice ? GAME_HEIGHT - 70 : GAME_HEIGHT - 80;
+    const buttonWidth = isMobileDevice ? 140 : 150;
+    const buttonHeight = isMobileDevice ? 54 : 60;
+    
+    this.spawnButton = this.add.container(GAME_WIDTH / 2, buttonY);
     
     // Glow
     const glow = this.add.graphics();
     glow.fillStyle(0xec4899, 0.4);
-    glow.fillRoundedRect(-80, -35, 160, 70, 20);
+    glow.fillRoundedRect(-buttonWidth/2 - 5, -buttonHeight/2 - 5, buttonWidth + 10, buttonHeight + 10, 20);
     this.spawnButton.add(glow);
     
     // Button
     const bg = this.add.graphics();
     bg.fillStyle(0xec4899, 1);
-    bg.fillRoundedRect(-75, -30, 150, 60, 16);
+    bg.fillRoundedRect(-buttonWidth/2, -buttonHeight/2, buttonWidth, buttonHeight, 16);
     this.spawnButton.add(bg);
     
     // Icon
-    this.add.text(0, -10, '🎲', { fontSize: '28px' }).setOrigin(0.5).setName('spawn-icon');
-    this.spawnButton.add(this.add.text(0, 15, `BUY ${formatNumber(cost)}`, { fontSize: '14px', color: '#fff' }));
+    this.spawnButton.add(this.add.text(-buttonWidth/4, -5, '🎲', {
+      fontSize: `${Math.round(28 * scaleFactor)}px`
+    }));
     
-    this.spawnButton.setSize(150, 60);
-    this.spawnButton.setInteractive({ useHandCursor: true });
+    // Cost text
+    this.spawnButtonCost = this.add.text(15, 0, `BUY ${formatNumber(cost)}`, {
+      fontSize: `${Math.round(14 * scaleFactor)}px`,
+      color: '#fff',
+      fontStyle: 'bold',
+    }).setOrigin(0, 0.5);
+    this.spawnButton.add(this.spawnButtonCost);
     
-    this.spawnButton.on('pointerdown', () => this.spawnBuddy());
-    this.spawnButton.on('pointerover', () => {
+    // Hit area (larger for touch)
+    const hitArea = this.add.rectangle(0, 0, buttonWidth + 20, buttonHeight + 20)
+      .setInteractive({ useHandCursor: true })
+      .setAlpha(0.001);
+    this.spawnButton.add(hitArea);
+    
+    hitArea.on('pointerdown', () => this.spawnBuddy());
+    
+    hitArea.on('pointerover', () => {
+      audioManager.playClick();
       this.tweens.add({ targets: this.spawnButton, scaleX: 1.1, scaleY: 1.1, duration: 100 });
     });
-    this.spawnButton.on('pointerout', () => {
+    
+    hitArea.on('pointerout', () => {
       this.tweens.add({ targets: this.spawnButton, scaleX: 1, scaleY: 1, duration: 100 });
     });
   }
 
-  private setupInput(): void {
+  private setupKeyboardControls(): void {
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
       this.wasd = {
@@ -340,55 +329,80 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private setupMobileControls(): void {
+  private setupTouchControls(): void {
+    // Touch controls are handled by setupMobileJoystick
+    // This is for additional touch interactions if needed
+  }
+
+  private setupMobileJoystick(): void {
+    if (!this.isTouch && !isMobile()) return;
+    
+    const joystickX = 80;
+    const joystickY = GAME_HEIGHT - 100;
+    const baseRadius = 50;
+    const knobRadius = 25;
+    
     // Joystick base
     const joystickBase = this.add.graphics();
-    joystickBase.fillStyle(0xffffff, 0.1);
-    joystickBase.fillCircle(80, GAME_HEIGHT - 100, 50);
+    joystickBase.fillStyle(0xffffff, 0.15);
+    joystickBase.fillCircle(joystickX, joystickY, baseRadius);
+    joystickBase.lineStyle(2, 0xa855f7, 0.5);
+    joystickBase.strokeCircle(joystickX, joystickY, baseRadius);
     
+    // Joystick knob
     const joystickKnob = this.add.graphics();
     joystickKnob.fillStyle(0xa855f7, 0.8);
-    joystickKnob.fillCircle(80, GAME_HEIGHT - 100, 25);
+    joystickKnob.fillCircle(joystickX, joystickY, knobRadius);
     
-    let dragging = false;
+    let isDragging = false;
     let startX = 0;
     let startY = 0;
     
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      if (pointer.x < 160 && pointer.y > GAME_HEIGHT - 200) {
-        dragging = true;
-        startX = pointer.x;
-        startY = pointer.y;
+      // Only activate in left half of screen
+      if (pointer.x < 200 && pointer.y > GAME_HEIGHT - 200) {
+        isDragging = true;
+        startX = joystickX;
+        startY = joystickY;
       }
     });
     
     this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
-      if (dragging && pointer.isDown) {
+      if (isDragging && pointer.isDown) {
         const dx = pointer.x - startX;
         const dy = pointer.y - startY;
-        const dist = Math.min(Math.sqrt(dx * dx + dy * dy), 40);
+        const dist = Math.min(Math.sqrt(dx * dx + dy * dy), baseRadius);
         const angle = Math.atan2(dy, dx);
         
+        // Move knob
         joystickKnob.clear();
         joystickKnob.fillStyle(0xa855f7, 0.8);
-        joystickKnob.fillCircle(80 + Math.cos(angle) * dist, GAME_HEIGHT - 100 + Math.sin(angle) * dist, 25);
+        joystickKnob.fillCircle(
+          joystickX + Math.cos(angle) * dist,
+          joystickY + Math.sin(angle) * dist,
+          knobRadius
+        );
         
-        // Move player
-        const speed = this.playerSpeed * (dist / 40);
-        this.player.x += Math.cos(angle) * speed * 0.016;
-        this.player.y += Math.sin(angle) * speed * 0.016;
+        // Move player based on joystick position
+        const normalizedDist = dist / baseRadius;
+        const moveX = Math.cos(angle) * normalizedDist;
+        const moveY = Math.sin(angle) * normalizedDist;
+        
+        this.player.x += moveX * this.playerSpeed * 0.016;
+        this.player.y += moveY * this.playerSpeed * 0.016;
       }
     });
     
     this.input.on('pointerup', () => {
-      dragging = false;
+      isDragging = false;
+      // Reset knob position
       joystickKnob.clear();
       joystickKnob.fillStyle(0xa855f7, 0.8);
-      joystickKnob.fillCircle(80, GAME_HEIGHT - 100, 25);
+      joystickKnob.fillCircle(joystickX, joystickY, knobRadius);
     });
   }
 
-  private handleMovement(): void {
+  private handleKeyboardMovement(): void {
     let dx = 0;
     let dy = 0;
     
@@ -413,7 +427,6 @@ export class GameScene extends Phaser.Scene {
     
     // Bounce animation when moving
     if (dx !== 0 || dy !== 0) {
-      this.player.setScale(1, 0.95);
       this.tweens.add({
         targets: this.player,
         scaleX: 1.05,
@@ -424,15 +437,19 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  private handleTouchMovement(): void {
+    // Touch movement is handled by joystick in setupMobileJoystick
+    // This method is called from update() but the actual movement
+    // is handled in the pointer events
+  }
+
   private spawnBuddy(): void {
     const result = this.stateService.processAction({ type: 'SPAWN_BUDDY' });
     this.gameState = this.stateService.getState();
     
     if (result.success && result.result) {
-      // Show spawn effect
+      audioManager.playSpawn();
       this.showSpawnEffect(result.result.rarity);
-      
-      // Show floating text
       this.showFloatingText(
         GAME_WIDTH / 2, 
         GAME_HEIGHT - 150,
@@ -440,6 +457,7 @@ export class GameScene extends Phaser.Scene {
         this.getRarityColor(result.result.rarity)
       );
     } else {
+      audioManager.playHit();
       this.showFloatingText(GAME_WIDTH / 2, GAME_HEIGHT - 150, '❌ Not enough!', COLORS.danger);
     }
     
@@ -448,12 +466,13 @@ export class GameScene extends Phaser.Scene {
 
   private showSpawnEffect(rarity: RarityType): void {
     const color = this.getRarityColor(rarity);
-    const tintValue = parseInt(color.replace('#', ''), 16);
+    const colorHex = parseInt(color.replace('#', ''), 16);
+    
     const particles = this.add.particles(GAME_WIDTH / 2, GAME_HEIGHT - 80, 'particle', {
       speed: { min: 50, max: 150 },
       scale: { start: 0.5, end: 0 },
       lifespan: 500,
-      tint: tintValue,
+      tint: colorHex,
       emitting: true,
       quantity: 20,
     });
@@ -463,8 +482,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   private showFloatingText(x: number, y: number, text: string, color: string): void {
+    const scaleFactor = getScaleFactor();
+    
     const floating = this.add.text(x, y, text, {
-      fontSize: '18px',
+      fontSize: `${Math.round(18 * scaleFactor)}px`,
       fontFamily: 'Arial Black',
       color,
       stroke: '#000',
@@ -491,6 +512,8 @@ export class GameScene extends Phaser.Scene {
   }
 
   private updateUI(): void {
+    const scaleFactor = getScaleFactor();
+    
     // Update coin display
     this.coinText.setText(formatNumber(Math.floor(this.gameState.player.coins)));
     
@@ -513,5 +536,8 @@ export class GameScene extends Phaser.Scene {
     // Update button color
     const bg = this.spawnButton.getAt(1) as Phaser.GameObjects.Graphics;
     bg.clear().fillStyle(canAfford ? 0xec4899 : 0x666666, 1).fillRoundedRect(-75, -30, 150, 60, 16);
+    
+    // Update cost text
+    this.spawnButtonCost.setText(`BUY ${formatNumber(cost)}`);
   }
 }
