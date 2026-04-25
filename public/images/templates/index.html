@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buy a Buddy - Spritesheet Templates</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 { 
+      color: #a855f7; 
+      margin-bottom: 10px;
+      font-size: 2.5em;
+      text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+    }
+    h2 { 
+      color: #ec4899; 
+      margin: 30px 0 15px; 
+      padding-bottom: 8px;
+      border-bottom: 2px solid rgba(236, 72, 153, 0.3);
+    }
+    h3 { color: #22c55e; margin: 20px 0 10px; }
+    h4 { color: #f59e0b; margin: 10px 0; }
+    p { margin-bottom: 8px; color: #bbb; }
+    a { color: #a855f7; text-decoration: none; }
+    a:hover { color: #c084fc; text-decoration: underline; }
+    
+    .header {
+      text-align: center;
+      padding: 30px;
+      background: rgba(30, 30, 50, 0.8);
+      border-radius: 16px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .subtitle {
+      color: #888;
+      font-size: 1.1em;
+      margin-top: 10px;
+    }
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .template-card {
+      background: linear-gradient(145deg, #2d1b4e 0%, #1e1433 100%);
+      border-radius: 12px;
+      padding: 20px;
+      border: 2px solid rgba(168, 85, 247, 0.3);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .template-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(168, 85, 247, 0.6);
+    }
+    .template-card img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 10px 0;
+      background: rgba(0,0,0,0.3);
+      padding: 5px;
+    }
+    .template-card h4 {
+      color: #fff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .template-card p {
+      font-size: 0.9em;
+      margin: 5px 0;
+    }
+    .template-card .dims {
+      color: #888;
+      font-size: 0.85em;
+    }
+    .template-card a.download {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border-radius: 6px;
+      color: #fff;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .template-card a.download:hover {
+      background: linear-gradient(135deg, #8b5cf6, #c084fc);
+      text-decoration: none;
+    }
+    .category {
+      background: rgba(30, 30, 50, 0.6);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px 0;
+      border-left: 4px solid #a855f7;
+    }
+    .emoji { font-size: 1.2em; }
+    
+    .instructions {
+      background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
+      padding: 25px;
+      border-radius: 12px;
+      margin: 30px 0;
+    }
+    .instructions h3 { color: #fff; margin-top: 0; }
+    .instructions ol { margin-left: 20px; color: #e0e0e0; }
+    .instructions li { margin: 8px 0; }
+    
+    code {
+      background: rgba(0,0,0,0.4);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      color: #a5b4fc;
+    }
+    
+    pre {
+      background: rgba(0,0,0,0.5);
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 15px 0;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .css-example h4 { color: #22c55e; margin: 15px 0 10px; }
+    
+    .stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    .stat-box {
+      background: rgba(168, 85, 247, 0.2);
+      padding: 15px 25px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+    .stat-box strong {
+      display: block;
+      font-size: 2em;
+      color: #a855f7;
+    }
+    .stat-box span { color: #888; }
+    
+    footer {
+      margin-top: 50px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      color: #666;
+      text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+      .template-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 1.8em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎮 Buy a Buddy - Spritesheet Templates</h1>
+    <p class="subtitle">Complete game asset templates for RPG development</p>
+    
+    <div class="stats">
+      <div class="stat-box">
+        <strong>60</strong>
+        <span>Templates</span>
+      </div>
+      <div class="stat-box">
+        <strong>12</strong>
+        <span>Categories</span>
+      </div>
+      <div class="stat-box">
+        <strong>1000+</strong>
+        <span>Asset Slots</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="instructions">
+    <h3>📋 How to Use These Templates</h3>
+    <ol>
+      <li><strong>Download</strong> the template images you need</li>
+      <li><strong>Fill</strong> each grid section with your custom artwork</li>
+      <li><strong>Save</strong> the completed spritesheet as PNG</li>
+      <li><strong>Place</strong> in <code>public/images/sprites/</code></li>
+      <li><strong>Use</strong> CSS <code>background-position</code> to select sprites</li>
+    </ol>
+  </div>
+
+  <h2>🎭 Characters & Buddies</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">👤</span> Characters</h4>
+      <p class="dims">1536 × 1024 • 6×2 grid • 256×512 cells</p>
+      <p>Main character sprites for players</p>
+      <a class="download" href="./characters_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🐾</span> Buddies</h4>
+      <p class="dims">1536 × 1024 • 6×2 grid • 256×512 cells</p>
+      <p>Companion/buddy character sprites</p>
+      <a class="download" href="./buddies_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🧙</span> NPC Portraits</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Villagers, merchants, guards, nobles</p>
+      <a class="download" href="./npc_portraits_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>🪖 Combat & Skills</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">⚔️</span> Enemies</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Slimes, goblins, orcs, skeletons, zombies, ghosts</p>
+      <a class="download" href="./enemies_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🐉</span> Bosses</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Dragons, golems, demons, liches, vampires</p>
+      <a class="download" href="./bosses_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🗡️</span> Weapons</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Swords, daggers, axes, hammers, bows, staffs</p>
+      <a class="download" href="./weapons_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🛡️</span> Clothing & Armor</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Helmets, plate armor, shields, gauntlets</p>
+      <a class="download" href="./clothing_armor_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">✨</span> Skills & Abilities</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Combat moves, magic spells, buffs</p>
+      <a class="download" href="./skills_abilities_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">⬆️</span> Upgrades & Powerups</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Speed, strength, defense, magic boosts</p>
+      <a class="download" href="./upgrades_powerups_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>🏗️ Buildings & Structures</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">🏠</span> Residential</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Houses, cottages, apartments, mansions, castles</p>
+      <a class="download" href="./buildings_residential_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🏪</span> Commercial</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Shops, restaurants, offices, banks, theaters</p>
+      <a class="download" href="./buildings_commercial_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🏭</span> Industrial</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Factories, warehouses, mines, workshops</p>
+      <a class="download" href="./buildings_industrial_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🏰</span> Fortifications</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Walls, towers, gates, dungeons, bridges</p>
+      <a class="download" href="./buildings_fortification_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🏗️</span> Generic Buildings</h4>
+      <p class="dims">2048 × 2048 • 8×8 grid</p>
+      <p>All-purpose building sprites</p>
+      <a class="download" href="./buildings_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>🚗 Vehicles & Transport</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">🚗</span> Land Vehicles</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Cars, trucks, motorcycles, buses, tractors</p>
+      <a class="download" href="./vehicles_land_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">✈️</span> Air Vehicles</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Planes, helicopters, blimps, hot air balloons, UFOs</p>
+      <a class="download" href="./vehicles_air_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🚢</span> Sea Vehicles</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Boats, ships, submarines, hovercraft</p>
+      <a class="download" href="./vehicles_sea_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>🌳 Environment & Nature</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">🌲</span> Trees & Plants</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Oaks, pines, palms, bushes, flowers, vines</p>
+      <a class="download" href="./trees_plants_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🌍</span> Environment</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Grass, dirt, stone, water, ice, paths</p>
+      <a class="download" href="./environment_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">⛏️</span> Rocks & Minerals</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Boulders, ores, gems, crystals</p>
+      <a class="download" href="./rocks_minerals_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">☁️</span> Sky & Weather</h4>
+      <p class="dims">1536 × 768 • 6×4 grid</p>
+      <p>Clouds, sun, moon, rain, snow, lightning</p>
+      <a class="download" href="./sky_weather_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🐾</span> Pets & Animals</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Dogs, cats, birds, fish, horses, unicorns</p>
+      <a class="download" href="./pets_animals_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>🗺️ Tilesets</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">🟩</span> Ground Tiles</h4>
+      <p class="dims">1024 × 1024 • 8×8 grid</p>
+      <p>Grass, dirt, cobblestone, water, sand</p>
+      <a class="download" href="./tiles_ground_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🧱</span> Wall Tiles</h4>
+      <p class="dims">1024 × 1024 • 8×8 grid</p>
+      <p>Stone walls, brick walls, wood walls</p>
+      <a class="download" href="./tiles_walls_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🏠</span> Roof Tiles</h4>
+      <p class="dims">1024 × 1024 • 8×8 grid</p>
+      <p>Various roof styles, domes, pagodas</p>
+      <a class="download" href="./tiles_roofs_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🪑</span> Furniture Tiles</h4>
+      <p class="dims">1024 × 1024 • 8×8 grid</p>
+      <p>Chairs, tables, beds, shelves, lamps</p>
+      <a class="download" href="./tiles_furniture_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>🎒 Items & Objects</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">🧪</span> Consumables</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Potions, elixirs, herbs, crystals, gems</p>
+      <a class="download" href="./consumables_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">💰</span> Collectables</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Coins, gems, keys, hearts, stars, chests</p>
+      <a class="download" href="./collectables_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🍎</span> Food & Drinks</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Fruits, bread, cakes, candy, meat, fish</p>
+      <a class="download" href="./food_drinks_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">📦</span> Containers</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Chests, boxes, barrels, urns, sacks</p>
+      <a class="download" href="./containers_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🪑</span> Furniture</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Chairs, tables, beds, sofas, lamps</p>
+      <a class="download" href="./furniture_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🚪</span> Doors & Windows</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Wooden doors, metal doors, windows, shutters</p>
+      <a class="download" href="./doors_windows_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🔧</span> Tools & Utensils</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Hammers, wrenches, kitchenware, candles</p>
+      <a class="download" href="./tools_utensils_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>🎮 Game UI Elements</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">📋</span> Main Menu</h4>
+      <p class="dims">1024 × 1085</p>
+      <p>Logos, buttons, backgrounds, hero portraits</p>
+      <a class="download" href="./main_menu_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🎯</span> Level Select</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Level nodes and selectors</p>
+      <a class="download" href="./level_select_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🔘</span> Buttons</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Various button styles, toggles, checkboxes</p>
+      <a class="download" href="./ui_buttons_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">📊</span> Status Bars</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Health, mana, exp, stamina bars</p>
+      <a class="download" href="./status_bars_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🎒</span> Inventory Grid</h4>
+      <p class="dims">760 × 435</p>
+      <p>Item slots, equipment slots, tooltips</p>
+      <a class="download" href="./inventory_grid_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🗺️</span> World Map</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Towns, dungeons, paths, regions</p>
+      <a class="download" href="./world_map_elements_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🧭</span> Minimap</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Player markers, POI dots, fog of war</p>
+      <a class="download" href="./minimap_elements_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🖼️</span> UI Elements</h4>
+      <p class="dims">2048 × 2048</p>
+      <p>Panels, menus, portraits, progress bars</p>
+      <a class="download" href="./ui_elements_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">📐</span> GUI Framework</h4>
+      <p class="dims">1024 × 2100</p>
+      <p>Windows, tabs, sliders, input fields</p>
+      <a class="download" href="./gui_framework_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🎨</span> Borders & Decorations</h4>
+      <p class="dims">1152 × 600</p>
+      <p>Corners, edges, dividers, seals, badges</p>
+      <a class="download" href="./borders_decorations_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>💥 Effects & Particles</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">✨</span> Particles</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Sparkles, glows, fire, smoke, ice, slashes</p>
+      <a class="download" href="./particles_effects_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">⚡</span> Effects</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Magic circles, auras, bursts, ripples</p>
+      <a class="download" href="./effects_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🎊</span> Banners & Decorations</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Flags, ribbons, confetti, lanterns</p>
+      <a class="download" href="./banners_decorations_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>⚠️ Hazards & Obstacles</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">☠️</span> Obstacles & Hazards</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Spikes, lava, ice, poison, webs, pits</p>
+      <a class="download" href="./obstacles_hazards_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🏴‍☠️</span> Dungeon & Underground</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Cave floors, walls, torches, chains</p>
+      <a class="download" href="./dungeon_underground_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🔗</span> Interactive Objects</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Levers, switches, buttons, doors, bridges</p>
+      <a class="download" href="./interactive_objects_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>📮 Popups & Notifications</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">📢</span> Popups & Alerts</h4>
+      <p class="dims">800 × 1235</p>
+      <p>Achievements, quest notifications, dialogs</p>
+      <a class="download" href="./popups_alerts_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🏆</span> Level Select</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Level nodes 1-24</p>
+      <a class="download" href="./level_select_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>📦 Icons & Symbols</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">⭐</span> Icons & Skills</h4>
+      <p class="dims">1536 × 2048 • 12×3 grid</p>
+      <p>Action icons, magic elements, stats</p>
+      <a class="download" href="./icons_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🚩</span> Flags & Banners</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Color flags, standards, emblems</p>
+      <a class="download" href="./flags_banners_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">📝</span> Signs & Symbols</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Arrows, operators, UI symbols</p>
+      <a class="download" href="./signs_symbols_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">📚</span> Books & Documents</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Books, scrolls, maps, letters, keys</p>
+      <a class="download" href="./books_documents_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>🎵 Entertainment & Tech</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">🎸</span> Music & Entertainment</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Instruments, game controllers, puzzles</p>
+      <a class="download" href="./music_entertainment_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">💻</span> Electronics & Tech</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Computers, robots, drones, cables</p>
+      <a class="download" href="./electronics_tech_template.png" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">⚽</span> Sports & Hobbies</h4>
+      <p class="dims">1536 × 1024 • 6×4 grid</p>
+      <p>Balls, rackets, skateboards, fishing gear</p>
+      <a class="download" href="./sports_hobbies_template.png" download>Download</a>
+    </div>
+  </div>
+
+  <h2>📖 Reference & Documentation</h2>
+  <div class="template-grid">
+    <div class="template-card">
+      <h4><span class="emoji">📋</span> CSS Usage Guide</h4>
+      <p>CSS classes for sprite positioning</p>
+      <a class="download" href="./spritesheet-guide.css" download>Download</a>
+    </div>
+    
+    <div class="template-card">
+      <h4><span class="emoji">🗺️</span> Master Overview</h4>
+      <p class="dims">3272 × 3000</p>
+      <p>All templates combined for reference</p>
+      <a class="download" href="./master_all_templates.png" download>Download</a>
+    </div>
+  </div>
+
+  <div class="css-example">
+    <h3>📐 CSS Sprite Positioning</h3>
+    
+    <h4>Character/Buddy Spritesheet (6×2 grid)</h4>
+    <pre>.sprite {
+  width: 256px;
+  height: 512px;
+  background-image: url('/images/sprites/characters.png');
+  background-repeat: no-repeat;
+}
+
+/* Row 1 */
+.char-1-1 { background-position: 0 0; }
+.char-1-2 { background-position: -256px 0; }
+.char-1-3 { background-position: -512px 0; }
+.char-1-4 { background-position: -768px 0; }
+.char-1-5 { background-position: -1024px 0; }
+.char-1-6 { background-position: -1280px 0; }
+
+/* Row 2 */
+.char-2-1 { background-position: 0 -512px; }
+.char-2-2 { background-position: -256px -512px; }
+.char-2-3 { background-position: -512px -512px; }
+.char-2-4 { background-position: -768px -512px; }
+.char-2-5 { background-position: -1024px -512px; }
+.char-2-6 { background-position: -1280px -512px; }</pre>
+
+    <h4>6×4 Grid (Weapons, Items, Enemies, etc.)</h4>
+    <pre>/* Row 1 (y = 0) */
+.slot-1-1 { background-position: 0 0; }
+.slot-1-2 { background-position: -256px 0; }
+.slot-1-3 { background-position: -512px 0; }
+.slot-1-4 { background-position: -768px 0; }
+.slot-1-5 { background-position: -1024px 0; }
+.slot-1-6 { background-position: -1280px 0; }
+
+/* Row 2 (y = -256) */
+.slot-2-1 { background-position: 0 -256px; }
+.slot-2-2 { background-position: -256px -256px; }
+/* ... */</pre>
+
+    <h4>8×8 Tileset Grid</h4>
+    <pre>/* Tile size: 128×128 */
+.tile-tl { background-position: 0 0; }
+.tile-t { background-position: -128px 0; }
+.tile-tr { background-position: -256px 0; }
+.tile-l { background-position: 0 -128px; }
+.tile-c { background-position: -128px -128px; }
+/* ... */</pre>
+  </div>
+
+  <footer>
+    <p>Buy a Buddy - Game Development Project</p>
+    <p>60 templates • 12 categories • 1000+ asset slots</p>
+  </footer>
+</body>
+</html>

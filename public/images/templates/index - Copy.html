@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buy a Buddy - Spritesheet Templates</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 { color: #a855f7; margin-bottom: 20px; }
+    h2 { color: #ec4899; margin: 20px 0 10px; }
+    h3 { color: #22c55e; margin: 15px 0 10px; }
+    p { margin-bottom: 10px; }
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .template-card {
+      background: #2d1b4e;
+      border-radius: 12px;
+      padding: 20px;
+      border: 2px solid #a855f7;
+    }
+    .template-card img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    .template-card h4 {
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .template-card ul {
+      margin-left: 20px;
+    }
+    .template-card li {
+      margin: 5px 0;
+    }
+    code {
+      background: #1a1a2e;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .warning {
+      background: #7c3aed;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .success {
+      background: #059669;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .dimensions {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+    .dim-box {
+      background: #3d2b5e;
+      padding: 10px 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .dim-box strong {
+      display: block;
+      color: #a855f7;
+      font-size: 1.2em;
+    }
+    pre {
+      background: #0d0d1a;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+    .grid-preview {
+      display: grid;
+      gap: 2px;
+      background: #333;
+      padding: 5px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    .grid-cell {
+      aspect-ratio: 1/2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      background: #2d1b4e;
+      border: 1px solid #555;
+    }
+    .css-example {
+      background: #0d0d1a;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 15px 0;
+    }
+    .css-example h4 {
+      color: #22c55e;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 Buy a Buddy - Spritesheet Templates</h1>
+  
+  <div class="warning">
+    <strong>⚠️ INSTRUCTIONS FOR CREATING GAME ASSETS</strong>
+    <p>Download the template images below. Fill each section with your artwork following the grid layout. When done, save as PNG and place in <code>public/images/sprites/</code></p>
+  </div>
+
+  <h2>📥 DOWNLOAD TEMPLATES</h2>
+  <div class="template-grid">
+    
+    <div class="template-card">
+      <h4>🎭 Characters Spritesheet</h4>
+      <p><strong>Size:</strong> 1536 × 1024 pixels</p>
+      <p><strong>Grid:</strong> 6 columns × 2 rows</p>
+      <p><strong>Cell Size:</strong> 256 × 512 pixels each</p>
+      <p><strong>Use for:</strong> Main character sprites</p>
+      <img src="./characters_template.png" alt="Characters template" style="max-height: 300px;">
+      <a href="./characters_template.png" download>Download characters_template.png</a>
+    </div>
+
+    <div class="template-card">
+      <h4>🐾 Buddies Spritesheet</h4>
+      <p><strong>Size:</strong> 1536 × 1024 pixels</p>
+      <p><strong>Grid:</strong> 6 columns × 2 rows</p>
+      <p><strong>Cell Size:</strong> 256 × 512 pixels each</p>
+      <p><strong>Use for:</strong> Companion/buddy sprites</p>
+      <img src="./buddies_template.png" alt="Buddies template" style="max-height: 300px;">
+      <a href="./buddies_template.png" download>Download buddies_template.png</a>
+    </div>
+
+    <div class="template-card">
+      <h4>🖼️ UI Elements Spritesheet</h4>
+      <p><strong>Size:</strong> 2048 × 2048 pixels</p>
+      <p><strong>Use for:</strong> Menus, buttons, icons, frames, dialogs</p>
+      <img src="./ui_elements_template.png" alt="UI template" style="max-height: 300px;">
+      <a href="./ui_elements_template.png" download>Download ui_elements_template.png</a>
+    </div>
+
+    <div class="template-card">
+      <h4>📋 Master Overview</h4>
+      <p><strong>All templates combined for reference</strong></p>
+      <img src="./master_template.png" alt="Master template" style="max-height: 400px;">
+      <a href="./master_template.png" download>Download master_template.png</a>
+    </div>
+  </div>
+
+  <h2>📐 SPRITESHEET LAYOUTS</h2>
+  
+  <h3>Character & Buddy Sheets (1536×1024)</h3>
+  <div class="dimensions">
+    <div class="dim-box">
+      <strong>1536px</strong>
+      <span>Width</span>
+    </div>
+    <div class="dim-box">
+      <strong>1024px</strong>
+      <span>Height</span>
+    </div>
+    <div class="dim-box">
+      <strong>256×512</strong>
+      <span>Cell Size</span>
+    </div>
+    <div class="dim-box">
+      <strong>6×2</strong>
+      <span>Grid</span>
+    </div>
+  </div>
+  
+  <p>Each spritesheet has 12 character slots (6 per row, 2 rows):</p>
+  
+  <h4>Grid Layout:</h4>
+  <div class="grid-preview" style="grid-template-columns: repeat(6, 1fr); max-width: 600px;">
+    <div class="grid-cell">1_1<br><small>top-left</small></div>
+    <div class="grid-cell">1_2</div>
+    <div class="grid-cell">1_3</div>
+    <div class="grid-cell">1_4</div>
+    <div class="grid-cell">1_5</div>
+    <div class="grid-cell">1_6<br><small>top-right</small></div>
+    <div class="grid-cell">2_1<br><small>bottom-left</small></div>
+    <div class="grid-cell">2_2</div>
+    <div class="grid-cell">2_3</div>
+    <div class="grid-cell">2_4</div>
+    <div class="grid-cell">2_5</div>
+    <div class="grid-cell">2_6<br><small>bottom-right</small></div>
+  </div>
+
+  <h2>🎨 CSS POSITIONING EXAMPLES</h2>
+  
+  <div class="css-example">
+    <h4>Loading sprites with CSS</h4>
+    <pre>.sprite {
+  width: 256px;
+  height: 512px;
+  background-image: url('/images/sprites/characters.png');
+  background-repeat: no-repeat;
+}
+
+/* Position sprites using background-position */
+.char-1-1 { background-position: 0 0; }
+.char-1-2 { background-position: -256px 0; }
+.char-1-3 { background-position: -512px 0; }
+.char-1-4 { background-position: -768px 0; }
+.char-1-5 { background-position: -1024px 0; }
+.char-1-6 { background-position: -1280px 0; }
+
+.char-2-1 { background-position: 0 -512px; }
+.char-2-2 { background-position: -256px -512px; }
+/* ... etc */</pre>
+  </div>
+
+  <div class="css-example">
+    <h4>HTML Usage</h4>
+    <pre>&lt;div class="character-card"&gt;
+  &lt;div class="sprite char-2-3" style="background-position: -512px -512px;"&gt;&lt;/div&gt;
+  &lt;span class="name"&gt;My Character&lt;/span&gt;
+&lt;/div&gt;</pre>
+  </div>
+
+  <div class="success">
+    <strong>✅ FILE STRUCTURE</strong>
+    <p>When you create your spritesheets, place them in:</p>
+    <code>public/images/sprites/characters.png</code><br>
+    <code>public/images/sprites/buddies.png</code><br>
+    <code>public/images/sprites/ui.png</code>
+  </div>
+
+  <h2>📝 NAMING CONVENTION</h2>
+  <ul>
+    <li><strong>characters.png</strong> - Main character sprites (12 slots)</li>
+    <li><strong>buddies.png</strong> - Companion sprites (12 slots)</li>
+    <li><strong>ui.png</strong> - UI elements (2048×2048)</li>
+  </ul>
+
+  <h2>🔧 TECHNICAL NOTES</h2>
+  <ul>
+    <li>All spritesheets should be PNG format</li>
+    <li>Use transparent backgrounds where appropriate</li>
+    <li>Characters: 256×512 per cell, 72 DPI recommended</li>
+    <li>UI: Can be any size but 2048×2048 is optimal for caching</li>
+    <li>For best performance, spritesheets should be power-of-2 dimensions</li>
+  </ul>
+
+  <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #444; color: #888;">
+    <p>Buy a Buddy - Game Development Project</p>
+  </footer>
+</body>
+</html>

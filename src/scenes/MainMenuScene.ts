@@ -1,478 +1,363 @@
-// ==========================================
-// MAIN MENU SCENE - Start screen with full RPG feel
-// ==========================================
+/**
+ * Main Menu Scene
+ */
 
 import Phaser from 'phaser';
-import { COLORS } from '../config/constants';
-import { audioManager } from '../audio/AudioManager';
+import { gameSystems } from '../systems/GameSystems';
 
 export class MainMenuScene extends Phaser.Scene {
-  private selectedButton = 0;
   private buttons: Phaser.GameObjects.Container[] = [];
-  private isTouch = false;
-
+  private selectedIndex: number = 0;
+  private title!: Phaser.GameObjects.Text;
+  private audioInitialized: boolean = false;
+  
   constructor() {
     super({ key: 'MainMenuScene' });
   }
-
+  
   create(): void {
-    // Check for touch
-    this.isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    // Initialize audio on first interaction
-    this.setupAudioInit();
+    const { width, height } = this.scale;
     
     // Background
-    this.cameras.main.setBackgroundColor(COLORS.background);
+    this.cameras.main.setBackgroundColor('#1a1a2e');
     
-    // Create visual elements
+    // Add gradient background effect
     this.createBackground();
-    this.createTitle();
-    this.createBuddyShowcase();
+    
+    // Title
+    this.title = this.add.text(width / 2, height / 4, 'BUY A BUDDY', {
+      fontSize: '64px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#a855f7',
+      stroke: '#000',
+      strokeThickness: 6
+    }).setOrigin(0.5);
+    
+    // Subtitle
+    this.add.text(width / 2, height / 4 + 60, 'An RPG Adventure', {
+      fontSize: '24px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#ec4899'
+    }).setOrigin(0.5);
+    
+    // Menu buttons
     this.createButtons();
-    this.createFullscreenButton();
-    this.createVersion();
     
-    // Animate title
-    this.animateTitle();
-    
-    // Play menu music
-    audioManager.playMenuMusic?.();
+    // Version
+    this.add.text(width / 2, height - 30, 'v2.0.0', {
+      fontSize: '14px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#555'
+    }).setOrigin(0.5);
     
     // Setup keyboard navigation
-    this.setupKeyboardNav();
+    this.setupInput();
     
-    // Setup gamepad support (for TV)
-    this.setupGamepad();
+    // Play menu music
+    this.initAudio();
+    
+    // Highlight first button
+    this.updateButtonSelection();
   }
-
-  private setupAudioInit(): void {
-    const initAudio = () => {
-      audioManager.init?.();
-      this.input.off('pointerdown', initAudio);
-    };
-    this.input.on('pointerdown', initAudio);
-    this.input.keyboard?.on('keydown', initAudio);
-  }
-
+  
   private createBackground(): void {
-    const width = this.scale.width;
-    const height = this.scale.height;
+    const { width, height } = this.scale;
+    const graphics = this.add.graphics();
     
-    // Gradient background
-    const bg = this.add.graphics();
-    
-    // Dark purple gradient
-    for (let y = 0; y < height; y += 4) {
-      const alpha = 0.3 + (y / height) * 0.3;
-      bg.fillStyle(0xa855f7, alpha);
-      bg.fillRect(0, y, width, 4);
+    // Create gradient-like effect with rectangles
+    for (let i = 0; i < 20; i++) {
+      const alpha = 0.02 * i;
+      const y = (height / 20) * i;
+      const h = height / 20 + 1;
+      graphics.fillStyle(0xa855f7, alpha);
+      graphics.fillRect(0, y, width, h);
     }
     
-    // Stars
-    for (let i = 0; i < 50; i++) {
-      const x = Phaser.Math.Between(0, width);
-      const y = Phaser.Math.Between(0, height * 0.6);
-      const size = Phaser.Math.FloatBetween(1, 3);
-      const star = this.add.text(x, y, '✦', {
-        fontSize: `${size * 10}px`,
-        color: '#ffffff',
-      }).setAlpha(Phaser.Math.FloatBetween(0.2, 0.8));
-      
-      // Twinkle animation
-      this.tweens.add({
-        targets: star,
-        alpha: 0.2,
-        duration: Phaser.Math.Between(1000, 3000),
-        yoyo: true,
-        repeat: -1,
-      });
-    }
+    // Decorative circles
+    graphics.fillStyle(0x7c3aed, 0.1);
+    graphics.fillCircle(100, 100, 150);
+    graphics.fillCircle(width - 100, height - 100, 200);
     
-    // Floating particles
+    // Particles effect
     this.createParticles();
   }
-
+  
   private createParticles(): void {
-    const width = this.scale.width;
-    const height = this.scale.height;
+    const { width, height } = this.scale;
     
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 30; i++) {
       const x = Phaser.Math.Between(0, width);
       const y = Phaser.Math.Between(0, height);
+      const size = Phaser.Math.Between(2, 6);
       
-      const particle = this.add.graphics();
-      particle.fillStyle(0xec4899, 0.3);
-      particle.fillCircle(0, 0, Phaser.Math.Between(3, 8));
-      particle.x = x;
-      particle.y = y;
+      const particle = this.add.circle(x, y, size, 0xa855f7, 0.3);
       
-      // Float animation
+      // Animate
       this.tweens.add({
         targets: particle,
-        y: y - Phaser.Math.Between(20, 50),
-        x: x + Phaser.Math.Between(-20, 20),
+        y: y - 100,
         alpha: 0,
         duration: Phaser.Math.Between(2000, 4000),
         repeat: -1,
-        delay: Phaser.Math.Between(0, 2000),
+        yoyo: false,
+        delay: Phaser.Math.Between(0, 3000)
       });
     }
   }
-
-  private createTitle(): void {
-    const width = this.scale.width;
-    const height = this.scale.height;
-    
-    // Title shadow
-    this.add.text(width / 2 + 4, height * 0.15 + 4, 'BUY A BUDDY', {
-      fontSize: '48px',
-      fontFamily: 'Georgia, serif',
-      color: '#000000',
-    }).setOrigin(0.5).setName('titleShadow');
-    
-    // Main title
-    this.add.text(width / 2, height * 0.15, 'BUY A BUDDY', {
-      fontSize: '48px',
-      fontFamily: 'Georgia, serif',
-      color: COLORS.primary,
-      stroke: '#ffffff',
-      strokeThickness: 3,
-    }).setOrigin(0.5).setName('title');
-    
-    // Subtitle
-    this.add.text(width / 2, height * 0.22, '~ Your Adventure Begins ~', {
-      fontSize: '18px',
-      fontFamily: 'Georgia, serif',
-      color: COLORS.secondary,
-      fontStyle: 'italic',
-    }).setOrigin(0.5);
-  }
-
-  private createBuddyShowcase(): void {
-    const width = this.scale.width;
-    const height = this.scale.height;
-    
-    // Show animated buddy sprites
-    const buddyPositions = [
-      { x: width * 0.2, y: height * 0.35 },
-      { x: width * 0.5, y: height * 0.3 },
-      { x: width * 0.8, y: height * 0.35 },
-    ];
-    
-    // Use text-based buddy representations (cute faces)
-    const buddyFaces = ['😊', '🥰', '✨'];
-    
-    buddyPositions.forEach((pos, i) => {
-      // Glow background
-      const glow = this.add.graphics();
-      glow.fillStyle(0xa855f7, 0.2);
-      glow.fillCircle(pos.x, pos.y, 50);
-      
-      // Buddy emoji (placeholder for sprite)
-      const buddy = this.add.text(pos.x, pos.y, buddyFaces[i], {
-        fontSize: '64px',
-      }).setOrigin(0.5);
-      
-      // Bounce animation
-      this.tweens.add({
-        targets: buddy,
-        y: pos.y - 10,
-        duration: 1000 + i * 200,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-      });
-      
-      // Glow pulse
-      this.tweens.add({
-        targets: glow,
-        alpha: 0.4,
-        duration: 1500,
-        yoyo: true,
-        repeat: -1,
-      });
-    });
-  }
-
+  
   private createButtons(): void {
-    const width = this.scale.width;
-    const height = this.scale.height;
-    
-    this.buttons = [];
-    
-    const buttonConfigs = [
-      { text: '🎮  NEW GAME', y: height * 0.52, color: 0xec4899, action: () => this.startNewGame() },
-      { text: '📖  CONTINUE', y: height * 0.62, color: 0x6B21A8, action: () => this.continueGame() },
-      { text: '🎨  BUDDIES', y: height * 0.72, color: 0xa855f7, action: () => this.openBuddies() },
-      { text: '⚙️  SETTINGS', y: height * 0.82, color: 0x4d3b6e, action: () => this.openSettings() },
+    const { width, height } = this.scale;
+    const menuItems = [
+      { text: 'NEW GAME', action: () => this.startNewGame() },
+      { text: 'CONTINUE', action: () => this.continueGame() },
+      { text: 'SETTINGS', action: () => this.openSettings() },
+      { text: 'CREDITS', action: () => this.showCredits() },
+      { text: 'QUIT', action: () => this.quitGame() }
     ];
     
-    buttonConfigs.forEach((config, index) => {
-      const btn = this.createMenuButton(width / 2, config.y, config.text, config.color, config.action, index);
-      this.buttons.push(btn);
-    });
+    const startY = height / 2 - 20;
+    const spacing = 60;
     
-    // Select first button
-    this.updateButtonSelection();
+    menuItems.forEach((item, index) => {
+      const container = this.createMenuButton(
+        width / 2,
+        startY + index * spacing,
+        item.text,
+        item.action
+      );
+      
+      this.buttons.push(container);
+    });
   }
-
+  
   private createMenuButton(
     x: number,
     y: number,
     text: string,
-    color: number,
-    onClick: () => void,
-    index: number
+    action: () => void
   ): Phaser.GameObjects.Container {
     const container = this.add.container(x, y);
-    const btnWidth = 280;
-    const btnHeight = 60;
-    const radius = 16;
     
-    // Glow
-    const glow = this.add.graphics();
-    glow.fillStyle(0xa855f7, 0.3);
-    glow.fillRoundedRect(-btnWidth/2 - 6, -btnHeight/2 - 6, btnWidth + 12, btnHeight + 12, radius + 4);
-    container.add(glow);
-    (container as any).glowGraphics = glow;
+    // Background rectangle
+    const bg = this.add.rectangle(0, 0, 250, 50, 0x2d1b4e);
+    bg.setStrokeStyle(2, 0xa855f7);
+    bg.setInteractive({ useHandCursor: true });
     
-    // Background
-    const bg = this.add.graphics();
-    bg.fillStyle(color, 1);
-    bg.fillRoundedRect(-btnWidth/2, -btnHeight/2, btnWidth, btnHeight, radius);
-    bg.lineStyle(3, 0xa855f7, 0.9);
-    bg.strokeRoundedRect(-btnWidth/2, -btnHeight/2, btnWidth, btnHeight, radius);
-    container.add(bg);
-    (container as any).bgGraphics = bg;
-    
-    // Text
+    // Button text
     const label = this.add.text(0, 0, text, {
-      fontSize: '20px',
-      fontFamily: 'Arial, sans-serif',
-      color: '#ffffff',
-      fontStyle: 'bold',
+      fontSize: '24px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#fff'
     }).setOrigin(0.5);
-    container.add(label);
     
-    // Hit area (large for touch)
-    const hitArea = this.add.rectangle(0, 0, btnWidth + 40, btnHeight + 40)
-      .setInteractive({ useHandCursor: true })
-      .setAlpha(0.001);
-    container.add(hitArea);
+    container.add([bg, label]);
     
-    // Store action
-    (container as any).action = onClick;
-    (container as any).index = index;
-    (container as any).btnWidth = btnWidth;
-    (container as any).btnHeight = btnHeight;
-    
-    // Events
-    hitArea.on('pointerover', () => {
-      audioManager.playClick?.();
-      this.selectedButton = index;
-      this.updateButtonSelection();
+    // Hover effects
+    bg.on('pointerover', () => {
+      this.tweens.add({
+        targets: container,
+        scaleX: 1.05,
+        scaleY: 1.05,
+        duration: 100
+      });
+      bg.setFillStyle(0x3d2b5e);
     });
     
-    hitArea.on('pointerdown', () => {
+    bg.on('pointerout', () => {
+      this.tweens.add({
+        targets: container,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 100
+      });
+      bg.setFillStyle(0x2d1b4e);
+    });
+    
+    bg.on('pointerdown', () => {
+      // Click effect
       this.tweens.add({
         targets: container,
         scaleX: 0.95,
         scaleY: 0.95,
         duration: 50,
         yoyo: true,
-        onComplete: () => onClick()
+        onComplete: () => {
+          this.playClickSound();
+          action();
+        }
       });
     });
     
     return container;
   }
-
+  
   private updateButtonSelection(): void {
     this.buttons.forEach((btn, index) => {
-      const glow = (btn as any).glowGraphics;
-      const isSelected = index === this.selectedButton;
-      
-      if (glow) {
-        const w = (btn as any).btnWidth || 280;
-        const h = (btn as any).btnHeight || 60;
-        const radius = 16;
-        
-        glow.clear();
-        glow.fillStyle(isSelected ? 0xec4899 : 0xa855f7, 0.5);
-        glow.fillRoundedRect(-w/2 - 6, -h/2 - 6, w + 12, h + 12, radius + 4);
+      const bg = btn.getAt(0) as Phaser.GameObjects.Rectangle;
+      if (index === this.selectedIndex) {
+        bg.setStrokeStyle(3, 0x22c55e);
+      } else {
+        bg.setStrokeStyle(2, 0xa855f7);
       }
-      
-      // Scale selected button
-      this.tweens.add({
-        targets: btn,
-        scaleX: isSelected ? 1.05 : 1,
-        scaleY: isSelected ? 1.05 : 1,
-        duration: 150,
-        ease: 'Power2'
-      });
     });
   }
-
-  private createFullscreenButton(): void {
-    const width = this.scale.width;
-    
-    // Fullscreen button (top right corner, large touch target)
-    const btnSize = 56;
-    const x = width - 35;
-    const y = 35;
-    
-    const fsBtn = this.add.container(x, y);
-    
-    // Button background
-    const bg = this.add.graphics();
-    bg.fillStyle(0x2d1b4e, 0.8);
-    bg.fillCircle(0, 0, btnSize / 2);
-    bg.lineStyle(2, 0xa855f7, 0.6);
-    bg.strokeCircle(0, 0, btnSize / 2);
-    fsBtn.add(bg);
-    
-    // Icon
-    const icon = this.add.text(0, 0, '⛶', {
-      fontSize: '24px',
-    }).setOrigin(0.5);
-    fsBtn.add(icon);
-    
-    // Hit area
-    const hitArea = this.add.rectangle(0, 0, btnSize + 20, btnSize + 20)
-      .setInteractive({ useHandCursor: true })
-      .setAlpha(0.001);
-    fsBtn.add(hitArea);
-    
-    hitArea.on('pointerdown', () => {
-      audioManager.playClick?.();
-      (window as any).toggleFullscreen();
+  
+  private setupInput(): void {
+    // Keyboard navigation
+    this.input.keyboard?.on('keydown-UP', () => {
+      this.selectedIndex = (this.selectedIndex - 1 + this.buttons.length) % this.buttons.length;
+      this.updateButtonSelection();
+      this.playHoverSound();
     });
     
-    hitArea.on('pointerover', () => {
-      this.tweens.add({ targets: fsBtn, scaleX: 1.1, scaleY: 1.1, duration: 100 });
+    this.input.keyboard?.on('keydown-DOWN', () => {
+      this.selectedIndex = (this.selectedIndex + 1) % this.buttons.length;
+      this.updateButtonSelection();
+      this.playHoverSound();
     });
     
-    hitArea.on('pointerout', () => {
-      this.tweens.add({ targets: fsBtn, scaleX: 1, scaleY: 1, duration: 100 });
-    });
-  }
-
-  private createVersion(): void {
-    const width = this.scale.width;
-    const height = this.scale.height;
-    
-    this.add.text(width / 2, height - 20, 'v2.0.0 | Press F for fullscreen', {
-      fontSize: '12px',
-      color: '#666666',
-    }).setOrigin(0.5);
-  }
-
-  private animateTitle(): void {
-    const title = this.children.getByName('title') as Phaser.GameObjects.Text;
-    const titleShadow = this.children.getByName('titleShadow') as Phaser.GameObjects.Text;
-    
-    if (title) {
-      const height = this.scale.height;
-      
-      this.tweens.add({
-        targets: title,
-        y: height * 0.13,
-        duration: 2500,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut',
-      });
-      
-      if (titleShadow) {
-        this.tweens.add({
-          targets: titleShadow,
-          y: height * 0.134,
-          duration: 2500,
-          yoyo: true,
-          repeat: -1,
-          ease: 'Sine.easeInOut',
-        });
+    this.input.keyboard?.on('keydown-ENTER', () => {
+      const btn = this.buttons[this.selectedIndex];
+      if (btn) {
+        const bg = btn.getAt(0) as Phaser.GameObjects.Rectangle;
+        bg.emit('pointerdown');
       }
+    });
+  }
+  
+  private initAudio(): void {
+    if (this.audioInitialized) return;
+    
+    // Play menu music
+    // gameSystems.audioManager.playMusic('menu');
+    this.audioInitialized = true;
+  }
+  
+  private playClickSound(): void {
+    // gameSystems.audioManager.playSFX('click');
+  }
+  
+  private playHoverSound(): void {
+    // gameSystems.audioManager.playSFX('hover');
+  }
+  
+  private startNewGame(): void {
+    gameSystems.startNewGame();
+    this.scene.start('CharacterSelectScene');
+  }
+  
+  private continueGame(): void {
+    // Check for save data
+    const slots = gameSystems.storage.getSaveSlots();
+    if (slots.length > 0) {
+      gameSystems.loadGame(slots[0].id);
+      this.scene.start('WorldScene');
+    } else {
+      // No save found - start new game
+      this.startNewGame();
     }
   }
-
-  private setupKeyboardNav(): void {
-    if (!this.input.keyboard) return;
-    
-    // Up/Down arrows for menu navigation
-    this.input.keyboard.on('keydown-UP', () => {
-      audioManager.playClick?.();
-      this.selectedButton = Math.max(0, this.selectedButton - 1);
-      this.updateButtonSelection();
-    });
-    
-    this.input.keyboard.on('keydown-DOWN', () => {
-      audioManager.playClick?.();
-      this.selectedButton = Math.min(this.buttons.length - 1, this.selectedButton + 1);
-      this.updateButtonSelection();
-    });
-    
-    // Enter/Space to select
-    this.input.keyboard.on('keydown-ENTER', () => {
-      const btn = this.buttons[this.selectedButton];
-      if (btn) (btn as any).action?.();
-    });
-    
-    this.input.keyboard.on('keydown-SPACE', () => {
-      const btn = this.buttons[this.selectedButton];
-      if (btn) (btn as any).action?.();
-    });
-    
-    // Escape for fullscreen exit
-    this.input.keyboard.on('keydown-ESC', () => {
-      if (document.fullscreenElement) {
-        (window as any).toggleFullscreen();
-      }
-    });
-  }
-
-  private setupGamepad(): void {
-    // Gamepad navigation for TV
-    this.input.gamepad?.on('down', (pad: any, button: any) => {
-      if (button.index === 0) { // A button
-        const btn = this.buttons[this.selectedButton];
-        if (btn) (btn as any).action?.();
-      }
-      if (button.index === 12) { // D-pad up
-        this.selectedButton = Math.max(0, this.selectedButton - 1);
-        this.updateButtonSelection();
-      }
-      if (button.index === 13) { // D-pad down
-        this.selectedButton = Math.min(this.buttons.length - 1, this.selectedButton + 1);
-        this.updateButtonSelection();
-      }
-    });
-  }
-
-  private startNewGame(): void {
-    audioManager.playClick?.();
-    this.cameras.main.fadeOut(500, 13, 13, 26);
-    this.time.delayedCall(500, () => {
-      this.scene.start('CharacterSelectScene');
-    });
-  }
-
-  private continueGame(): void {
-    audioManager.playClick?.();
-    this.cameras.main.flash(200, 100, 100, 100);
-    // Would load saved game here
-  }
-
-  private openBuddies(): void {
-    audioManager.playClick?.();
-    this.cameras.main.flash(200, 100, 100, 100);
-    // Would open buddy collection here
-  }
-
+  
   private openSettings(): void {
-    audioManager.playClick?.();
-    audioManager.toggleMute?.();
-    this.cameras.main.flash(100, 50, 50, 50);
+    this.scene.start('SettingsScene');
+  }
+  
+  private showCredits(): void {
+    const { width, height } = this.scale;
+    
+    // Overlay
+    const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.8);
+    overlay.setInteractive();
+    
+    // Credits text
+    const credits = this.add.text(width / 2, height / 2, [
+      'BUY A BUDDY',
+      '',
+      'A Game by You',
+      '',
+      'Created with Phaser 3',
+      '',
+      'MIT License',
+      '',
+      '2024'
+    ].join('\n'), {
+      fontSize: '24px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#fff',
+      align: 'center',
+      lineSpacing: 10
+    }).setOrigin(0.5);
+    
+    // Close button
+    const closeBtn = this.add.text(width / 2, height - 100, '[ Press ESC or Click to Close ]', {
+      fontSize: '18px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#888'
+    }).setOrigin(0.5);
+    
+    // Fade in
+    overlay.setAlpha(0);
+    credits.setAlpha(0);
+    closeBtn.setAlpha(0);
+    
+    this.tweens.add({
+      targets: [overlay, credits, closeBtn],
+      alpha: 1,
+      duration: 300
+    });
+    
+    // Close on click or ESC
+    const close = () => {
+      this.tweens.add({
+        targets: [overlay, credits, closeBtn],
+        alpha: 0,
+        duration: 200,
+        onComplete: () => {
+          overlay.destroy();
+          credits.destroy();
+          closeBtn.destroy();
+        }
+      });
+    };
+    
+    overlay.on('pointerdown', close);
+    this.input.keyboard?.once('keydown-ESC', close);
+  }
+  
+  private quitGame(): void {
+    // Show confirmation
+    const { width, height } = this.scale;
+    
+    const overlay = this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.8);
+    
+    const text = this.add.text(width / 2, height / 2 - 30, 'Are you sure you want to quit?', {
+      fontSize: '28px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#fff'
+    }).setOrigin(0.5);
+    
+    const yesBtn = this.add.text(width / 2 - 100, height / 2 + 40, 'YES', {
+      fontSize: '24px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#22c55e'
+    }).setOrigin(0.5).setInteractive();
+    
+    const noBtn = this.add.text(width / 2 + 100, height / 2 + 40, 'NO', {
+      fontSize: '24px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#ef4444'
+    }).setOrigin(0.5).setInteractive();
+    
+    yesBtn.on('pointerdown', () => {
+      // Quit game
+      window.close();
+    });
+    
+    noBtn.on('pointerdown', () => {
+      overlay.destroy();
+      text.destroy();
+      yesBtn.destroy();
+      noBtn.destroy();
+    });
   }
 }

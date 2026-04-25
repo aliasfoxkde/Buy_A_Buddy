@@ -1,367 +1,361 @@
 // ==========================================
 // BUDDY SCENE - Buddy collection and management
+// Uses actual sprites from 2302f2f7 and 6f01f97c
 // ==========================================
 
 import Phaser from 'phaser';
 import { COLORS } from '../config/constants';
 import { audioManager } from '../audio/AudioManager';
-import { GameStateService } from '../services/GameStateService';
-import { getCharacterName, getAllCharacterTypes, generateName } from '../sprites/SpriteRenderer';
-import type { BuddyType, RarityType } from '../sprites/SpriteRenderer';
+import { 
+  getAllCharacters, 
+  getCharacterConfig, 
+  getRarityStyle,
+  createAnimatedSprite,
+  getCharacterName,
+  preloadSprites
+} from '../sprites/SpriteRenderer';
+import type { BuddyType, CharacterConfig, RarityType } from '../sprites/SpriteRenderer';
+
+interface Buddy {
+  id: string;
+  type: BuddyType;
+  nickname?: string;
+  level: number;
+  exp: number;
+  expToLevel: number;
+  stats: { hp: number; atk: number; def: number; spd: number };
+  rarity: RarityType;
+  obtained: number;
+}
 
 export class BuddyScene extends Phaser.Scene {
-  private stateService = GameStateService.getInstance();
-  private buddies: any[] = [];
-  private selectedBuddy: any = null;
+  private buddies: Buddy[] = [];
+  private selectedBuddy: Buddy | null = null;
   private buddyCards: Phaser.GameObjects.Container[] = [];
-  
+  private previewSprite: Phaser.GameObjects.Sprite | null = null;
+  private readonly CARDS_PER_PAGE = 6;
+
   constructor() {
     super({ key: 'BuddyScene' });
   }
 
+  preload(): void {
+    preloadSprites(this);
+  }
+
   create(): void {
     this.cameras.main.setBackgroundColor(COLORS.background);
-    this.buddies = this.stateService.getState().buddies;
-    
-    // Create header
+    this.loadBuddies();
+    this.createBackground();
     this.createHeader();
-    
-    // Create buddy list
-    this.createBuddyList();
-    
-    // Create detail panel
-    this.createDetailPanel();
-    
-    // Create actions
-    this.createActions();
-    
-    // Create back button
+    this.createBuddyGrid();
+    this.createStatsPanel();
     this.createBackButton();
     
-    console.log('🐾 Buddy collection opened');
+    console.log(`🐾 Buddy Scene - ${this.buddies.length} buddies collected`);
+  }
+
+  private loadBuddies(): void {
+    // Load from localStorage or initialize starter buddy
+    const saved = localStorage.getItem('buyabuddy_buddies');
+    if (saved) {
+      try {
+        this.buddies = JSON.parse(saved);
+      } catch {
+        this.buddies = this.getStarterBuddies();
+      }
+    } else {
+      this.buddies = this.getStarterBuddies();
+    }
+  }
+
+  private getStarterBuddies(): Buddy[] {
+    const starters: BuddyType[] = ['char_1_1', 'char_1_2', 'char_1_3'];
+    return starters.map((type, i) => {
+      const config = getCharacterConfig(type)!;
+      return {
+        id: `buddy_${Date.now()}_${i}`,
+        type,
+        nickname: config.name,
+        level: 1,
+        exp: 0,
+        expToLevel: 100,
+        stats: { ...config.stats },
+        rarity: config.rarity,
+        obtained: Date.now(),
+      };
+    });
+  }
+
+  private saveBuddies(): void {
+    localStorage.setItem('buyabuddy_buddies', JSON.stringify(this.buddies));
+  }
+
+  private createBackground(): void {
+    const w = this.scale.width;
+    const h = this.scale.height;
+    
+    const bg = this.add.graphics();
+    bg.fillGradientStyle(0x0d0d1a, 0x0d0d1a, 0x1a0a2e, 0x1a0a2e, 1);
+    bg.fillRect(0, 0, w, h);
+    
+    // Floating hearts
+    for (let i = 0; i < 10; i++) {
+      const x = Phaser.Math.Between(50, w - 50);
+      const y = Phaser.Math.Between(100, h - 100);
+      const heart = this.add.text(x, y, '💜', {
+        fontSize: Phaser.Math.Between(12, 24) + 'px',
+      }).setAlpha(Phaser.Math.FloatBetween(0.15, 0.4));
+      
+      this.tweens.add({
+        targets: heart,
+        y: y - 30,
+        alpha: 0.05,
+        duration: Phaser.Math.Between(3000, 6000),
+        yoyo: true,
+        repeat: -1,
+      });
+    }
   }
 
   private createHeader(): void {
-    const width = this.scale.width;
+    const w = this.scale.width;
     
-    // Header background
     const header = this.add.graphics();
     header.fillStyle(0x1a0a2e, 0.95);
-    header.fillRect(0, 0, width, 70);
-    header.lineStyle(2, 0xa855f7, 0.5);
-    header.lineBetween(0, 70, width, 70);
+    header.fillRect(0, 0, w, 70);
+    header.lineStyle(3, 0xa855f7, 0.7);
+    header.lineBetween(0, 70, w, 70);
     
-    // Title
-    this.add.text(width / 2, 35, '🐾 Your Buddies', {
-      fontSize: '24px',
+    this.add.text(w / 2, 25, '✦ MY BUDDIES ✦', {
+      fontSize: '22px',
       fontFamily: 'Georgia, serif',
-      color: COLORS.primary,
+      color: '#a855f7',
       fontStyle: 'bold',
     }).setOrigin(0.5);
     
-    // Count
-    this.add.text(20, 35, `${this.buddies.length} Buddies`, {
-      fontSize: '14px',
-      color: COLORS.textSecondary,
-    }).setOrigin(0, 0.5);
+    this.add.text(w / 2, 50, `${this.buddies.length} collected`, {
+      fontSize: '12px',
+      color: '#888888',
+    }).setOrigin(0.5);
   }
 
-  private createBuddyList(): void {
-    const startY = 90;
-    const cardHeight = 80;
-    const cardSpacing = 10;
+  private createBuddyGrid(): void {
+    const w = this.scale.width;
+    const startY = 80;
+    const cols = 3;
+    const cardW = (w - 50) / cols;
+    const cardH = 130;
+    const spacing = 8;
     
-    // If no buddies, show message
     if (this.buddies.length === 0) {
-      this.add.text(this.scale.width / 2, this.scale.height / 2, 'No buddies yet!\nGo catch some!', {
-        fontSize: '18px',
+      this.add.text(w / 2, startY + 100, 'No buddies yet!\nStart your adventure to find some.', {
+        fontSize: '16px',
         color: '#666666',
         align: 'center',
       }).setOrigin(0.5);
       return;
     }
     
-    this.buddies.forEach((buddy, index) => {
-      const y = startY + index * (cardHeight + cardSpacing);
-      
-      const card = this.createBuddyCard(buddy, y);
-      this.buddyCards.push(card);
+    this.buddies.forEach((buddy, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const x = 20 + col * (cardW + spacing);
+      const y = startY + row * (cardH + spacing);
+      this.createBuddyCard(buddy, x, y, cardW, cardH);
     });
   }
 
-  private createBuddyCard(buddy: any, y: number): Phaser.GameObjects.Container {
-    const width = this.scale.width;
-    const card = this.add.container(0, y);
+  private createBuddyCard(buddy: Buddy, x: number, y: number, w: number, h: number): void {
+    const card = this.add.container(x, y);
+    const rarityStyle = getRarityStyle(buddy.rarity as RarityType);
     
     // Card background
     const bg = this.add.graphics();
-    bg.fillStyle(0x2d1b4e, 0.9);
-    bg.fillRoundedRect(20, 0, width - 40, 70, 10);
-    bg.lineStyle(2, this.getRarityColor(buddy.rarity), 0.6);
-    bg.strokeRoundedRect(20, 0, width - 40, 70, 10);
+    bg.fillStyle(0x2d1b4e, 0.95);
+    bg.fillRoundedRect(0, 0, w, h, 12);
+    bg.lineStyle(2, rarityStyle.border, 0.8);
+    bg.strokeRoundedRect(0, 0, w, h, 12);
     card.add(bg);
     
-    // Buddy icon (colored circle)
-    const iconBg = this.add.graphics();
-    iconBg.fillStyle(this.getRarityColor(buddy.rarity), 1);
-    iconBg.fillCircle(60, 35, 25);
-    card.add(iconBg);
+    // Character sprite
+    const sprite = createAnimatedSprite(this, buddy.type as BuddyType, 45, h / 2 - 5, 0.32);
+    if (sprite) card.add(sprite);
     
-    // Buddy icon emoji
-    const icon = this.add.text(60, 35, this.getBuddyEmoji(buddy.type), {
-      fontSize: '28px',
+    // Level badge
+    const levelBadge = this.add.graphics();
+    levelBadge.fillStyle(0xa855f7, 1);
+    levelBadge.fillCircle(w - 18, 16, 14);
+    card.add(levelBadge);
+    
+    this.add.text(w - 18, 16, `L${buddy.level}`, {
+      fontSize: '9px',
+      color: '#fff',
+      fontStyle: 'bold',
     }).setOrigin(0.5);
-    card.add(icon);
     
-    // Name
-    this.add.text(110, 20, buddy.name, {
-      fontSize: '18px',
+    // Nickname
+    this.add.text(85, 12, buddy.nickname || getCharacterName(buddy.type as BuddyType), {
+      fontSize: '14px',
       color: '#ffffff',
       fontStyle: 'bold',
     }).setOrigin(0, 0);
     
-    // Type & Level
-    this.add.text(110, 45, `${buddy.type} • Lv.${buddy.level}`, {
-      fontSize: '14px',
-      color: COLORS.textSecondary,
-    }).setOrigin(0, 0);
-    
-    // HP bar
-    const hpBar = this.add.graphics();
-    hpBar.fillStyle(0x2d1b4e, 1);
-    hpBar.fillRoundedRect(250, 25, 80, 12, 4);
-    const hpFill = (buddy.hp / buddy.maxHp) * 76;
-    hpBar.fillStyle(0x22c55e, 1);
-    hpBar.fillRoundedRect(252, 27, Math.max(0, hpFill), 8, 2);
-    card.add(hpBar);
-    
-    // HP text
-    this.add.text(335, 31, `${buddy.hp}/${buddy.maxHp}`, {
+    // Stats preview
+    this.add.text(85, 35, `HP ${buddy.stats.hp}  ATK ${buddy.stats.atk}`, {
       fontSize: '10px',
-      color: '#888888',
-    }).setOrigin(0, 0);
+      color: '#aaa',
+    });
+    
+    // EXP bar
+    const expBar = this.add.graphics();
+    expBar.fillStyle(0x1a1a2e, 1);
+    expBar.fillRoundedRect(85, 55, 100, 8, 3);
+    expBar.fillStyle(0xa855f7, 1);
+    expBar.fillRoundedRect(85, 55, (buddy.exp / buddy.expToLevel) * 100, 8, 3);
+    card.add(expBar);
     
     // Rarity indicator
-    const rarityIcon = this.add.text(width - 50, 35, this.getRarityIcon(buddy.rarity), {
-      fontSize: '24px',
+    const rareStar = this.add.text(w - 18, h - 16, '★', {
+      fontSize: '14px',
+      color: '#' + rarityStyle.badge.toString(16).padStart(6, '0'),
     }).setOrigin(0.5);
-    card.add(rarityIcon);
+    card.add(rareStar);
     
     // Hit area
-    const hit = this.add.rectangle(width / 2, 35, width - 40, 70).setInteractive({ useHandCursor: true }).setAlpha(0.001);
+    const hit = this.add.rectangle(w / 2, h / 2, w + 10, h + 10)
+      .setInteractive({ useHandCursor: true })
+      .setAlpha(0.001);
     card.add(hit);
     
     hit.on('pointerdown', () => {
       audioManager.playClick?.();
-      this.selectBuddy(buddy);
+      this.selectBuddy(buddy, card);
     });
     
     hit.on('pointerover', () => {
-      bg.clear();
-      bg.fillStyle(0x4d3b6e, 1);
-      bg.fillRoundedRect(20, 0, width - 40, 70, 10);
-      bg.lineStyle(3, this.getRarityColor(buddy.rarity), 0.9);
-      bg.strokeRoundedRect(20, 0, width - 40, 70, 10);
+      this.tweens.add({ targets: card, scaleX: 1.05, scaleY: 1.05, duration: 100 });
     });
     
     hit.on('pointerout', () => {
-      bg.clear();
-      bg.fillStyle(0x2d1b4e, 0.9);
-      bg.fillRoundedRect(20, 0, width - 40, 70, 10);
-      bg.lineStyle(2, this.getRarityColor(buddy.rarity), 0.6);
-      bg.strokeRoundedRect(20, 0, width - 40, 70, 10);
+      this.tweens.add({ targets: card, scaleX: 1, scaleY: 1, duration: 100 });
     });
     
-    return card;
+    this.buddyCards.push(card);
   }
 
-  private createDetailPanel(): void {
-    // Placeholder for selected buddy details
-    // In full implementation, this would show stats, abilities, etc.
-  }
-
-  private selectBuddy(buddy: any): void {
+  private selectBuddy(buddy: Buddy, card: Phaser.GameObjects.Container): void {
     this.selectedBuddy = buddy;
-    // Update detail panel with selected buddy info
-  }
-
-  private createActions(): void {
-    const width = this.scale.width;
-    const height = this.scale.height;
     
-    // Add buddy button
-    const addBtn = this.add.container(width - 80, height - 80);
-    
-    const bg = this.add.graphics();
-    bg.fillStyle(0xec4899, 1);
-    bg.fillCircle(0, 0, 35);
-    bg.lineStyle(3, 0xffffff, 0.5);
-    bg.strokeCircle(0, 0, 35);
-    addBtn.add(bg);
-    
-    const icon = this.add.text(0, 0, '+', {
-      fontSize: '32px',
-      color: '#ffffff',
-      fontStyle: 'bold',
-    }).setOrigin(0.5);
-    addBtn.add(icon);
-    
-    const hit = this.add.rectangle(0, 0, 80, 80).setInteractive({ useHandCursor: true }).setAlpha(0.001);
-    addBtn.add(hit);
-    
-    hit.on('pointerdown', () => {
-      audioManager.playClick?.();
-      // Add new buddy (for testing)
-      this.addTestBuddy();
-    });
-    
-    hit.on('pointerover', () => {
-      this.tweens.add({ targets: addBtn, scaleX: 1.1, scaleY: 1.1, duration: 100 });
-    });
-    
-    hit.on('pointerout', () => {
-      this.tweens.add({ targets: addBtn, scaleX: 1, scaleY: 1, duration: 100 });
-    });
-  }
-
-  private addTestBuddy(): void {
-    const types: BuddyType[] = ['twilight_petal', 'rose_angel', 'shadow_mistress', 'crimson_flame', 'violet_dream', 'dark_princess', 'golden_hero', 'petal_fairy', 'night_weaver', 'emerald_sprite', 'storm_mage', 'frost_enchantress'];
-    const rarities: RarityType[] = ['common', 'rare', 'epic', 'legendary'];
-    const weights = [60, 25, 12, 3];
-    
-    // Weighted rarity roll
-    const roll = Math.random() * 100;
-    let rarity: RarityType = 'common';
-    let cumulative = 0;
-    for (let i = 0; i < rarities.length; i++) {
-      cumulative += weights[i];
-      if (roll < cumulative) {
-        rarity = rarities[i];
-        break;
-      }
-    }
-    
-    const buddy = {
-      id: `buddy_${Date.now()}`,
-      name: generateName(),
-      type: types[Math.floor(Math.random() * types.length)],
-      rarity,
-      level: 1,
-      hp: 80,
-      maxHp: 80,
-      atk: 12,
-      def: 8,
-      speed: 15,
-    };
-    
-    this.stateService.processAction({ type: 'ADD_BUDDY', payload: buddy });
-    
-    // Show spawn effect
-    this.showSpawnEffect();
-    
-    // Reload scene
-    this.time.delayedCall(500, () => {
-      this.scene.restart();
-    });
-  }
-
-  private showSpawnEffect(): void {
-    const x = this.scale.width / 2;
-    const y = this.scale.height / 2;
-    
-    // Particle burst
-    for (let i = 0; i < 20; i++) {
-      const angle = (i / 20) * Math.PI * 2;
-      const particle = this.add.graphics();
-      particle.fillStyle(0xFFD700, 1);
-      particle.fillCircle(0, 0, 6);
-      particle.x = x;
-      particle.y = y;
-      
+    this.buddyCards.forEach(c => {
+      const isSelected = c === card;
       this.tweens.add({
-        targets: particle,
-        x: x + Math.cos(angle) * 150,
-        y: y + Math.sin(angle) * 150,
-        alpha: 0,
-        duration: 800,
-        ease: 'Power2',
-        onComplete: () => particle.destroy(),
+        targets: c,
+        scaleX: isSelected ? 1.1 : 1,
+        scaleY: isSelected ? 1.1 : 1,
+        duration: 200,
       });
+    });
+    
+    this.updateStatsPanel(buddy);
+    this.updatePreview(buddy);
+  }
+
+  private updatePreview(buddy: Buddy): void {
+    if (this.previewSprite) {
+      this.previewSprite.destroy();
     }
     
-    // Central flash
-    const flash = this.add.graphics();
-    flash.fillStyle(0xFFD700, 0.8);
-    flash.fillCircle(x, y, 20);
-    flash.setAlpha(1);
+    const sprite = createAnimatedSprite(this, buddy.type as BuddyType, 60, this.scale.height - 70, 0.5);
+    if (sprite) {
+      this.previewSprite = sprite;
+    }
+  }
+
+  private createStatsPanel(): void {
+    const w = this.scale.width;
+    const h = this.scale.height;
+    const panelY = h - 135;
     
-    this.tweens.add({
-      targets: flash,
-      scaleX: 5,
-      scaleY: 5,
-      alpha: 0,
-      duration: 600,
-      onComplete: () => flash.destroy(),
+    const panel = this.add.graphics();
+    panel.fillStyle(0x1a0a2e, 0.95);
+    panel.fillRoundedRect(15, panelY, w - 30, 120, 12);
+    panel.lineStyle(2, 0xa855f7, 0.6);
+    panel.strokeRoundedRect(15, panelY, w - 30, 120, 12);
+    
+    this.add.text(w / 2, panelY + 60, '✦ Tap a buddy to view ✦', {
+      fontSize: '14px',
+      color: '#555',
+      fontStyle: 'italic',
+    }).setOrigin(0.5);
+  }
+
+  private updateStatsPanel(buddy: Buddy): void {
+    const w = this.scale.width;
+    const panelY = this.scale.height - 135;
+    const rarityStyle = getRarityStyle(buddy.rarity as RarityType);
+    
+    // Clear previous stats (simple approach - just add new ones)
+    // In production you'd track these objects to destroy them
+    
+    // Name and level
+    this.add.text(130, panelY + 15, buddy.nickname || getCharacterName(buddy.type as BuddyType), {
+      fontSize: '22px',
+      color: '#fff',
+      fontStyle: 'bold',
     });
+    
+    this.add.text(290, panelY + 18, `Lv.${buddy.level}`, {
+      fontSize: '12px',
+      color: '#a855f7',
+    });
+    
+    // Stats display
+    const statsY = panelY + 60;
+    
+    // HP bar
+    this.add.text(130, statsY, 'HP', { fontSize: '10px', color: '#22c55e' });
+    const hpBar = this.add.graphics();
+    hpBar.fillStyle(0x1a1a2e, 1);
+    hpBar.fillRoundedRect(155, statsY - 2, 80, 10, 3);
+    hpBar.fillStyle(0x22c55e, 1);
+    hpBar.fillRoundedRect(155, statsY - 2, (buddy.stats.hp / 100) * 80, 10, 3);
+    
+    // ATK bar
+    this.add.text(130, statsY + 15, 'ATK', { fontSize: '10px', color: '#ef4444' });
+    const atkBar = this.add.graphics();
+    atkBar.fillStyle(0x1a1a2e, 1);
+    atkBar.fillRoundedRect(155, statsY + 13, 80, 10, 3);
+    atkBar.fillStyle(0xef4444, 1);
+    atkBar.fillRoundedRect(155, statsY + 13, (buddy.stats.atk / 25) * 80, 10, 3);
+    
+    // DEF/SPD
+    this.add.text(260, statsY + 3, `DEF ${buddy.stats.def}`, { fontSize: '12px', color: '#3b82f6', fontStyle: 'bold' });
+    this.add.text(260, statsY + 18, `SPD ${buddy.stats.spd}`, { fontSize: '12px', color: '#f59e0b', fontStyle: 'bold' });
+    
+    // EXP progress
+    this.add.text(130, statsY + 38, `EXP: ${buddy.exp}/${buddy.expToLevel}`, { fontSize: '10px', color: '#888' });
   }
 
   private createBackButton(): void {
-    const backBtn = this.add.container(35, 35);
+    const btn = this.add.container(38, 35);
     
     const bg = this.add.graphics();
-    bg.fillStyle(0x2d1b4e, 0.9);
+    bg.fillStyle(0x2d1b4e, 0.95);
     bg.fillRoundedRect(-18, -18, 36, 36, 8);
     bg.lineStyle(2, 0xa855f7, 0.6);
     bg.strokeRoundedRect(-18, -18, 36, 36, 8);
-    backBtn.add(bg);
+    btn.add(bg);
     
-    const icon = this.add.text(0, 0, '←', { fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
-    backBtn.add(icon);
+    this.add.text(0, 0, '←', { fontSize: '18px', color: '#fff' }).setOrigin(0.5);
     
-    const hit = this.add.rectangle(0, 0, 46, 46).setInteractive({ useHandCursor: true }).setAlpha(0.001);
-    backBtn.add(hit);
+    const hit = this.add.rectangle(0, 0, 50, 50).setInteractive({ useHandCursor: true }).setAlpha(0.001);
+    btn.add(hit);
     
     hit.on('pointerdown', () => {
       audioManager.playClick?.();
-      this.scene.stop();
+      this.cameras.main.fadeOut(300, 13, 13, 26);
+      this.time.delayedCall(300, () => this.scene.start('MenuScene'));
     });
-  }
-
-  private getRarityColor(rarity: RarityType): number {
-    const colors: Record<RarityType, number> = {
-      common: 0x87CEEB,
-      rare: 0x9370DB,
-      epic: 0xFF69B4,
-      legendary: 0xFFD700,
-    };
-    return colors[rarity] || colors.common;
-  }
-
-  private getRarityIcon(rarity: RarityType): string {
-    const icons: Record<RarityType, string> = {
-      common: '⬜',
-      rare: '💜',
-      epic: '💖',
-      legendary: '💛',
-    };
-    return icons[rarity] || icons.common;
-  }
-
-  private getBuddyEmoji(type: string): string {
-    const emojis: Record<string, string> = {
-      twilight_petal: '🌸',
-      rose_angel: '🌹',
-      shadow_mistress: '👤',
-      crimson_flame: '🔥',
-      violet_dream: '💜',
-      dark_princess: '👑',
-      golden_hero: '⭐',
-      petal_fairy: '🌼',
-      night_weaver: '🌙',
-      emerald_sprite: '💚',
-      storm_mage: '⚡',
-      frost_enchantress: '❄️',
-    };
-    return emojis[type] || '😊';
   }
 }
