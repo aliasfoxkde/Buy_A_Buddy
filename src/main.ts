@@ -3,14 +3,24 @@
  */
 
 import './style.css';
+import Phaser from 'phaser';
 import { startGame } from './game/gameEngine';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Get or create game container
+  console.log('DOM ready, starting game...');
+  
+  // Use the existing #game div or create container
+  const gameDiv = document.getElementById('game');
   let container = document.getElementById('game-container');
   
-  if (!container) {
+  if (!container && gameDiv) {
+    container = document.createElement('div');
+    container.id = 'game-container';
+    container.style.width = '100%';
+    container.style.height = '100%';
+    gameDiv.appendChild(container);
+  } else if (!container) {
     container = document.createElement('div');
     container.id = 'game-container';
     document.body.appendChild(container);
@@ -26,7 +36,26 @@ document.addEventListener('DOMContentLoaded', () => {
   container.style.backgroundColor = '#1a1a2e';
   
   // Start the game
-  const game = startGame();
+  console.log('Starting game with container:', container.id);
+  
+  // Check container exists and has size
+  const rect = container.getBoundingClientRect();
+  console.log('Container rect:', JSON.stringify(rect));
+  
+  if (rect.width === 0 || rect.height === 0) {
+    console.error('Container has zero size! Forcing dimensions');
+    container.style.width = window.innerWidth + 'px';
+    container.style.height = window.innerHeight + 'px';
+  }
+  
+  let game: Phaser.Game | undefined;
+  try {
+    game = startGame();
+    console.log('Game started:', !!game);
+    console.log('Game canvas:', game?.canvas);
+  } catch (e) {
+    console.error('Game start failed:', e);
+  }
   
   // Register service worker for PWA
   if ('serviceWorker' in navigator) {
@@ -44,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Handle visibility changes (pause/resume)
   document.addEventListener('visibilitychange', () => {
+    if (!game) return;
     if (document.hidden) {
       game.scene.pause('WorldScene');
     } else {
