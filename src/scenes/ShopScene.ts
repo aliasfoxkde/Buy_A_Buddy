@@ -4,6 +4,7 @@
 
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
+import { audioManager } from '../audio/AudioManager';
 
 interface ShopItem {
   id: string;
@@ -66,6 +67,9 @@ export class ShopScene extends Phaser.Scene {
     
     // Load shop items
     this.loadShopItems();
+    
+    // Play shop music
+    audioManager.playShopMusic();
   }
   
   private createShopHeader(x: number, y: number): void {
@@ -372,6 +376,7 @@ export class ShopScene extends Phaser.Scene {
     const total = this.calculateTotal();
     
     if (!this.canAfford(total)) {
+      audioManager.playSound('error');
       this.showMessage('Not enough gold!', 0xef4444);
       return;
     }
@@ -384,12 +389,14 @@ export class ShopScene extends Phaser.Scene {
       if (qty > 0 && this.shopItems[index]) {
         const item = this.shopItems[index];
         gameSystems.inventory.addItem(item.id, qty);
+        audioManager.playCoin();
       }
     });
     
     // Clear cart
     this.cart.clear();
     
+    audioManager.playSound('success');
     this.showMessage('Purchase complete!', 0x22c55e);
     
     // Refresh display

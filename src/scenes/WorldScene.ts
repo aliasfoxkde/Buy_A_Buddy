@@ -5,6 +5,7 @@
 import Phaser from 'phaser';
 import { gameSystems, SpriteConfig } from '../systems/GameSystems';
 import { DialogueUI } from '../ui/DialogueUI';
+import { audioManager } from '../audio/AudioManager';
 
 export class WorldScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Sprite;
@@ -26,6 +27,9 @@ export class WorldScene extends Phaser.Scene {
   
   // Camera
   private cameraSpeed: number = 1;
+  
+  // Audio
+  private musicStarted: boolean = false;
   
   // Dialogue
   private dialogueUI!: DialogueUI;
@@ -67,6 +71,16 @@ export class WorldScene extends Phaser.Scene {
     
     // Create debug info
     this.createDebugInfo();
+    
+    // Start exploration music
+    this.startExplorationMusic();
+  }
+  
+  private startExplorationMusic(): void {
+    if (!this.musicStarted) {
+      audioManager.playExplorationMusic();
+      this.musicStarted = true;
+    }
   }
   
   update(time: number, delta: number): void {

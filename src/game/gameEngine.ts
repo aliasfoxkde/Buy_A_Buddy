@@ -14,6 +14,7 @@ import { CraftingScene } from '../scenes/CraftingScene';
 import { ShopScene } from '../scenes/ShopScene';
 import { MenuScene } from '../scenes/MenuScene';
 import { SettingsScene } from '../scenes/SettingsScene';
+import { SaveLoadScene } from '../scenes/SaveLoadScene';
 
 export interface GameConfig {
   type: number;
@@ -62,7 +63,8 @@ export function createGameConfig(): GameConfig {
       CraftingScene,
       ShopScene,
       MenuScene,
-      SettingsScene
+      SettingsScene,
+      SaveLoadScene
     ],
     pixelArt: false,
     render: {

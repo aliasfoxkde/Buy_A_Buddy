@@ -2,7 +2,7 @@
  * Storage System Module - Save/Load, LocalStorage, Cloud
  */
 
-import { EventBus, SaveData, GameState, generateId } from '../../core';
+import { EventBus, SaveData, GameState, generateId, EntityStats } from '../../core';
 
 export type StorageBackend = 'local' | 'cloud' | 'indexeddb';
 export type StorageKey = 'save' | 'settings' | 'achievements' | 'statistics';
@@ -330,5 +330,147 @@ export class StorageSystem {
       }
     }
     return total;
+  }
+
+  // ==================== HELPER METHODS ====================
+
+  /**
+   * Get all saves as an array (for save/load UI)
+   */
+  getAllSaves(): (Record<string, unknown> | null)[] {
+    const saves: (Record<string, unknown> | null)[] = [];
+    for (let i = 0; i < 6; i++) {
+      const slot = this.saveSlots[i];
+      if (slot) {
+        const json = localStorage.getItem(`buyabuddy_save_${slot.id}`);
+        if (json) {
+          try {
+            saves.push(JSON.parse(json));
+          } catch {
+            saves.push(null);
+          }
+        } else {
+          saves.push(null);
+        }
+      } else {
+        saves.push(null);
+      }
+    }
+    return saves;
+  }
+
+  /**
+   * Save game to specific slot
+   */
+  saveGame(saveData: Record<string, unknown>, slotIndex: number): boolean {
+    try {
+      const slotId = this.saveSlots[slotIndex]?.id || generateId();
+      
+      // Get player stats or use defaults
+      const playerStats = saveData.stats as Partial<EntityStats> || {};
+      
+      const data = {
+        version: '1.0.0',
+        timestamp: Date.now(),
+        zone: saveData.zone || 'village_start',
+        player: {
+          name: saveData.playerName as string || 'Hero',
+          characterIndex: 0,
+          buddyIndex: 0,
+          stats: {
+            level: (saveData.level as number) || 1,
+            maxHealth: playerStats.maxHealth || 100,
+            currentHealth: playerStats.currentHealth || playerStats.maxHealth || 100,
+            maxMana: playerStats.maxMana || 50,
+            currentMana: playerStats.currentMana || playerStats.maxMana || 50,
+            attack: playerStats.attack || 10,
+            defense: playerStats.defense || 5,
+            speed: playerStats.speed || 10,
+            luck: playerStats.luck || 5,
+            experience: (saveData.experience as number) || 0,
+            experienceToNextLevel: 100,
+            gold: (saveData.gold as number) || 100
+          },
+          position: { x: 400, y: 400 },
+          playTime: (saveData.playTime as number) || 0
+        },
+        inventory: saveData.inventory || { slots: [], gold: 100 },
+        quests: saveData.quests || [],
+        achievements: []
+      };
+
+      localStorage.setItem(`buyabuddy_save_${slotId}`, JSON.stringify(data));
+
+      const slot: SaveSlot = {
+        id: slotId,
+        name: saveData.playerName as string || 'Hero',
+        timestamp: Date.now(),
+        playTime: (saveData.playTime as number) || 0,
+        level: (saveData.level as number) || 1,
+        zone: saveData.zone as string || 'village_start'
+      };
+
+      if (slotIndex >= 0 && slotIndex < this.saveSlots.length) {
+        this.saveSlots[slotIndex] = slot;
+      } else {
+        this.saveSlots.push(slot);
+      }
+
+      this.saveSaveSlots();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Load game from specific slot
+   */
+  loadGame(slotIndex: number): Record<string, unknown> | null {
+    const slot = this.saveSlots[slotIndex];
+    if (!slot) return null;
+
+    const json = localStorage.getItem(`buyabuddy_save_${slot.id}`);
+    if (!json) return null;
+
+    try {
+      return JSON.parse(json);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Delete save in specific slot
+   */
+  deleteSave(slotIndex: number): boolean {
+    const slot = this.saveSlots[slotIndex];
+    if (!slot) return false;
+
+    localStorage.removeItem(`buyabuddy_save_${slot.id}`);
+    this.saveSlots.splice(slotIndex, 1);
+    this.saveSaveSlots();
+    return true;
+  }
+
+  /**
+   * Auto-save to first slot
+   */
+  autoSave(): boolean {
+    // Emit event to get current game state
+    return false; // Would need game state to actually save
+  }
+
+  /**
+   * Get play time from storage
+   */
+  getPlayTime(): number {
+    const json = localStorage.getItem('buyabuddy_playtime');
+    if (!json) return 0;
+    try {
+      return JSON.parse(json);
+    } catch {
+      return 0;
+    }
   }
 }

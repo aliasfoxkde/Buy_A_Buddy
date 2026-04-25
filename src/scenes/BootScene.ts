@@ -4,6 +4,7 @@
 
 import Phaser from 'phaser';
 import { gameSystems, SpriteConfig } from '../systems/GameSystems';
+import { audioManager } from '../audio/AudioManager';
 
 export class BootScene extends Phaser.Scene {
   private loadingBar!: Phaser.GameObjects.Graphics;
@@ -29,6 +30,9 @@ export class BootScene extends Phaser.Scene {
   }
   
   create(): void {
+    // Initialize audio (must be done on user interaction)
+    this.initAudio();
+    
     // Initialize game systems
     this.initGameSystems();
     
@@ -36,6 +40,15 @@ export class BootScene extends Phaser.Scene {
     this.time.delayedCall(500, () => {
       this.scene.start('MainMenuScene');
     });
+  }
+  
+  private async initAudio(): Promise<void> {
+    try {
+      await audioManager.init();
+      console.log('Audio system ready');
+    } catch (error) {
+      console.warn('Audio initialization failed:', error);
+    }
   }
   
   private createLoadingUI(): void {

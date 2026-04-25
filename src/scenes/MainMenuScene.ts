@@ -4,6 +4,7 @@
 
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
+import { audioManager } from '../audio/AudioManager';
 
 export class MainMenuScene extends Phaser.Scene {
   private buttons: Phaser.GameObjects.Container[] = [];
@@ -229,16 +230,16 @@ export class MainMenuScene extends Phaser.Scene {
     if (this.audioInitialized) return;
     
     // Play menu music
-    // gameSystems.audioManager.playMusic('menu');
+    audioManager.playMenuMusic();
     this.audioInitialized = true;
   }
   
   private playClickSound(): void {
-    // gameSystems.audioManager.playSFX('click');
+    audioManager.playClick();
   }
   
   private playHoverSound(): void {
-    // gameSystems.audioManager.playSFX('hover');
+    audioManager.playHover();
   }
   
   private startNewGame(): void {

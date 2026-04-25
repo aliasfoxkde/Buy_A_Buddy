@@ -30,29 +30,29 @@ export class MenuScene extends Phaser.Scene {
     // Menu options
     const options = [
       { text: 'RESUME', action: () => this.resume() },
-      { text: 'SETTINGS', action: () => this.openSettings() },
+      { text: 'SAVE / LOAD', action: () => this.openSaveLoad() },
       { text: 'INVENTORY', action: () => this.openInventory() },
       { text: 'QUEST LOG', action: () => this.openQuests() },
-      { text: 'SAVE GAME', action: () => this.saveGame() },
+      { text: 'SETTINGS', action: () => this.openSettings() },
       { text: 'MAIN MENU', action: () => this.goToMainMenu() }
     ];
     
     const startY = height / 2 - 100;
-    const spacing = 60;
+    const spacing = 55;
     
     for (let i = 0; i < options.length; i++) {
       const btn = this.add.rectangle(
         width / 2,
         startY + i * spacing,
         250,
-        50,
+        45,
         0x2d1b4e
       );
       btn.setStrokeStyle(2, 0xa855f7);
       btn.setInteractive({ useHandCursor: true });
       
       this.add.text(width / 2, startY + i * spacing, options[i].text, {
-        fontSize: '20px',
+        fontSize: '18px',
         fontFamily: 'Arial Black, sans-serif',
         color: '#fff'
       }).setOrigin(0.5);
@@ -89,26 +89,9 @@ export class MenuScene extends Phaser.Scene {
     this.scene.launch('QuestScene');
   }
   
-  private saveGame(): void {
-    const { width, height } = this.scale;
-    
-    // Show save notification
-    const notification = this.add.rectangle(width / 2, height - 100, 300, 60, 0x22c55e);
-    notification.setStrokeStyle(2, 0x166534);
-    
-    this.add.text(width / 2, height - 100, 'Game Saved!', {
-      fontSize: '24px',
-      fontFamily: 'Arial Black, sans-serif',
-      color: '#fff'
-    }).setOrigin(0.5);
-    
-    // Auto-hide
-    this.time.delayedCall(1500, () => {
-      notification.destroy();
-    });
-    
-    // Actually save
-    // gameSystems.saveGame();
+  private openSaveLoad(): void {
+    this.scene.pause();
+    this.scene.launch('SaveLoadScene', { mode: 'save' });
   }
   
   private goToMainMenu(): void {

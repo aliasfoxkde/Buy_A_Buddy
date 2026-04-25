@@ -4,12 +4,13 @@
 
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
+import { audioManager } from '../audio/AudioManager';
 
 export class SettingsScene extends Phaser.Scene {
   private masterVolume: number = 1.0;
-  private musicVolume: number = 0.7;
-  private sfxVolume: number = 0.8;
-  private volumeBars: Phaser.GameObjects.Rectangle[] = [];
+  private musicVolume: number = 0.4;
+  private sfxVolume: number = 0.7;
+  private volumeBars: { fill: Phaser.GameObjects.Rectangle; text: Phaser.GameObjects.Text; onChange: (v: number) => void }[] = [];
   
   constructor() {
     super({ key: 'SettingsScene' });
@@ -22,55 +23,78 @@ export class SettingsScene extends Phaser.Scene {
     this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.85);
     
     // Panel
-    const panel = this.add.rectangle(width / 2, height / 2, 500, 550, 0x1a1a2e);
+    const panel = this.add.rectangle(width / 2, height / 2, 500, 600, 0x1a1a2e);
     panel.setStrokeStyle(3, 0xa855f7);
     
     // Title
-    this.add.text(width / 2, 60, 'SETTINGS', {
+    this.add.text(width / 2, 50, 'SETTINGS', {
       fontSize: '36px',
       fontFamily: 'Arial Black, sans-serif',
       color: '#a855f7'
     }).setOrigin(0.5);
     
+    // Load saved settings
+    this.loadSettings();
+    
     // Settings options
-    this.createVolumeSlider(width / 2, 150, 'Master Volume', this.masterVolume, (v) => {
+    this.createVolumeSlider(width / 2, 130, 'Master Volume', this.masterVolume, (v) => {
       this.masterVolume = v;
-      // gameSystems.audioManager.setMasterVolume(v);
+      audioManager.setMasterVolume(v);
     });
     
-    this.createVolumeSlider(width / 2, 230, 'Music Volume', this.musicVolume, (v) => {
+    this.createVolumeSlider(width / 2, 220, 'Music Volume', this.musicVolume, (v) => {
       this.musicVolume = v;
-      // gameSystems.audioManager.setMusicVolume(v);
+      audioManager.setMusicVolume(v);
+      // Test music volume
+      audioManager.playSound('click');
     });
     
     this.createVolumeSlider(width / 2, 310, 'SFX Volume', this.sfxVolume, (v) => {
       this.sfxVolume = v;
-      // gameSystems.audioManager.setSfxVolume(v);
+      audioManager.setSFXVolume(v);
+      // Test sfx volume
+      audioManager.playSound('click');
+    });
+    
+    // Test buttons
+    this.createTestButtons(width / 2, 400);
+    
+    // Toggles
+    this.createToggleButton(width / 2, 470, 'Mute All', () => {
+      const muted = audioManager.toggleMute();
+      audioManager.playSound(muted ? 'error' : 'success');
     });
     
     // Fullscreen button
-    this.createToggleButton(width / 2, 400, 'Fullscreen', () => {
+    this.createToggleButton(width / 2, 540, 'Toggle Fullscreen', () => {
       this.toggleFullscreen();
     });
     
-    // Show FPS toggle
-    this.createToggleButton(width / 2, 470, 'Show FPS', () => {
-      // Toggle FPS display
-    });
-    
     // Close button
-    const closeBtn = this.add.rectangle(width / 2, height / 2 + 220, 150, 50, 0x22c55e);
+    const closeBtn = this.add.rectangle(width / 2, height / 2 + 250, 150, 50, 0x22c55e);
     closeBtn.setInteractive({ useHandCursor: true });
     
-    this.add.text(width / 2, height / 2 + 220, 'CLOSE', {
+    this.add.text(width / 2, height / 2 + 250, 'CLOSE', {
       fontSize: '22px',
       fontFamily: 'Arial Black, sans-serif',
       color: '#fff'
     }).setOrigin(0.5);
     
-    closeBtn.on('pointerdown', () => this.close());
+    closeBtn.on('pointerdown', () => {
+      audioManager.playClick();
+      this.close();
+    });
     
     this.input.keyboard?.on('keydown-ESC', () => this.close());
+  }
+  
+  private loadSettings(): void {
+    const settings = gameSystems.storage.loadSettings() as any;
+    if (settings) {
+      this.masterVolume = settings.masterVolume ?? 1.0;
+      this.musicVolume = settings.musicVolume ?? 0.4;
+      this.sfxVolume = settings.sfxVolume ?? 0.7;
+    }
   }
   
   private createVolumeSlider(x: number, y: number, label: string, initialValue: number, onChange: (v: number) => void): void {
@@ -95,19 +119,21 @@ export class SettingsScene extends Phaser.Scene {
       color: '#888'
     }).setOrigin(0, 0.5);
     
-    this.volumeBars.push(fillBar);
+    this.volumeBars.push({ fill: fillBar, text: percentText, onChange });
     
     // Slider hit area
     const slider = this.add.rectangle(x, y, 300, 40).setInteractive({ useHandCursor: true });
     slider.setAlpha(0.001);
     
+    const index = this.volumeBars.length - 1;
+    
     slider.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-      this.updateSlider(pointer, x, fillBar, percentText, onChange);
+      this.updateSlider(pointer, x, index);
     });
     
     slider.on('pointermove', (pointer: Phaser.Input.Pointer) => {
       if (pointer.isDown) {
-        this.updateSlider(pointer, x, fillBar, percentText, onChange);
+        this.updateSlider(pointer, x, index);
       }
     });
   }
@@ -115,9 +141,7 @@ export class SettingsScene extends Phaser.Scene {
   private updateSlider(
     pointer: Phaser.Input.Pointer,
     centerX: number,
-    fillBar: Phaser.GameObjects.Rectangle,
-    percentText: Phaser.GameObjects.Text,
-    onChange: (v: number) => void
+    index: number
   ): void {
     const sliderX = centerX - 150;
     const sliderWidth = 300;
@@ -125,11 +149,43 @@ export class SettingsScene extends Phaser.Scene {
     let value = (pointer.x - sliderX) / sliderWidth;
     value = Math.max(0, Math.min(1, value));
     
-    fillBar.setDisplaySize(sliderWidth * value, 20);
-    fillBar.setX(this.cameras.main.scrollX + sliderX + (sliderWidth * value / 2));
+    const bar = this.volumeBars[index];
+    bar.fill.setDisplaySize(sliderWidth * value, 20);
+    bar.fill.setX(sliderX + (sliderWidth * value / 2));
     
-    percentText.setText(Math.round(value * 100) + '%');
-    onChange(value);
+    bar.text.setText(Math.round(value * 100) + '%');
+    bar.onChange(value);
+  }
+  
+  private createTestButtons(x: number, y: number): void {
+    this.add.text(x - 80, y - 15, 'Test Sounds:', {
+      fontSize: '14px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#888'
+    });
+    
+    const sounds: { label: string; sound: string }[] = [
+      { label: 'Click', sound: 'click' },
+      { label: 'Attack', sound: 'attack' },
+      { label: 'Coin', sound: 'coin' },
+      { label: 'Heal', sound: 'heal' }
+    ];
+    
+    sounds.forEach((s, i) => {
+      const btn = this.add.rectangle(x - 100 + i * 70, y + 25, 60, 35, 0x3d2b5e);
+      btn.setStrokeStyle(1, 0xa855f7);
+      btn.setInteractive({ useHandCursor: true });
+      
+      this.add.text(x - 100 + i * 70, y + 25, s.label, {
+        fontSize: '11px',
+        fontFamily: 'Arial, sans-serif',
+        color: '#fff'
+      }).setOrigin(0.5);
+      
+      btn.on('pointerdown', () => {
+        (audioManager as any).playSound(s.sound);
+      });
+    });
   }
   
   private createToggleButton(x: number, y: number, label: string, action: () => void): void {
@@ -138,7 +194,7 @@ export class SettingsScene extends Phaser.Scene {
     btn.setInteractive({ useHandCursor: true });
     
     this.add.text(x, y, label, {
-      fontSize: '20px',
+      fontSize: '18px',
       fontFamily: 'Arial, sans-serif',
       color: '#fff'
     }).setOrigin(0.5);

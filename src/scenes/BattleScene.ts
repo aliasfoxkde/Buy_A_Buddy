@@ -4,6 +4,7 @@
 
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
+import { audioManager } from '../audio/AudioManager';
 
 export class BattleScene extends Phaser.Scene {
   private playerEntity: any = null;
@@ -27,6 +28,7 @@ export class BattleScene extends Phaser.Scene {
   private playerHp: number = 100;
   private enemyMaxHp: number = 40;
   private enemyHp: number = 40;
+  private battleMusicStarted: boolean = false;
   
   constructor() {
     super({ key: 'BattleScene' });
@@ -71,6 +73,16 @@ export class BattleScene extends Phaser.Scene {
     
     // Listen for events
     this.setupEventListeners();
+    
+    // Start battle music
+    this.startBattleMusic();
+  }
+  
+  private startBattleMusic(): void {
+    if (!this.battleMusicStarted) {
+      audioManager.playBattleMusic();
+      this.battleMusicStarted = true;
+    }
   }
   
   private initializeBattle(): void {
@@ -80,6 +92,21 @@ export class BattleScene extends Phaser.Scene {
       this.playerMaxHp = stats.maxHealth;
       this.playerHp = stats.health;
     }
+  }
+  
+  private setupEventListeners(): void {
+    // Listen for combat events from game systems
+    gameSystems.eventBus.on('battle:start', () => {
+      this.addBattleLog('Battle started!');
+    });
+    
+    gameSystems.eventBus.on('battle:end', (event: any) => {
+      if (event.payload?.victory) {
+        this.isBattleOver = true;
+        this.addBattleLog('VICTORY!');
+        this.time.delayedCall(2000, () => this.endBattle(true));
+      }
+    });
   }
   
   private createHealthBars(width: number, y: number): void {
@@ -212,7 +239,7 @@ export class BattleScene extends Phaser.Scene {
     }).setOrigin(0.5);
     
     // Turn indicator
-    this.uiElements!.turnIndicator = this.add.text(width / 2, 70, "YOUR TURN", {
+    this.uiElements!.turnIndicator = this.add.text(width / 2, 70, 'YOUR TURN', {
       fontSize: '24px',
       fontFamily: 'Arial Black, sans-serif',
       color: '#22c55e'
@@ -222,7 +249,7 @@ export class BattleScene extends Phaser.Scene {
   private updateTurnIndicator(): void {
     if (!this.uiElements) return;
     
-    const text = this.isPlayerTurn ? "YOUR TURN" : "ENEMY TURN";
+    const text = this.isPlayerTurn ? 'YOUR TURN' : 'ENEMY TURN';
     const color = this.isPlayerTurn ? '#22c55e' : '#ef4444';
     
     this.uiElements.turnIndicator?.destroy();
@@ -233,23 +260,11 @@ export class BattleScene extends Phaser.Scene {
     }).setOrigin(0.5);
   }
   
-  private setupEventListeners(): void {
-    // Listen for combat events from game systems
-    gameSystems.eventBus.on('battle:start', () => {
-      this.addBattleLog('Battle started!');
-    });
-    
-    gameSystems.eventBus.on('battle:end', (event: any) => {
-      if (event.payload?.victory) {
-        this.isBattleOver = true;
-        this.addBattleLog('VICTORY!');
-        this.time.delayedCall(2000, () => this.endBattle(true));
-      }
-    });
-  }
-  
   private playerAttack(): void {
     if (!this.isPlayerTurn || this.isBattleOver) return;
+    
+    // Play attack sound
+    audioManager.playAttack();
     
     // Calculate damage
     const baseDamage = 15;
@@ -270,6 +285,7 @@ export class BattleScene extends Phaser.Scene {
   private playerDefend(): void {
     if (!this.isPlayerTurn || this.isBattleOver) return;
     
+    audioManager.playDefend();
     this.addBattleLog('Hero takes a defensive stance!');
     
     this.isPlayerTurn = false;
@@ -303,6 +319,9 @@ export class BattleScene extends Phaser.Scene {
       
       // Remove item
       gameSystems.inventory.removeItem(potionIndex, 1);
+      
+      // Play heal sound
+      audioManager.playHeal();
       
       this.addBattleLog(`Hero drinks a potion and heals ${healAmount} HP!`);
       this.updateHealthBars();
@@ -388,11 +407,6 @@ export class BattleScene extends Phaser.Scene {
     this.uiElements.enemyHpText.setText(`${this.enemyHp}/${this.enemyMaxHp}`);
   }
   
-  private updateManaBar(): void {
-    if (!this.uiElements) return;
-    // Mana bar update would go here
-  }
-  
   private addBattleLog(message: string): void {
     if (!this.uiElements) return;
     this.uiElements.logText.setText(message);
@@ -424,6 +438,9 @@ export class BattleScene extends Phaser.Scene {
   }
   
   private endBattle(victory: boolean, fled: boolean = false): void {
+    // Stop battle music
+    audioManager.stopMusic();
+    
     // Give rewards if victory
     if (victory) {
       const expGain = 25;
@@ -432,7 +449,13 @@ export class BattleScene extends Phaser.Scene {
       // Add gold
       gameSystems.inventory.addGold(goldGain);
       
+      // Play victory sound
+      audioManager.playVictory();
+      
       this.addBattleLog(`+${expGain} EXP, +${goldGain} Gold`);
+    } else if (!fled) {
+      // Play defeat sound
+      audioManager.playDefeat();
     }
     
     // Return to world

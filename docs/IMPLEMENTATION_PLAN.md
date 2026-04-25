@@ -291,8 +291,8 @@
 - [x] Phase 3: Sprite integration ✅
 - [x] Phase 4: UI components (inventory, quests, settings) ✅
 - [x] Phase 5: Game logic (combat, dialogue, crafting, shop UIs) ✅
-- [ ] Phase 6: Save/load UI
-- [ ] Phase 7: Audio integration
+- [x] Phase 6: Save/load UI ✅
+- [x] Phase 7: Audio integration ✅
 - [ ] Phase 8: Testing & polish
 
 ---
