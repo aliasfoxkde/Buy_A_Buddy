@@ -1,506 +1,249 @@
 // ==========================================
-// GAME ROUTES - Core game API endpoints
+// GAME ROUTES - Core game API
 // ==========================================
 
 import { Router, Request, Response } from 'express';
-import { GameState } from '../../game/types';
-import { getSpawnCost, getBuddyUpgradeCost, getPlotUpgradeCost, createBuddy } from '../../systems/spawner';
-import { calculateIncomePerSecond } from '../../systems/economy';
-import { ApiResponse, GameStateDto, toGameStateDto, ApiErrorCode } from '../types';
+import {
+  successResponse,
+  errorResponse,
+  ErrorCode,
+  type GameStateDTO,
+  type ActionResult,
+  type ValidationResult,
+  validateId,
+  validateRarity,
+  validatePositiveNumber,
+} from '../types';
+import { GameStateService } from '../../services/GameStateService';
 
 const router = Router();
 
-// In-memory game state (could be replaced with database)
-let gameState: GameState | null = null;
-
-// Initialize game state
-export function initGameState(state: GameState): void {
-  gameState = state;
-}
-
 // Get current game state
-router.get('/state', (_req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
+router.get('/state', (req: Request, res: Response) => {
+  const stateService = GameStateService.getInstance();
+  const state = stateService.getState();
   
-  return res.json({
-    success: true,
-    data: toGameStateDto(gameState),
-    timestamp: Date.now(),
-  } as ApiResponse<GameStateDto>);
+  // Transform to DTO
+  const stateDTO: GameStateDTO = {
+    version: state.version,
+    player: {
+      id: state.player.id,
+      name: state.player.name,
+      level: state.player.level,
+      xp: state.player.xp,
+      xpRequired: Math.floor(500 * Math.pow(1.3, state.player.level - 1)),
+      coins: Math.floor(state.player.coins),
+      gems: state.player.gems,
+    },
+    buddies: state.buddies.map(b => ({
+      id: b.id,
+      name: b.name,
+      rarity: b.rarity,
+      level: b.level,
+      xp: b.xp,
+      xpRequired: Math.floor(100 * Math.pow(1.5, b.level - 1)),
+      baseIncome: b.baseIncome,
+      stats: {
+        attack: b.stats.attack,
+        defense: b.stats.defense,
+        speed: b.stats.speed,
+        hp: b.stats.hp,
+        maxHp: b.stats.hp + (b.level - 1) * 10,
+      },
+      isWorking: b.isWorking,
+      workPlotId: b.workPlotId,
+    })),
+    plots: state.plots.map(p => ({
+      id: p.id,
+      level: p.level,
+      multiplier: p.multiplier,
+      buddyId: p.buddyId,
+      buddy: p.buddyId ? state.buddies.find(b => b.id === p.buddyId) ? {
+        id: state.buddies.find(b => b.id === p.buddyId)!.id,
+        name: state.buddies.find(b => b.id === p.buddyId)!.name,
+        rarity: state.buddies.find(b => b.id === p.buddyId)!.rarity,
+        level: state.buddies.find(b => b.id === p.buddyId)!.level,
+        xp: 0,
+        xpRequired: 0,
+        baseIncome: state.buddies.find(b => b.id === p.buddyId)!.baseIncome,
+        stats: {
+          attack: state.buddies.find(b => b.id === p.buddyId)!.stats.attack,
+          defense: state.buddies.find(b => b.id === p.buddyId)!.stats.defense,
+          speed: state.buddies.find(b => b.id === p.buddyId)!.stats.speed,
+          hp: state.buddies.find(b => b.id === p.buddyId)!.stats.hp,
+          maxHp: state.buddies.find(b => b.id === p.buddyId)!.stats.hp + (state.buddies.find(b => b.id === p.buddyId)!.level - 1) * 10,
+        },
+        isWorking: true,
+        workPlotId: p.id,
+      } : null : null,
+    })),
+    inventory: state.inventory.map(i => ({
+      id: i.id,
+      name: i.name,
+      description: i.description,
+      type: i.type,
+      rarity: i.rarity,
+      quantity: i.quantity,
+      maxStack: i.maxStack,
+      value: i.value,
+    })),
+    quests: state.quests.map(q => ({
+      questId: q.questId,
+      name: q.questId,
+      description: '',
+      type: 'kill',
+      isComplete: q.isComplete,
+      claimed: q.claimed,
+      progress: q.completedObjectives,
+    })),
+    statistics: {
+      totalPlayTime: state.statistics.totalPlayTime,
+      battlesWon: state.statistics.battlesWon,
+      battlesLost: state.statistics.battlesLost,
+      buddiesSpawned: state.statistics.buddiesSpawned,
+      buddiesBred: state.statistics.buddiesBred,
+      questsCompleted: state.statistics.questsCompleted,
+      totalCoinsEarned: state.statistics.totalCoinsEarned,
+      totalCoinsSpent: state.statistics.totalCoinsSpent,
+    },
+    settings: state.settings,
+  };
+  
+  res.json(successResponse(stateDTO, req.headers['x-request-id'] as string));
 });
 
-// Get current income rate
-router.get('/income', (_req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
+// Perform game action
+router.post('/action', (req: Request, res: Response) => {
+  const stateService = GameStateService.getInstance();
+  const action = req.body;
+  
+  // Validate action
+  const validation = validateAction(action);
+  if (!validation.valid) {
+    res.status(400).json(
+      errorResponse(validation.errors[0].message, ErrorCode.VALIDATION_FAILED)
+    );
+    return;
   }
   
-  const income = calculateIncomePerSecond(gameState);
+  // Process action
+  const result = stateService.processAction(action);
   
-  return res.json({
-    success: true,
-    data: { incomePerSecond: income },
-    timestamp: Date.now(),
-  } as ApiResponse<{ incomePerSecond: number }>);
+  res.json({
+    ...successResponse(result, req.headers['x-request-id'] as string),
+    newState: result.success ? stateService.getState() : undefined,
+  });
 });
 
 // Get spawner info
-router.get('/spawner', (_req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
+router.get('/spawner', (req: Request, res: Response) => {
+  const stateService = GameStateService.getInstance();
+  const state = stateService.getState();
   
-  const ownedCount = gameState.buddies.length;
-  const cost = getSpawnCost(ownedCount);
+  const ownedCount = state.buddies.length;
+  const cost = Math.floor(10 * Math.pow(1.15, ownedCount));
+  const nextCost = Math.floor(10 * Math.pow(1.15, ownedCount + 1));
   
-  return res.json({
-    success: true,
-    data: {
-      ownedCount,
-      spawnCost: cost,
-      spawnCostNext: getSpawnCost(ownedCount + 1),
+  res.json(successResponse({
+    ownedCount,
+    cost,
+    nextCost,
+    probabilities: {
+      common: 60,
+      rare: 25,
+      epic: 12,
+      legendary: 3,
     },
-    timestamp: Date.now(),
-  } as ApiResponse<{
-    ownedCount: number;
-    spawnCost: number;
-    spawnCostNext: number;
-  }>);
+  }));
 });
 
-// Buy a buddy
-router.post('/buddy/buy', (req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
+// Get plots info
+router.get('/plots', (req: Request, res: Response) => {
+  const stateService = GameStateService.getInstance();
+  const state = stateService.getState();
   
-  const ownedCount = gameState.buddies.length;
-  const cost = getSpawnCost(ownedCount);
-  
-  if (gameState.currency < cost) {
-    return res.status(400).json({
-      success: false,
-      error: 'Insufficient funds',
-      errorCode: ApiErrorCode.INSUFFICIENT_FUNDS,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  // Create new buddy (respects forceRarity for testing)
-  const forceRarity = req.body.forceRarity as string | undefined;
-  const newBuddy = forceRarity 
-    ? createBuddy(forceRarity as any)
-    : createBuddyForSpawner();
-  
-  gameState.currency -= cost;
-  gameState.buddies.push(newBuddy);
-  gameState.buddiesBought++;
-  
-  return res.status(201).json({
-    success: true,
-    data: newBuddy,
-    timestamp: Date.now(),
-  } as ApiResponse<any>);
+  res.json(successResponse(state.plots.map(p => ({
+    id: p.id,
+    level: p.level,
+    multiplier: p.multiplier,
+    buddyId: p.buddyId,
+    upgradeCost: Math.floor(25 * Math.pow(1.4, p.level - 1)),
+  }))));
 });
 
-// Assign buddy to plot
-router.post('/buddy/assign', (req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
+// Get buddies info
+router.get('/buddies', (req: Request, res: Response) => {
+  const stateService = GameStateService.getInstance();
+  const state = stateService.getState();
+  
+  const workingOnly = req.query.working === 'true';
+  const unassignedOnly = req.query.unassigned === 'true';
+  
+  let buddies = state.buddies;
+  
+  if (workingOnly) {
+    buddies = buddies.filter(b => b.isWorking);
+  } else if (unassignedOnly) {
+    buddies = buddies.filter(b => !b.isWorking);
   }
   
-  const { buddyId, plotId } = req.body;
-  
-  if (!buddyId || !plotId) {
-    return res.status(400).json({
-      success: false,
-      error: 'Missing buddyId or plotId',
-      errorCode: ApiErrorCode.INVALID_REQUEST,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const buddy = gameState.buddies.find(b => b.id === buddyId);
-  const plot = gameState.plots.find(p => p.id === plotId);
-  
-  if (!buddy) {
-    return res.status(404).json({
-      success: false,
-      error: 'Buddy not found',
-      errorCode: ApiErrorCode.BUDDY_NOT_FOUND,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  if (!plot) {
-    return res.status(404).json({
-      success: false,
-      error: 'Plot not found',
-      errorCode: ApiErrorCode.PLOT_NOT_FOUND,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  if (plot.assignedBuddyId) {
-    return res.status(400).json({
-      success: false,
-      error: 'Plot is already occupied',
-      errorCode: ApiErrorCode.PLOT_OCCUPIED,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  // Unassign from previous plot if any
-  if (buddy.assignedPlotId) {
-    const prevPlot = gameState.plots.find(p => p.id === buddy.assignedPlotId);
-    if (prevPlot) prevPlot.assignedBuddyId = null;
-  }
-  
-  // Assign to new plot
-  buddy.assignedPlotId = plotId;
-  plot.assignedBuddyId = buddyId;
-  
-  return res.json({
-    success: true,
-    data: { buddy, plot },
-    timestamp: Date.now(),
-  } as ApiResponse<any>);
+  res.json(successResponse(buddies));
 });
 
-// Unassign buddy
-router.post('/buddy/unassign', (req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
+// Validation helper
+function validateAction(action: any): ValidationResult {
+  const errors: any[] = [];
+  
+  if (!action || !action.type) {
+    errors.push({ field: 'type', message: 'Action type is required', code: 'MISSING_FIELD' });
+    return { valid: false, errors };
   }
   
-  const { buddyId } = req.body;
-  
-  if (!buddyId) {
-    return res.status(400).json({
-      success: false,
-      error: 'Missing buddyId',
-      errorCode: ApiErrorCode.INVALID_REQUEST,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const buddy = gameState.buddies.find(b => b.id === buddyId);
-  
-  if (!buddy) {
-    return res.status(404).json({
-      success: false,
-      error: 'Buddy not found',
-      errorCode: ApiErrorCode.BUDDY_NOT_FOUND,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  if (!buddy.assignedPlotId) {
-    return res.status(400).json({
-      success: false,
-      error: 'Buddy is not assigned to any plot',
-      errorCode: ApiErrorCode.BUDDY_NOT_FOUND,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const plot = gameState.plots.find(p => p.id === buddy.assignedPlotId);
-  if (plot) plot.assignedBuddyId = null;
-  buddy.assignedPlotId = null;
-  
-  return res.json({
-    success: true,
-    data: { buddy },
-    timestamp: Date.now(),
-  } as ApiResponse<any>);
-});
-
-// Upgrade buddy
-router.post('/buddy/upgrade', (req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const { buddyId } = req.body;
-  
-  if (!buddyId) {
-    return res.status(400).json({
-      success: false,
-      error: 'Missing buddyId',
-      errorCode: ApiErrorCode.INVALID_REQUEST,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const buddy = gameState.buddies.find(b => b.id === buddyId);
-  
-  if (!buddy) {
-    return res.status(404).json({
-      success: false,
-      error: 'Buddy not found',
-      errorCode: ApiErrorCode.BUDDY_NOT_FOUND,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const cost = getBuddyUpgradeCost(buddy);
-  
-  if (gameState.currency < cost) {
-    return res.status(400).json({
-      success: false,
-      error: 'Insufficient funds',
-      errorCode: ApiErrorCode.INSUFFICIENT_FUNDS,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  gameState.currency -= cost;
-  buddy.level++;
-  
-  return res.json({
-    success: true,
-    data: { buddy, cost },
-    timestamp: Date.now(),
-  } as ApiResponse<any>);
-});
-
-// Upgrade plot
-router.post('/plot/upgrade', (req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const { plotId } = req.body;
-  
-  if (!plotId) {
-    return res.status(400).json({
-      success: false,
-      error: 'Missing plotId',
-      errorCode: ApiErrorCode.INVALID_REQUEST,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const plot = gameState.plots.find(p => p.id === plotId);
-  
-  if (!plot) {
-    return res.status(404).json({
-      success: false,
-      error: 'Plot not found',
-      errorCode: ApiErrorCode.PLOT_NOT_FOUND,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const cost = getPlotUpgradeCost(plot);
-  
-  if (gameState.currency < cost) {
-    return res.status(400).json({
-      success: false,
-      error: 'Insufficient funds',
-      errorCode: ApiErrorCode.INSUFFICIENT_FUNDS,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  gameState.currency -= cost;
-  plot.level++;
-  plot.multiplier = 1 + (plot.level - 1) * 0.5;
-  
-  return res.json({
-    success: true,
-    data: { plot, cost },
-    timestamp: Date.now(),
-  } as ApiResponse<any>);
-});
-
-// Purchase global upgrade
-router.post('/upgrade/purchase', (req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const { upgradeId } = req.body;
-  
-  if (!upgradeId) {
-    return res.status(400).json({
-      success: false,
-      error: 'Missing upgradeId',
-      errorCode: ApiErrorCode.INVALID_REQUEST,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const upgrade = gameState.upgrades.find(u => u.id === upgradeId);
-  
-  if (!upgrade) {
-    return res.status(404).json({
-      success: false,
-      error: 'Upgrade not found',
-      errorCode: ApiErrorCode.UPGRADE_NOT_FOUND,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  if (upgrade.currentLevel >= upgrade.maxLevel) {
-    return res.status(400).json({
-      success: false,
-      error: 'Upgrade is already maxed',
-      errorCode: ApiErrorCode.UPGRADE_MAXED,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const cost = upgrade.cost * upgrade.currentLevel;
-  
-  if (gameState.currency < cost) {
-    return res.status(400).json({
-      success: false,
-      error: 'Insufficient funds',
-      errorCode: ApiErrorCode.INSUFFICIENT_FUNDS,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  gameState.currency -= cost;
-  upgrade.currentLevel++;
-  
-  return res.json({
-    success: true,
-    data: { upgrade, cost },
-    timestamp: Date.now(),
-  } as ApiResponse<any>);
-});
-
-// Add currency (admin/testing)
-router.post('/admin/add-currency', (req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  const { amount } = req.body;
-  
-  if (typeof amount !== 'number' || amount <= 0) {
-    return res.status(400).json({
-      success: false,
-      error: 'Invalid amount',
-      errorCode: ApiErrorCode.INVALID_REQUEST,
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  gameState.currency += amount;
-  
-  return res.json({
-    success: true,
-    data: { newBalance: gameState.currency },
-    timestamp: Date.now(),
-  } as ApiResponse<any>);
-});
-
-// Reset game (admin)
-router.post('/admin/reset', (_req: Request, res: Response) => {
-  if (!gameState) {
-    return res.status(503).json({
-      success: false,
-      error: 'Game not initialized',
-      timestamp: Date.now(),
-    } as ApiResponse<null>);
-  }
-  
-  // Reset to initial state
-  gameState.currency = 100;
-  gameState.buddies = [];
-  gameState.plots.forEach(p => {
-    p.level = 1;
-    p.multiplier = 1;
-    p.assignedBuddyId = null;
-  });
-  gameState.upgrades.forEach(u => {
-    u.currentLevel = u.id === 'plot-boost' ? 1 : 0;
-  });
-  gameState.stats = { totalEarned: 0, sessionEarned: 0, highScore: 0 };
-  gameState.buddiesBought = 0;
-  gameState.moneyEarned = 0;
-  
-  return res.json({
-    success: true,
-    data: toGameStateDto(gameState),
-    timestamp: Date.now(),
-  } as ApiResponse<GameStateDto>);
-});
-
-// Helper to create buddy for spawner (uses rarity system)
-import { RARITY_CONFIG, BUDDY_NAMES, Rarity } from '../../game/types';
-
-function createBuddyForSpawner(): any {
-  const roll = Math.random() * 100;
-  let cumulative = 0;
-  let rarity: Rarity = 'common';
-  
-  for (const config of RARITY_CONFIG) {
-    cumulative += config.chance;
-    if (roll < cumulative) {
-      rarity = config.name;
+  switch (action.type) {
+    case 'SPAWN_BUDDY':
+      if (action.forcedRarity && !validateRarity(action.forcedRarity)) {
+        errors.push({ field: 'forcedRarity', message: 'Invalid rarity', code: 'INVALID_VALUE' });
+      }
       break;
-    }
+      
+    case 'ASSIGN_BUDDY':
+      if (!action.buddyId || !validateId(action.buddyId)) {
+        errors.push({ field: 'buddyId', message: 'Invalid buddy ID', code: 'INVALID_ID' });
+      }
+      if (!action.plotId || !validateId(action.plotId)) {
+        errors.push({ field: 'plotId', message: 'Invalid plot ID', code: 'INVALID_ID' });
+      }
+      break;
+      
+    case 'UNASSIGN_BUDDY':
+      if (!action.buddyId || !validateId(action.buddyId)) {
+        errors.push({ field: 'buddyId', message: 'Invalid buddy ID', code: 'INVALID_ID' });
+      }
+      break;
+      
+    case 'UPGRADE_BUDDY':
+      if (!action.buddyId || !validateId(action.buddyId)) {
+        errors.push({ field: 'buddyId', message: 'Invalid buddy ID', code: 'INVALID_ID' });
+      }
+      break;
+      
+    case 'UPGRADE_PLOT':
+      if (!action.plotId || !validateId(action.plotId)) {
+        errors.push({ field: 'plotId', message: 'Invalid plot ID', code: 'INVALID_ID' });
+      }
+      break;
+      
+    case 'BREED_BUDDIES':
+      if (!action.parent1Id || !validateId(action.parent1Id)) {
+        errors.push({ field: 'parent1Id', message: 'Invalid parent ID', code: 'INVALID_ID' });
+      }
+      if (!action.parent2Id || !validateId(action.parent2Id)) {
+        errors.push({ field: 'parent2Id', message: 'Invalid parent ID', code: 'INVALID_ID' });
+      }
+      break;
   }
   
-  const names = BUDDY_NAMES[rarity];
-  const name = names[Math.floor(Math.random() * names.length)];
-  const config = RARITY_CONFIG.find(r => r.name === rarity)!;
-  
-  return {
-    id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    name,
-    emoji: config.emoji,
-    rarity,
-    baseIncome: 1 * config.baseIncomeMultiplier,
-    level: 1,
-    assignedPlotId: null,
-  };
+  return { valid: errors.length === 0, errors };
 }
 
 export default router;

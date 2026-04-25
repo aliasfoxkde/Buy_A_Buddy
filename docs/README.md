@@ -1,263 +1,257 @@
-# Buy a Buddy - Game Development Documentation
+# Buy a Buddy - Comprehensive Game Documentation
 
-## 📋 Overview
+## 🎮 Project Overview
 
-**Buy a Buddy** is a web-based idle tycoon game built with TypeScript and Vite. Players buy and manage "Buddies" that generate passive income over time.
+**Buy a Buddy** is an immersive 2D RPG with integrated mini-games, built with Vite, Phaser 3, and TypeScript.
 
 ### Tech Stack
-- **Build Tool:** Vite 6.x
-- **Language:** TypeScript 5.x
-- **Testing:** Vitest 3.x with jsdom
-- **API Server:** Express 4.x with Swagger UI
-- **PWA:** vite-plugin-pwa with Workbox
-- **Deployment:** Cloudflare Pages
+- **Frontend:** Vite 6 + Phaser 3 + TypeScript
+- **Backend:** Express 4 + Swagger UI
+- **Testing:** Vitest + Playwright
+- **Deployment:** Cloudflare Pages (PWA)
 
 ---
 
-## 🏗️ Architecture
+## 📁 Project Structure
 
 ```
-src/
-├── api/                    # Express API server
-│   ├── docs/              # OpenAPI/Swagger documentation
-│   ├── routes/            # API route handlers
-│   ├── server.ts          # Server entry point
-│   └── types.ts            # API DTOs and response types
-├── game/                   # Core game logic
-│   ├── gameEngine.ts      # Main game state management
-│   └── types.ts           # Game type definitions
-├── systems/                # Game systems
-│   ├── economy.ts         # Income calculations
-│   ├── saveSystem.ts      # localStorage persistence
-│   └── spawner.ts         # Buddy creation and rarity
-├── ui/                     # Frontend UI
-│   ├── components.ts      # UI components
-│   └── uiManager.ts       # DOM rendering and events
-└── main.ts                # Entry point
-```
-
----
-
-## 🎮 Core Concepts
-
-### Buddies
-
-Each buddy has:
-- **Rarity:** common (60%), rare (25%), epic (12%), legendary (3%)
-- **Base Income:** 1× to 8× multiplier based on rarity
-- **Level:** Upgradeable, increases income
-- **Assignment:** Can work on a plot or be in inventory
-
-### Plots
-
-Each plot:
-- **Multiplier:** Increases with level (1 + (level-1) × 0.5)
-- **Assignment:** One buddy per plot
-- **Income:** buddy.baseIncome × buddy.level × plot.multiplier
-
-### Upgrades
-
-| Upgrade | Effect | Max Level |
-|---------|--------|-----------|
-| Plot Power | +50% plot multiplier per level | 20 |
-| Lucky Spawn | +5% rare+ spawn chance per level | 10 |
-
-### Income Formula
-
-```
-incomePerSecond = Σ(buddy.baseIncome × buddy.level × plot.multiplier)
+Buy_A_Buddy/
+├── src/
+│   ├── api/                 # Express API server
+│   │   ├── docs/            # OpenAPI specs
+│   │   ├── routes/         # API endpoints
+│   │   ├── types.ts        # API DTOs
+│   │   └── server.ts       # Express server
+│   ├── config/
+│   │   └── constants.ts    # Game configuration
+│   ├── debug/
+│   │   └── DebugTools.ts   # Debug overlay, performance monitor
+│   ├── game/
+│   │   └── types.ts        # Core game types
+│   ├── scenes/              # Phaser scenes
+│   ├── services/
+│   │   └── GameStateService.ts  # Central state management
+│   ├── systems/
+│   │   └── GameSystems.ts  # Core game logic
+│   └── ui/                  # UI components
+├── tests/
+│   ├── unit/               # Unit tests
+│   ├── integration/        # Integration tests
+│   ├── e2e/                # Playwright E2E tests
+│   └── fixtures/          # Test data
+├── docs/                   # Documentation
+├── scripts/                # Utility scripts
+└── public/                 # Static assets
 ```
 
 ---
 
-## 🧪 Testing
+## 🎯 Core Features
 
-### Run Tests
-```bash
-npm run test              # Run all tests
-npm run test:watch        # Watch mode
-npm run test:coverage    # Coverage report
-```
+### 1. Idle Buddy Farm
+- Buy buddies from gacha spawner
+- Assign buddies to 9 work plots
+- Passive income generation
+- Upgrade system (buddy level, plot multiplier)
 
-### Test Structure
-```
-tests/
-├── api/api.test.ts       # API response format tests
-├── game/types.test.ts    # Type system tests
-├── systems/
-│   ├── economy.test.ts   # Income calculations
-│   ├── saveSystem.test.ts # Persistence tests
-│   └── spawner.test.ts   # Buddy generation
-└── setup.ts             # Test utilities
-```
+### 2. RPG World Map
+- Top-down 2D exploration
+- Player movement with WASD/arrows
+- Touch joystick for mobile
+- NPC interactions
+- Portal transitions
 
-### Coverage Targets
-- Statements: 80%
-- Branches: 80%
-- Functions: 80%
-- Lines: 80%
+### 3. Mini-Games Hub
+- Idle Farm (passive income)
+- Buddy Brawl (turn-based combat)
+- Quest Quest (task-based)
+- Buddy Breeding (combination)
 
----
-
-## 🌐 API Documentation
-
-The API server provides RESTful endpoints for game operations.
-
-### Start Server
-```bash
-npm run dev:api          # Start API server on port 3001
-```
-
-### Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/game/state` | Get current game state |
-| GET | `/api/game/income` | Get income rate |
-| GET | `/api/game/spawner` | Get spawner info |
-| POST | `/api/buddy/buy` | Buy a new buddy |
-| POST | `/api/buddy/assign` | Assign to plot |
-| POST | `/api/buddy/unassign` | Unassign from plot |
-| POST | `/api/buddy/upgrade` | Upgrade buddy level |
-| POST | `/api/plot/upgrade` | Upgrade plot level |
-| POST | `/api/upgrade/purchase` | Buy global upgrade |
-| POST | `/api/admin/add-currency` | Add currency (dev) |
-| POST | `/api/admin/reset` | Reset game (dev) |
-| GET | `/api/health` | Health check |
-
-### API Docs UI
-Visit `http://localhost:3001/api-docs` for Swagger UI.
-
-### Response Format
-```json
-{
-  "success": true,
-  "data": { ... },
-  "timestamp": 1234567890
-}
-```
-
----
-
-## 📱 PWA Configuration
-
-### Installation
-The game can be installed as a Progressive Web App on mobile and desktop.
-
-### Features
-- Offline support via Service Worker
-- Auto-update on new version
-- App-like experience (standalone display)
-
-### Icons
-Located in `/public/icons/`:
-- `icon-192.svg` (192×192)
-- `icon-512.svg` (512×512)
-
----
-
-## ☁️ Cloudflare Deployment
-
-### Setup
-1. Install Wrangler CLI: `npm i -g wrangler`
-2. Configure `wrangler.toml`:
-```toml
-name = "buy-a-buddy"
-compatibility_date = "2024-12-01"
-pages_build_output_dir = "dist"
-```
-
-### Deploy
-```bash
-npm run deploy
-# or manually:
-npm run build
-wrangler pages deploy dist --project-name buy-a-buddy
-```
-
-### Environment Variables
-```env
-CLOUDFLARE_API_TOKEN=your_token
-CLOUDFLARE_ACCOUNT_ID=your_account_id
-```
+### 4. Progression System
+- Player level with XP
+- Buddy leveling
+- Region unlocks
+- Achievement system
 
 ---
 
 ## 🔧 Development
 
-### Prerequisites
-- Node.js 18+
-- npm 9+
-
-### Setup
-```bash
-npm install
-```
-
 ### Commands
-```bash
-npm run dev          # Start Vite dev server
-npm run build        # Production build
-npm run preview      # Preview production build
-npm run dev:api      # Start API server
-npm run test         # Run tests
-npm run lint         # Lint code
-```
 
-### Project Structure
-```
-.
-├── docs/              # Documentation
-├── public/            # Static assets
-├── references/        # Design references
-├── src/               # Source code
-├── tests/             # Test files
-├── index.html         # Entry HTML
-├── package.json       # Dependencies
-├── tsconfig.json      # TypeScript config
-├── vite.config.ts     # Vite config
-├── vitest.config.ts   # Test config
-└── wrangler.toml     # CF deployment
+```bash
+# Install dependencies
+npm install
+
+# Start development
+npm run dev          # Frontend (Vite)
+npm run dev:api       # Backend (Express)
+
+# Testing
+npm run test          # Unit tests
+npm run test:watch    # Watch mode
+npm run test:coverage # Coverage report
+npm run test:e2e      # Playwright E2E
+
+# Code quality
+npm run lint          # ESLint
+npm run lint:fix      # Auto-fix
+npm run check         # Full check (tsc + lint + test)
+
+# Build & Deploy
+npm run build         # Production build
+npm run deploy        # Deploy to Cloudflare Pages
 ```
 
 ---
 
-## 🎯 Roadmap
+## 🌐 API Documentation
 
-### Phase 1 ✅ (Complete)
-- [x] Core game types and state
-- [x] Buddy spawner with rarity
-- [x] Income calculation
-- [x] Save system
+### Endpoints
 
-### Phase 2 ✅ (Complete)
-- [x] 3×3 plot grid
-- [x] Buddy assignment
-- [x] Upgrade system
-- [x] Basic UI
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api` | API info |
+| GET | `/api/game/state` | Get game state |
+| POST | `/api/game/action` | Perform game action |
+| GET | `/api/game/spawner` | Spawner info |
+| GET | `/api/game/buddies` | List buddies |
+| GET | `/api/game/plots` | List plots |
+| GET | `/api/debug/report` | Debug report |
+| GET | `/api/debug/validate` | State validation |
+| GET | `/api/debug/metrics` | Performance metrics |
+| GET | `/api/health` | Health check |
+| GET | `/api/health/ready` | Readiness |
+| GET | `/api/health/live` | Liveness |
 
-### Phase 3 🔄 (Current)
-- [ ] Animations and visual feedback
-- [ ] Sound effects
-- [ ] Achievement system
-- [ ] Mobile responsiveness
+### Interactive Docs
 
-### Phase 4 📋 (Planned)
+Visit `/api-docs` for Swagger UI.
+
+---
+
+## 🧪 Testing Strategy
+
+### Unit Tests
+- Game systems (Idle, Spawner, Battle, Quest, Breeding)
+- Validation system
+- Save system
+- Debug utilities
+
+### Integration Tests
+- API endpoints
+- State management
+- Cross-system interactions
+
+### E2E Tests
+- Full game flow
+- Mobile responsiveness
+- Performance benchmarks
+
+### Coverage Targets
+- Statements: 70%
+- Branches: 70%
+- Functions: 70%
+- Lines: 70%
+
+---
+
+## 🎨 Visual Design
+
+### Color Palette
+| Name | Hex | Usage |
+|------|-----|-------|
+| Background | `#0d0d1a` | Main background |
+| Primary | `#a855f7` | Purple accents |
+| Secondary | `#ec4899` | Pink highlights |
+| Accent | `#06b6d4` | Cyan interactive |
+| Gold | `#fbbf24` | Coins/values |
+
+### Rarity Colors
+- **Common:** Sky blue (`#87CEEB`)
+- **Rare:** Purple (`#9370DB`)
+- **Epic:** Pink (`#FF69B4`)
+- **Legendary:** Gold (`#FFD700`)
+
+---
+
+## 📱 Mobile Support
+
+### Touch Controls
+- Virtual joystick (left side)
+- Tap to interact
+- Swipe gestures for menus
+- Haptic feedback
+
+### Responsive Layout
+- 400×700 base resolution
+- Scales to screen size
+- Touch-optimized UI
+
+---
+
+## 🔐 Debug System
+
+### Debug Overlay
+Press `Ctrl+Shift+D` to toggle.
+
+Features:
+- Performance metrics (FPS, frame time)
+- Quick actions (add coins, spawn buddy)
+- Console log viewer
+- State inspector
+
+### Validation
+- `GET /api/debug/validate` - Check game state integrity
+- `GET /api/debug/report` - Get debug report
+
+---
+
+## 🚀 Deployment
+
+### Cloudflare Pages
+
+1. Build: `npm run build`
+2. Deploy: `wrangler pages deploy dist --project-name buy-a-buddy`
+
+### CI/CD
+
+GitHub Actions workflow for:
+- Lint & type check
+- Unit tests
+- E2E tests
+- Auto-deploy on main
+
+---
+
+## 📈 Performance
+
+### Targets
+- 60 FPS gameplay
+- < 16.67ms frame time
+- < 100ms input latency
+- < 500KB initial bundle
+
+### Optimization
+- Sprite pooling
+- Object reuse
+- Throttled updates
+- Lazy loading
+
+---
+
+## 🔮 Future Features
+
+- [ ] Multiplayer co-op battles
+- [ ] Guild system
+- [ ] Seasonal events
 - [ ] Cloud save (Cloudflare KV)
 - [ ] Leaderboards
-- [ ] Daily rewards
-- [ ] Limited-time events
+- [ ] Steam release
+- [ ] Native mobile app (Capacitor)
 
 ---
 
-## 📖 References
-
-- Game design inspiration from reference images in `/references/`
-- Color scheme: Dark purple (#1a0a2e) with pink (#a855f7, #ec4899) accents
-- Emoji-based buddy characters
-
----
-
-## 📄 License
+## 📝 License
 
 MIT
