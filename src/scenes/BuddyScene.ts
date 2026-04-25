@@ -225,7 +225,7 @@ export class BuddyScene extends Phaser.Scene {
   }
 
   private addTestBuddy(): void {
-    const types: BuddyType[] = ['buddy_1_1', 'buddy_1_2', 'buddy_1_3', 'buddy_2_1', 'buddy_2_2', 'buddy_2_3', 'char_1_1', 'char_1_2', 'char_1_3', 'char_2_1', 'char_2_2', 'char_2_3'];
+    const types: BuddyType[] = ['twilight_petal', 'rose_angel', 'shadow_mistress', 'crimson_flame', 'violet_dream', 'dark_princess', 'golden_hero', 'petal_fairy', 'night_weaver', 'emerald_sprite', 'storm_mage', 'frost_enchantress'];
     const rarities: RarityType[] = ['common', 'rare', 'epic', 'legendary'];
     const weights = [60, 25, 12, 3];
     
@@ -349,15 +349,18 @@ export class BuddyScene extends Phaser.Scene {
 
   private getBuddyEmoji(type: string): string {
     const emojis: Record<string, string> = {
-      slime: '🟢',
-      fairy: '🧚',
-      angel: '👼',
-      demon: '😈',
-      shadow: '👻',
-      crystal: '💎',
-      nature: '🌿',
-      fire: '🔥',
-      golden: '⭐',
+      twilight_petal: '🌸',
+      rose_angel: '🌹',
+      shadow_mistress: '👤',
+      crimson_flame: '🔥',
+      violet_dream: '💜',
+      dark_princess: '👑',
+      golden_hero: '⭐',
+      petal_fairy: '🌼',
+      night_weaver: '🌙',
+      emerald_sprite: '💚',
+      storm_mage: '⚡',
+      frost_enchantress: '❄️',
     };
     return emojis[type] || '😊';
   }

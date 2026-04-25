@@ -1,50 +1,99 @@
 // ==========================================
-// CHARACTER SELECT SCENE - Fixed implementation
-// Uses properly extracted character sprites
+// CHARACTER SELECT SCENE - Using extracted reference art sprites
+// 12 unique anime characters with proper sprite loading
 // ==========================================
 
 import Phaser from 'phaser';
 import { COLORS } from '../config/constants';
 import { audioManager } from '../audio/AudioManager';
-import { getAllCharacters, getRarityStyle, getCharacterConfig, getCharacterImagePath } from '../sprites/SpriteRenderer';
-import type { BuddyType } from '../sprites/SpriteRenderer';
-
-interface CharacterInfo {
-  id: string;
-  name: string;
-  type: string;
-  rarity: string;
-  description: string;
-  stats: { hp: number; atk: number; def: number; spd: number };
-}
+import { 
+  getAllCharacters, 
+  getRarityStyle, 
+  getCharacterConfig,
+  getSpritePath 
+} from '../sprites/SpriteRenderer';
+import type { BuddyType, CharacterConfig, RarityType } from '../sprites/SpriteRenderer';
 
 export class CharacterSelectScene extends Phaser.Scene {
-  private selectedCharacter: CharacterInfo | null = null;
+  private selectedCharacter: CharacterConfig | null = null;
   private characterCards: Phaser.GameObjects.Container[] = [];
-  private infoTexts: Phaser.GameObjects.Text[] = [];
   private previewSprite: Phaser.GameObjects.Sprite | null = null;
+  private isLoaded = false;
 
   constructor() {
     super({ key: 'CharacterSelectScene' });
   }
 
   preload(): void {
-    // Pre-load all character sprites
+    // Preload all 12 character sprites
     const characters = getAllCharacters();
-    characters.forEach((char: any) => {
-      const path = getCharacterImagePath(char.type as BuddyType);
+    characters.forEach((char: CharacterConfig) => {
+      const path = getSpritePath(char.type as BuddyType);
       this.load.image(`char_${char.type}`, path);
     });
     
-    // Load character select background
-    this.load.image('char_select_bg', '/images/assets/character_select.png');
+    // Loading progress
+    this.load.on('progress', (progress: number) => {
+      this.updateLoadingBar(progress);
+    });
   }
 
   create(): void {
     this.cameras.main.setBackgroundColor(COLORS.background);
     
-    // Create background with reference art
-    this.createBackground();
+    // Wait for textures to load
+    this.load.once('complete', () => {
+      this.isLoaded = true;
+      this.buildUI();
+    });
+    
+    if (!this.load.isLoading()) {
+      this.load.start();
+    }
+    
+    // Show loading screen while waiting
+    this.showLoadingScreen();
+  }
+
+  private showLoadingScreen(): void {
+    const w = this.scale.width;
+    const h = this.scale.height;
+    
+    // Loading bar
+    const barBg = this.add.graphics();
+    barBg.fillStyle(0x2d1b4e, 1);
+    barBg.fillRoundedRect(w/2 - 100, h/2, 200, 20, 10);
+    
+    const barFill = this.add.graphics();
+    
+    // Animated loading dots
+    const loadingText = this.add.text(w/2, h/2 - 40, 'Loading Buddies...', {
+      fontSize: '18px',
+      color: '#a855f7',
+    }).setOrigin(0.5);
+    
+    let dotCount = 0;
+    this.time.addEvent({
+      delay: 400,
+      callback: () => {
+        dotCount = (dotCount + 1) % 4;
+        loadingText.setText('Loading Buddies' + '.'.repeat(dotCount));
+      },
+      loop: true,
+    });
+  }
+
+  private updateLoadingBar(progress: number): void {
+    // Progress is handled by Phaser's load events
+  }
+
+  private buildUI(): void {
+    // Clear any loading elements
+    this.children.list.forEach((child: any) => {
+      if (child.type !== 'Graphics' || !child.isLoading) {
+        child.destroy();
+      }
+    });
     
     this.createHeader();
     this.createCharacterGrid();
@@ -52,78 +101,46 @@ export class CharacterSelectScene extends Phaser.Scene {
     this.createConfirmButton();
     this.createBackButton();
     
-    console.log(`🎭 Choose your Buddy! (${getAllCharacters().length} characters available)`);
-  }
-
-  private createBackground(): void {
-    const w = this.scale.width;
-    const h = this.scale.height;
-    
-    // Add a subtle gradient overlay
-    const gradient = this.add.graphics();
-    gradient.fillGradientStyle(0x0d0d1a, 0x0d0d1a, 0x1a0a2e, 0x1a0a2e, 1);
-    gradient.fillRect(0, 0, w, h);
-    
-    // Add decorative particles
-    for (let i = 0; i < 20; i++) {
-      const x = Phaser.Math.Between(50, w - 50);
-      const y = Phaser.Math.Between(100, h - 100);
-      const star = this.add.text(x, y, '✦', {
-        fontSize: Phaser.Math.Between(12, 24) + 'px',
-        color: '#a855f7',
-      }).setAlpha(Phaser.Math.FloatBetween(0.2, 0.5));
-      
-      this.tweens.add({
-        targets: star,
-        y: y - 30,
-        alpha: 0.1,
-        duration: Phaser.Math.Between(2000, 4000),
-        yoyo: true,
-        repeat: -1,
-      });
-    }
+    console.log(`🎭 Character Select - ${getAllCharacters().length} buddies loaded!`);
   }
 
   private createHeader(): void {
     const w = this.scale.width;
     
-    // Header background
+    // Header bar
     const header = this.add.graphics();
     header.fillStyle(0x1a0a2e, 0.95);
-    header.fillRect(0, 0, w, 85);
-    header.lineStyle(3, 0xa855f7, 0.8);
-    header.lineBetween(0, 85, w, 85);
+    header.fillRect(0, 0, w, 80);
+    header.lineStyle(3, 0xa855f7, 0.7);
+    header.lineBetween(0, 80, w, 80);
     
     // Title
-    const title = this.add.text(w / 2, 30, 'Choose Your Buddy', {
-      fontSize: '28px',
+    this.add.text(w/2, 28, '✦ Choose Your Buddy ✦', {
+      fontSize: '26px',
       fontFamily: 'Georgia, serif',
       color: '#a855f7',
       fontStyle: 'bold',
     }).setOrigin(0.5);
     
     // Subtitle
-    const subtitle = this.add.text(w / 2, 60, 'Tap a character to learn more', {
-      fontSize: '14px',
-      color: '#8a8a8a',
+    this.add.text(w/2, 58, 'Tap a character to learn more', {
+      fontSize: '13px',
+      color: '#888888',
     }).setOrigin(0.5);
-    
-    // Decorative elements
-    this.add.text(w - 30, 42, '✨', { fontSize: '22px' }).setOrigin(0.5);
-    this.add.text(30, 42, '✨', { fontSize: '22px' }).setOrigin(0.5);
   }
 
   private createCharacterGrid(): void {
     const w = this.scale.width;
-    const startY = 95;
+    const h = this.scale.height;
+    const startY = 90;
     const cols = 3;
     const cardW = (w - 60) / cols;
-    const cardH = 125;
-    const spacing = 5;
+    const cardH = 120;
+    const spacing = 6;
     
     const characters = getAllCharacters();
     
-    characters.forEach((char: CharacterInfo, i: number) => {
+    characters.forEach((char: CharacterConfig, i: number) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
       const x = 20 + col * (cardW + spacing);
@@ -132,72 +149,70 @@ export class CharacterSelectScene extends Phaser.Scene {
     });
   }
 
-  private createCard(char: CharacterInfo, x: number, y: number, w: number, h: number): void {
+  private createCard(char: CharacterConfig, x: number, y: number, w: number, h: number): void {
     const card = this.add.container(x, y);
-    const rarityStyle = getRarityStyle(char.rarity as any);
+    const rarityStyle = getRarityStyle(char.rarity as RarityType);
     
-    // Card background with rounded corners
+    // Card background
     const bg = this.add.graphics();
     bg.fillStyle(0x2d1b4e, 0.95);
     bg.fillRoundedRect(0, 0, w, h, 12);
-    bg.lineStyle(3, rarityStyle.border, 0.9);
+    bg.lineStyle(3, rarityStyle.border, 0.85);
     bg.strokeRoundedRect(0, 0, w, h, 12);
     card.add(bg);
     
-    // Add character sprite
+    // Character sprite
     const spriteKey = `char_${char.type}`;
-    let sprite: Phaser.GameObjects.Sprite | null = null;
-    
     if (this.textures.exists(spriteKey)) {
-      sprite = this.add.sprite(48, h / 2 - 3, spriteKey).setScale(0.45);
+      const sprite = this.add.sprite(45, h/2 - 3, spriteKey).setScale(0.4);
       card.add(sprite);
     } else {
-      // Placeholder circle
+      // Placeholder
       const placeholder = this.add.graphics();
       placeholder.fillStyle(rarityStyle.border, 1);
-      placeholder.fillCircle(48, h / 2 - 3, 38);
+      placeholder.fillCircle(45, h/2 - 3, 35);
       card.add(placeholder);
       
-      this.add.text(48, h / 2 - 3, char.name.substring(0, 1), {
-        fontSize: '22px',
+      this.add.text(45, h/2 - 3, char.type[0].toUpperCase(), {
+        fontSize: '20px',
         color: '#fff',
         fontStyle: 'bold',
       }).setOrigin(0.5);
     }
     
-    // Rarity badge (top right)
+    // Rarity badge
     const badge = this.add.graphics();
     badge.fillStyle(rarityStyle.badge, 1);
-    badge.fillCircle(w - 18, 16, 14);
+    badge.fillCircle(w - 16, 14, 13);
     card.add(badge);
     
-    this.add.text(w - 18, 16, rarityStyle.label, {
-      fontSize: '12px',
+    this.add.text(w - 16, 14, rarityStyle.label, {
+      fontSize: '11px',
       color: '#fff',
       fontStyle: 'bold',
     }).setOrigin(0.5);
     
     // Character name
-    this.add.text(88, 10, char.name, {
+    this.add.text(85, 10, char.name, {
       fontSize: '14px',
       color: '#ffffff',
       fontStyle: 'bold',
     }).setOrigin(0, 0);
     
-    // Rarity name
-    this.add.text(88, 30, char.rarity.toUpperCase(), {
+    // Rarity text
+    this.add.text(85, 30, char.rarity.toUpperCase(), {
       fontSize: '10px',
       color: `#${rarityStyle.badge.toString(16).slice(2)}`,
     });
     
     // Stats preview
-    this.add.text(88, 48, `HP:${char.stats.hp}`, { fontSize: '10px', color: '#22c55e' });
-    this.add.text(135, 48, `ATK:${char.stats.atk}`, { fontSize: '10px', color: '#ef4444' });
-    this.add.text(88, 64, `DEF:${char.stats.def}`, { fontSize: '10px', color: '#3b82f6' });
-    this.add.text(135, 64, `SPD:${char.stats.spd}`, { fontSize: '10px', color: '#f59e0b' });
+    this.add.text(85, 50, `HP:${char.stats.hp}`, { fontSize: '11px', color: '#22c55e' });
+    this.add.text(130, 50, `ATK:${char.stats.atk}`, { fontSize: '11px', color: '#ef4444' });
+    this.add.text(85, 66, `DEF:${char.stats.def}`, { fontSize: '11px', color: '#3b82f6' });
+    this.add.text(130, 66, `SPD:${char.stats.spd}`, { fontSize: '11px', color: '#f59e0b' });
     
-    // Interactive hit area
-    const hit = this.add.rectangle(w / 2, h / 2, w + 10, h + 10)
+    // Hit area
+    const hit = this.add.rectangle(w/2, h/2, w + 10, h + 10)
       .setInteractive({ useHandCursor: true })
       .setAlpha(0.001);
     card.add(hit);
@@ -208,54 +223,52 @@ export class CharacterSelectScene extends Phaser.Scene {
     });
     
     hit.on('pointerover', () => {
-      this.tweens.add({ targets: card, scaleX: 1.06, scaleY: 1.06, duration: 120, ease: 'Power2' });
+      this.tweens.add({ targets: card, scaleX: 1.07, scaleY: 1.07, duration: 100, ease: 'Power2' });
     });
     
     hit.on('pointerout', () => {
-      this.tweens.add({ targets: card, scaleX: 1, scaleY: 1, duration: 120, ease: 'Power2' });
+      this.tweens.add({ targets: card, scaleX: 1, scaleY: 1, duration: 100, ease: 'Power2' });
     });
     
     this.characterCards.push(card);
   }
 
-  private selectCharacter(char: CharacterInfo, card: Phaser.GameObjects.Container): void {
+  private selectCharacter(char: CharacterConfig, card: Phaser.GameObjects.Container): void {
     this.selectedCharacter = char;
     
-    // Animate selection
+    // Animate selected card
     this.characterCards.forEach(c => {
       const isSelected = c === card;
       this.tweens.add({
         targets: c,
-        scaleX: isSelected ? 1.1 : 1,
-        scaleY: isSelected ? 1.1 : 1,
+        scaleX: isSelected ? 1.12 : 1,
+        scaleY: isSelected ? 1.12 : 1,
         duration: 200,
         ease: 'Power2',
       });
     });
     
-    // Update info panel
     this.updateInfoPanel(char);
-    
-    // Update preview sprite
-    this.updatePreviewSprite(char.type);
+    this.updatePreviewSprite(char.type as BuddyType);
   }
 
-  private updatePreviewSprite(type: string): void {
-    // Remove old preview
+  private updatePreviewSprite(type: BuddyType): void {
     if (this.previewSprite) {
       this.previewSprite.destroy();
     }
     
     const spriteKey = `char_${type}`;
     if (this.textures.exists(spriteKey)) {
-      const panelY = this.scale.height - 165;
-      this.previewSprite = this.add.sprite(75, panelY + 60, spriteKey).setScale(0.55);
-      this.previewSprite.setAlpha(0);
+      const panelY = this.scale.height - 160;
+      this.previewSprite = this.add.sprite(70, panelY + 65, spriteKey).setScale(0.55);
       
+      // Fade in animation
+      this.previewSprite.setAlpha(0);
       this.tweens.add({
         targets: this.previewSprite,
         alpha: 1,
         duration: 300,
+        ease: 'Power2',
       });
     }
   }
@@ -263,132 +276,126 @@ export class CharacterSelectScene extends Phaser.Scene {
   private createInfoPanel(): void {
     const w = this.scale.width;
     const h = this.scale.height;
-    const panelY = h - 165;
+    const panelY = h - 160;
     
-    // Panel background
     const panel = this.add.graphics();
     panel.fillStyle(0x1a0a2e, 0.95);
-    panel.fillRoundedRect(15, panelY, w - 30, 145, 14);
-    panel.lineStyle(2, 0xa855f7, 0.7);
-    panel.strokeRoundedRect(15, panelY, w - 30, 145, 14);
+    panel.fillRoundedRect(15, panelY, w - 30, 140, 14);
+    panel.lineStyle(2, 0xa855f7, 0.6);
+    panel.strokeRoundedRect(15, panelY, w - 30, 140, 14);
     
-    // Placeholder text
-    this.infoTexts.push(
-      this.add.text(w / 2, panelY + 60, '✨ Tap a buddy to learn more ✨', {
-        fontSize: '16px',
-        color: '#555555',
-        fontStyle: 'italic',
-      }).setOrigin(0.5)
-    );
+    // Placeholder
+    this.add.text(w/2, panelY + 60, '✦ Tap a buddy to learn more ✦', {
+      fontSize: '15px',
+      color: '#555555',
+      fontStyle: 'italic',
+    }).setOrigin(0.5);
   }
 
-  private updateInfoPanel(char: CharacterInfo): void {
+  private updateInfoPanel(char: CharacterConfig): void {
     const w = this.scale.width;
     const h = this.scale.height;
-    const panelY = h - 165;
-    const rarityStyle = getRarityStyle(char.rarity as any);
+    const panelY = h - 160;
+    const rarityStyle = getRarityStyle(char.rarity as RarityType);
     
-    // Clear old info texts
-    this.infoTexts.forEach(t => t.destroy());
-    this.infoTexts = [];
+    // Clear existing info (simple approach - destroy all text)
+    this.children.list.forEach((child: any) => {
+      if (child.type === 'Text' && child.isInfoPanel) {
+        child.destroy();
+      }
+    });
     
-    // Character name
-    this.infoTexts.push(
-      this.add.text(145, panelY + 18, char.name, {
-        fontSize: '26px',
-        color: '#ffffff',
-        fontStyle: 'bold',
-      })
-    );
+    // Name
+    const nameText = this.add.text(145, panelY + 15, char.name, {
+      fontSize: '26px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    });
+    (nameText as any).isInfoPanel = true;
     
     // Rarity badge
-    const badge = this.add.graphics();
-    badge.fillStyle(rarityStyle.badge, 1);
-    badge.fillRoundedRect(300, 20, 65, 24, 6);
-    this.infoTexts.push(
-      this.add.text(332, 32, char.rarity.toUpperCase(), {
-        fontSize: '12px',
-        color: '#ffffff',
-        fontStyle: 'bold',
-      }).setOrigin(0.5)
-    );
+    const badgeBg = this.add.graphics();
+    badgeBg.fillStyle(rarityStyle.badge, 1);
+    badgeBg.fillRoundedRect(295, 17, 60, 22, 5);
+    (badgeBg as any).isInfoPanel = true;
+    
+    const rarityText = this.add.text(325, 28, char.rarity.toUpperCase(), {
+      fontSize: '11px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+    }).setOrigin(0.5);
+    (rarityText as any).isInfoPanel = true;
     
     // Description
-    this.infoTexts.push(
-      this.add.text(145, panelY + 55, char.description, {
-        fontSize: '14px',
-        color: '#909090',
-      })
-    );
+    const descText = this.add.text(145, panelY + 50, char.description, {
+      fontSize: '13px',
+      color: '#909090',
+    });
+    (descText as any).isInfoPanel = true;
     
-    // Stats with visual bars
-    const statsY = panelY + 90;
+    // Stats bars
+    const statsY = panelY + 85;
     
     // HP bar
-    const hpPct = char.stats.hp / 150;
     const hpBar = this.add.graphics();
     hpBar.fillStyle(0x1a1a2e, 1);
-    hpBar.fillRoundedRect(145, statsY, 100, 14, 4);
+    hpBar.fillRoundedRect(145, statsY, 100, 12, 3);
     hpBar.fillStyle(0x22c55e, 1);
-    hpBar.fillRoundedRect(145, statsY, hpPct * 100, 14, 4);
-    this.infoTexts.push(
-      this.add.text(150, statsY + 3, `HP ${char.stats.hp}`, {
-        fontSize: '10px',
-        color: '#ffffff',
-      })
-    );
+    hpBar.fillRoundedRect(145, statsY, (char.stats.hp / 150) * 100, 12, 3);
+    (hpBar as any).isInfoPanel = true;
+    
+    const hpText = this.add.text(150, statsY + 2, `HP ${char.stats.hp}`, {
+      fontSize: '9px',
+      color: '#ffffff',
+    });
+    (hpText as any).isInfoPanel = true;
     
     // ATK bar
-    const atkPct = char.stats.atk / 30;
     const atkBar = this.add.graphics();
     atkBar.fillStyle(0x1a1a2e, 1);
-    atkBar.fillRoundedRect(145, statsY + 18, 100, 14, 4);
+    atkBar.fillRoundedRect(145, statsY + 16, 100, 12, 3);
     atkBar.fillStyle(0xef4444, 1);
-    atkBar.fillRoundedRect(145, statsY + 18, atkPct * 100, 14, 4);
-    this.infoTexts.push(
-      this.add.text(150, statsY + 21, `ATK ${char.stats.atk}`, {
-        fontSize: '10px',
-        color: '#ffffff',
-      })
-    );
+    atkBar.fillRoundedRect(145, statsY + 16, (char.stats.atk / 30) * 100, 12, 3);
+    (atkBar as any).isInfoPanel = true;
     
-    // DEF/SPD text on right
-    this.infoTexts.push(
-      this.add.text(265, statsY + 5, `DEF ${char.stats.def}`, {
-        fontSize: '12px',
-        color: '#3b82f6',
-        fontStyle: 'bold',
-      })
-    );
-    this.infoTexts.push(
-      this.add.text(265, statsY + 23, `SPD ${char.stats.spd}`, {
-        fontSize: '12px',
-        color: '#f59e0b',
-        fontStyle: 'bold',
-      })
-    );
+    const atkText = this.add.text(150, statsY + 18, `ATK ${char.stats.atk}`, {
+      fontSize: '9px',
+      color: '#ffffff',
+    });
+    (atkText as any).isInfoPanel = true;
+    
+    // DEF/SPD
+    const defText = this.add.text(260, statsY + 5, `DEF ${char.stats.def}`, {
+      fontSize: '12px',
+      color: '#3b82f6',
+      fontStyle: 'bold',
+    });
+    (defText as any).isInfoPanel = true;
+    
+    const spdText = this.add.text(260, statsY + 22, `SPD ${char.stats.spd}`, {
+      fontSize: '12px',
+      color: '#f59e0b',
+      fontStyle: 'bold',
+    });
+    (spdText as any).isInfoPanel = true;
   }
 
   private createConfirmButton(): void {
     const w = this.scale.width;
     const h = this.scale.height;
+    const btn = this.add.container(w/2, h - 38);
     
-    const btn = this.add.container(w / 2, h - 40);
-    
-    // Button background
     const bg = this.add.graphics();
     bg.fillStyle(0xec4899, 1);
     bg.fillRoundedRect(-100, -32, 200, 64, 18);
     btn.add(bg);
     
-    // Button text
     this.add.text(0, 0, '⚔️ START ADVENTURE', {
       fontSize: '17px',
       color: '#ffffff',
       fontStyle: 'bold',
     }).setOrigin(0.5);
     
-    // Hit area
     const hit = this.add.rectangle(0, 0, 220, 70).setInteractive({ useHandCursor: true }).setAlpha(0.001);
     btn.add(hit);
     
@@ -397,10 +404,9 @@ export class CharacterSelectScene extends Phaser.Scene {
         audioManager.playClick?.();
         this.startAdventure();
       } else {
-        // Shake feedback for no selection
         this.tweens.add({
           targets: btn,
-          x: w / 2 + 18,
+          x: w/2 + 20,
           duration: 50,
           yoyo: true,
           repeat: 5,
@@ -427,7 +433,6 @@ export class CharacterSelectScene extends Phaser.Scene {
   private startAdventure(): void {
     if (!this.selectedCharacter) return;
     
-    // Fade transition
     this.cameras.main.fadeOut(500, 13, 13, 26);
     this.time.delayedCall(500, () => {
       this.scene.start('WorldScene', {
@@ -438,20 +443,17 @@ export class CharacterSelectScene extends Phaser.Scene {
   }
 
   private createBackButton(): void {
-    const btn = this.add.container(38, 42);
+    const btn = this.add.container(38, 40);
     
-    // Button background
     const bg = this.add.graphics();
     bg.fillStyle(0x2d1b4e, 0.95);
     bg.fillRoundedRect(-22, -22, 44, 44, 12);
-    bg.lineStyle(2, 0xa855f7, 0.7);
+    bg.lineStyle(2, 0xa855f7, 0.6);
     bg.strokeRoundedRect(-22, -22, 44, 44, 12);
     btn.add(bg);
     
-    // Button text
     this.add.text(0, 0, '←', { fontSize: '22px', color: '#ffffff' }).setOrigin(0.5);
     
-    // Hit area
     const hit = this.add.rectangle(0, 0, 60, 60).setInteractive({ useHandCursor: true }).setAlpha(0.001);
     btn.add(hit);
     
