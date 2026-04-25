@@ -5,6 +5,7 @@
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
 import { audioManager } from '../audio/AudioManager';
+import { VisualEffects } from '../utils/VisualEffects';
 
 export class BattleScene extends Phaser.Scene {
   private playerEntity: any = null;
@@ -26,9 +27,12 @@ export class BattleScene extends Phaser.Scene {
   private isBattleOver: boolean = false;
   private playerMaxHp: number = 100;
   private playerHp: number = 100;
+  private playerMp: number = 50;
+  private playerMaxMp: number = 50;
   private enemyMaxHp: number = 40;
   private enemyHp: number = 40;
   private battleMusicStarted: boolean = false;
+  private vfx!: VisualEffects;
   
   constructor() {
     super({ key: 'BattleScene' });
@@ -76,6 +80,9 @@ export class BattleScene extends Phaser.Scene {
     
     // Start battle music
     this.startBattleMusic();
+    
+    // Initialize visual effects
+    this.vfx = new VisualEffects(this);
   }
   
   private startBattleMusic(): void {
@@ -276,6 +283,12 @@ export class BattleScene extends Phaser.Scene {
     this.showDamageNumber(damage, 900);
     this.updateHealthBars();
     
+    // Screen shake on hit
+    this.vfx.shake(0.008, 100);
+    
+    // Particles on enemy
+    this.vfx.showHitParticles(900, 300, 0xff4444);
+    
     this.isPlayerTurn = false;
     this.updateTurnIndicator();
     
@@ -325,6 +338,7 @@ export class BattleScene extends Phaser.Scene {
       
       this.addBattleLog(`Hero drinks a potion and heals ${healAmount} HP!`);
       this.updateHealthBars();
+      this.vfx.showHealParticles(300, 350);
     }
     
     if (!foundPotion) {
@@ -364,6 +378,11 @@ export class BattleScene extends Phaser.Scene {
     this.addBattleLog(`Slime attacks for ${damage} damage!`);
     this.showDamageNumber(damage, 300);
     this.updateHealthBars();
+    
+    // Screen shake when player takes damage
+    this.vfx.heavyShake();
+    this.vfx.flash(0xff0000, 100);
+    this.vfx.showHitParticles(300, 300, 0xffaa00);
     
     this.isPlayerTurn = true;
     this.updateTurnIndicator();
@@ -426,6 +445,7 @@ export class BattleScene extends Phaser.Scene {
       fontFamily: 'Arial Black, sans-serif',
       color: '#ef4444'
     }).setOrigin(0.5);
+    text.setDepth(100);
     
     this.tweens.add({
       targets: text,
@@ -452,11 +472,17 @@ export class BattleScene extends Phaser.Scene {
       // Play victory sound
       audioManager.playVictory();
       
+      // Victory particles
+      this.vfx.showLevelUpBurst(640, 300);
+      
       this.addBattleLog(`+${expGain} EXP, +${goldGain} Gold`);
     } else if (!fled) {
       // Play defeat sound
       audioManager.playDefeat();
     }
+    
+    // Fade out and return
+    this.cameras.main.fadeOut(500);
     
     // Return to world
     this.time.delayedCall(2000, () => {

@@ -45,6 +45,10 @@ export class WorldScene extends Phaser.Scene {
   private vfx!: VisualEffects;
   private mobileControls!: MobileControls;
   
+  // Combat trigger
+  private encounterCooldown: boolean = false;
+  private encounterZones: Phaser.GameObjects.Zone[] = [];
+  
   constructor() {
     super({ key: 'WorldScene' });
   }
@@ -254,7 +258,41 @@ export class WorldScene extends Phaser.Scene {
       
       // Pickup zone
       const zone = this.add.zone(pos.x, pos.y, 40, 40);
+      (zone as any).itemType = 'coin';
       this.physics.add.existing(zone);
+    }
+    
+    // Add enemy encounter zones
+    this.createEncounterZones();
+  }
+  
+  private createEncounterZones(): void {
+    // Create encounter zones throughout the world
+    const encounterPositions = [
+      { x: 600, y: 400 },
+      { x: 1000, y: 200 },
+      { x: 1400, y: 500 },
+      { x: 1600, y: 300 },
+      { x: 1900, y: 450 }
+    ];
+    
+    for (const pos of encounterPositions) {
+      // Visual indicator (subtle red glow)
+      const indicator = this.add.circle(pos.x, pos.y, 40, 0xff0000, 0.08);
+      this.tweens.add({
+        targets: indicator,
+        alpha: 0.2,
+        scale: 1.2,
+        duration: 800,
+        yoyo: true,
+        repeat: -1
+      });
+      
+      // Encounter zone
+      const zone = this.add.zone(pos.x, pos.y, 60, 60);
+      (zone as any).isEncounter = true;
+      this.physics.add.existing(zone);
+      this.encounterZones.push(zone);
     }
   }
   
@@ -480,6 +518,36 @@ export class WorldScene extends Phaser.Scene {
         this.showInteractionHint(id);
       });
     }
+    
+    // Add collision for encounter zones
+    for (const zone of this.encounterZones) {
+      this.physics.add.overlap(this.player, zone, () => {
+        this.triggerEncounter();
+      });
+    }
+  }
+  
+  private triggerEncounter(): void {
+    if (this.encounterCooldown) return;
+    
+    this.encounterCooldown = true;
+    
+    // Pause movement
+    (this.player.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
+    
+    // Screen fade
+    this.cameras.main.fade(500, 0, 0, 0);
+    
+    this.time.delayedCall(500, () => {
+      // Start battle scene
+      this.scene.pause();
+      this.scene.launch('BattleScene');
+      
+      // Reset cooldown after returning from battle
+      this.time.delayedCall(3000, () => {
+        this.encounterCooldown = false;
+      });
+    });
   }
   
   private setupCamera(): void {
