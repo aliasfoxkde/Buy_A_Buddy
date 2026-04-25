@@ -7,6 +7,8 @@ import { gameSystems, SpriteConfig } from '../systems/GameSystems';
 import { DialogueUI } from '../ui/DialogueUI';
 import { audioManager } from '../audio/AudioManager';
 import { getCharacterFrame, getBuddyFrame, getNPCFrame, getTileFrame } from '../utils/spriteUtils';
+import { VisualEffects } from '../utils/VisualEffects';
+import { MobileControls } from '../ui/MobileControls';
 
 export class WorldScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Sprite;
@@ -39,6 +41,10 @@ export class WorldScene extends Phaser.Scene {
   private nearestNPC: string | null = null;
   private interactionPrompt!: Phaser.GameObjects.Text;
   
+  // Effects & Mobile
+  private vfx!: VisualEffects;
+  private mobileControls!: MobileControls;
+  
   constructor() {
     super({ key: 'WorldScene' });
   }
@@ -69,6 +75,12 @@ export class WorldScene extends Phaser.Scene {
     
     // Setup camera
     this.setupCamera();
+    
+    // Initialize visual effects
+    this.vfx = new VisualEffects(this);
+    
+    // Initialize mobile controls (if touch device)
+    this.mobileControls = new MobileControls(this);
     
     // Create debug info
     this.createDebugInfo();
@@ -494,6 +506,17 @@ export class WorldScene extends Phaser.Scene {
       this.playerVelocity.y = -this.speed;
     } else if (this.cursors.down.isDown || this.wasd.S.isDown) {
       this.playerVelocity.y = this.speed;
+    }
+    
+    // Mobile controls (virtual joystick)
+    if (this.mobileControls && this.mobileControls.isTouchDevice()) {
+      const joystick = this.mobileControls.getOutput();
+      if (joystick.isActive) {
+        this.playerVelocity.x = joystick.x * this.speed;
+        this.playerVelocity.y = joystick.y * this.speed;
+        if (joystick.x < -0.2) this.player.setFlipX(true);
+        if (joystick.x > 0.2) this.player.setFlipX(false);
+      }
     }
     
     // Normalize diagonal movement
