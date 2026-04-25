@@ -68,70 +68,70 @@ class AudioManager {
   
   // Sound configurations
   private readonly sounds: Record<SoundType, SoundConfig> = {
-    click: { frequency: 800, type: 'sine', duration: 0.08, attack: 0.01, decay: 0.07, volume: 0.3 },
-    hover: { frequency: 600, type: 'sine', duration: 0.05, attack: 0.01, decay: 0.04, volume: 0.15 },
-    open: { frequency: 400, type: 'triangle', duration: 0.15, attack: 0.02, decay: 0.13, volume: 0.25 },
-    close: { frequency: 300, type: 'triangle', duration: 0.1, attack: 0.01, decay: 0.09, volume: 0.2 },
-    success: { frequency: 880, type: 'sine', duration: 0.3, attack: 0.02, decay: 0.28, volume: 0.35, pitchVariation: 220 },
-    error: { frequency: 200, type: 'sawtooth', duration: 0.2, attack: 0.01, decay: 0.19, volume: 0.3 },
-    pickup: { frequency: 1000, type: 'sine', duration: 0.12, attack: 0.01, decay: 0.11, volume: 0.3, pitchVariation: 500 },
-    drop: { frequency: 400, type: 'triangle', duration: 0.1, attack: 0.01, decay: 0.09, volume: 0.25 },
-    attack: { frequency: 150, type: 'sawtooth', duration: 0.15, attack: 0.01, decay: 0.14, volume: 0.4 },
-    defend: { frequency: 300, type: 'square', duration: 0.2, attack: 0.02, decay: 0.18, volume: 0.25 },
-    heal: { frequency: 1200, type: 'sine', duration: 0.5, attack: 0.05, decay: 0.45, volume: 0.3, pitchVariation: 400 },
-    levelup: { frequency: 523, type: 'sine', duration: 0.8, attack: 0.05, decay: 0.75, volume: 0.4, pitchVariation: 262 },
-    victory: { frequency: 784, type: 'sine', duration: 1.0, attack: 0.05, decay: 0.95, volume: 0.4, pitchVariation: 392 },
-    defeat: { frequency: 300, type: 'sawtooth', duration: 0.8, attack: 0.05, decay: 0.75, volume: 0.35, pitchVariation: 100 },
-    coin: { frequency: 1500, type: 'triangle', duration: 0.1, attack: 0.01, decay: 0.09, volume: 0.25, pitchVariation: 500 },
-    door: { frequency: 200, type: 'square', duration: 0.3, attack: 0.05, decay: 0.25, volume: 0.2 },
-    step: { frequency: 100, type: 'triangle', duration: 0.05, attack: 0.01, decay: 0.04, volume: 0.1 },
-    swing: { frequency: 250, type: 'sawtooth', duration: 0.12, attack: 0.01, decay: 0.11, volume: 0.35 },
-    potion: { frequency: 900, type: 'sine', duration: 0.2, attack: 0.02, decay: 0.18, volume: 0.3, pitchVariation: 300 }
+    click: { frequency: 800, type: 'sine', duration: 0.08, attack: 0.01, decay: 0.07, volume: 0.15 },
+    hover: { frequency: 600, type: 'sine', duration: 0.05, attack: 0.01, decay: 0.04, volume: 0.08 },
+    open: { frequency: 400, type: 'triangle', duration: 0.15, attack: 0.02, decay: 0.13, volume: 0.12 },
+    close: { frequency: 300, type: 'triangle', duration: 0.1, attack: 0.01, decay: 0.09, volume: 0.1 },
+    success: { frequency: 880, type: 'sine', duration: 0.3, attack: 0.02, decay: 0.28, volume: 0.2, pitchVariation: 220 },
+    error: { frequency: 200, type: 'sawtooth', duration: 0.2, attack: 0.01, decay: 0.19, volume: 0.15 },
+    pickup: { frequency: 1000, type: 'sine', duration: 0.12, attack: 0.01, decay: 0.11, volume: 0.15, pitchVariation: 500 },
+    drop: { frequency: 400, type: 'triangle', duration: 0.1, attack: 0.01, decay: 0.09, volume: 0.12 },
+    attack: { frequency: 150, type: 'sawtooth', duration: 0.15, attack: 0.01, decay: 0.14, volume: 0.2 },
+    defend: { frequency: 300, type: 'square', duration: 0.2, attack: 0.02, decay: 0.18, volume: 0.12 },
+    heal: { frequency: 1200, type: 'sine', duration: 0.5, attack: 0.05, decay: 0.45, volume: 0.15, pitchVariation: 400 },
+    levelup: { frequency: 523, type: 'sine', duration: 0.8, attack: 0.05, decay: 0.75, volume: 0.2, pitchVariation: 262 },
+    victory: { frequency: 784, type: 'sine', duration: 1.0, attack: 0.05, decay: 0.95, volume: 0.2, pitchVariation: 392 },
+    defeat: { frequency: 300, type: 'sawtooth', duration: 0.8, attack: 0.05, decay: 0.75, volume: 0.18, pitchVariation: 100 },
+    coin: { frequency: 1500, type: 'triangle', duration: 0.1, attack: 0.01, decay: 0.09, volume: 0.12, pitchVariation: 500 },
+    door: { frequency: 200, type: 'square', duration: 0.3, attack: 0.05, decay: 0.25, volume: 0.1 },
+    step: { frequency: 100, type: 'triangle', duration: 0.05, attack: 0.01, decay: 0.04, volume: 0.05 },
+    swing: { frequency: 250, type: 'sawtooth', duration: 0.12, attack: 0.01, decay: 0.11, volume: 0.18 },
+    potion: { frequency: 900, type: 'sine', duration: 0.2, attack: 0.02, decay: 0.18, volume: 0.15, pitchVariation: 300 }
   };
   
-  // Music tracks (simple melodies)
+  // Music tracks (longer melodies with more variety)
   private readonly musicTracks: Record<MusicType, MusicTrack> = {
     menu: {
-      notes: [392, 440, 494, 523, 587, 523, 494, 440],
-      durations: [0.25, 0.25, 0.25, 0.5, 0.25, 0.25, 0.25, 0.5],
+      notes: [392, 440, 494, 523, 587, 523, 494, 440, 392, 349, 330, 294, 262, 294, 330, 349],
+      durations: [0.5, 0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 1.0, 0.5, 0.5, 0.5, 0.5, 1.0, 0.5, 0.5, 1.0],
+      instrument: 'sine',
+      volume: 0.08
+    },
+    exploration: {
+      notes: [262, 294, 330, 349, 392, 440, 494, 392, 330, 294, 262, 294, 330, 294, 262, 247],
+      durations: [0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 1.6, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 1.6],
+      instrument: 'triangle',
+      volume: 0.06
+    },
+    battle: {
+      notes: [196, 196, 247, 294, 247, 196, 165, 196, 247, 294, 330, 294, 247, 196, 165, 130],
+      durations: [0.2, 0.2, 0.3, 0.3, 0.2, 0.2, 0.4, 0.2, 0.2, 0.3, 0.3, 0.2, 0.2, 0.4, 0.4, 0.8],
+      instrument: 'sawtooth',
+      volume: 0.1
+    },
+    victory: {
+      notes: [523, 587, 659, 784, 880, 784, 1047, 1175, 1047, 1319, 1568, 1760],
+      durations: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 1.0],
       instrument: 'sine',
       volume: 0.15
     },
-    exploration: {
-      notes: [262, 294, 330, 349, 392, 349, 330, 294],
-      durations: [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4],
-      instrument: 'triangle',
-      volume: 0.12
-    },
-    battle: {
-      notes: [196, 196, 196, 247, 294, 247, 196, 165],
-      durations: [0.15, 0.15, 0.15, 0.3, 0.15, 0.15, 0.15, 0.3],
-      instrument: 'sawtooth',
-      volume: 0.2
-    },
-    victory: {
-      notes: [523, 659, 784, 1047, 784, 1047],
-      durations: [0.2, 0.2, 0.2, 0.4, 0.2, 0.6],
-      instrument: 'sine',
-      volume: 0.25
-    },
     defeat: {
-      notes: [392, 349, 330, 262, 220, 196],
-      durations: [0.4, 0.4, 0.4, 0.4, 0.4, 0.6],
+      notes: [392, 349, 330, 294, 262, 247, 220, 196, 165, 147, 131, 98],
+      durations: [0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 1.0, 1.0, 1.0, 2.0],
       instrument: 'triangle',
-      volume: 0.2
-    },
-    shop: {
-      notes: [330, 370, 415, 440, 415, 370],
-      durations: [0.3, 0.3, 0.3, 0.3, 0.3, 0.3],
-      instrument: 'sine',
       volume: 0.1
     },
-    inn: {
-      notes: [262, 294, 330, 294, 262, 247],
-      durations: [0.5, 0.5, 0.5, 0.5, 0.5, 0.8],
+    shop: {
+      notes: [330, 370, 415, 440, 494, 440, 415, 370, 330, 294, 262, 294],
+      durations: [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1.0],
       instrument: 'sine',
-      volume: 0.08
+      volume: 0.05
+    },
+    inn: {
+      notes: [262, 294, 330, 370, 330, 294, 262, 247, 220, 247, 262, 294, 262, 220],
+      durations: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0],
+      instrument: 'sine',
+      volume: 0.04
     }
   };
 

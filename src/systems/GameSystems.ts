@@ -462,14 +462,15 @@ export class SpriteConfig {
       { key: 'enemies', path: this.ENEMIES.path },
       { key: 'bosses', path: this.BOSSES.path },
       { key: 'items', path: this.ITEMS.path },
-      { key: 'weapons', path: this.WEAPONS.path },
+      { key: 'weapons', path: '/images/sprites/weapons.png' },
       { key: 'armor', path: '/images/sprites/armor.png' },
       { key: 'skills', path: '/images/sprites/skills.png' },
       { key: 'effects', path: '/images/sprites/effects.png' },
       { key: 'npc', path: '/images/sprites/npc.png' },
+      { key: 'nature', path: '/images/sprites/nature.png' },
+      { key: 'environment', path: '/images/sprites/environment.png' },
       { key: 'ui_menu', path: '/images/sprites/ui/menu.png' },
       { key: 'ui_inventory', path: '/images/sprites/ui/inventory.png' },
-
     ];
   }
 }

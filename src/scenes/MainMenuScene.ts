@@ -152,9 +152,14 @@ export class MainMenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
     
     container.add([bg, label]);
+    container.setSize(250, 50);
+    container.setInteractive();
+    
+    let isPressed = false;
     
     // Hover effects
-    bg.on('pointerover', () => {
+    container.on('pointerover', () => {
+      if (isPressed) return;
       this.tweens.add({
         targets: container,
         scaleX: 1.05,
@@ -164,7 +169,8 @@ export class MainMenuScene extends Phaser.Scene {
       bg.setFillStyle(0x3d2b5e);
     });
     
-    bg.on('pointerout', () => {
+    container.on('pointerout', () => {
+      if (isPressed) return;
       this.tweens.add({
         targets: container,
         scaleX: 1,
@@ -174,8 +180,10 @@ export class MainMenuScene extends Phaser.Scene {
       bg.setFillStyle(0x2d1b4e);
     });
     
-    bg.on('pointerdown', () => {
-      // Click effect
+    container.on('pointerdown', () => {
+      if (isPressed) return;
+      isPressed = true;
+      
       this.tweens.add({
         targets: container,
         scaleX: 0.95,
@@ -183,12 +191,14 @@ export class MainMenuScene extends Phaser.Scene {
         duration: 50,
         yoyo: true,
         onComplete: () => {
+          isPressed = false;
           this.playClickSound();
           action();
         }
       });
     });
     
+    this.buttons.push(container);
     return container;
   }
   
