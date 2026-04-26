@@ -46,3 +46,43 @@ export function getNPCFrame(npcType: number): number {
 export function getTileFrame(tileType: number): number {
   return tileType % 24;
 }
+
+/**
+ * Verify sprite sheet is properly loaded
+ */
+export function isSpriteLoaded(scene: Phaser.Scene, textureKey: string): boolean {
+  return scene.textures.exists(textureKey);
+}
+
+/**
+ * Create animated sprite with walk cycle
+ */
+export function createAnimatedCharacter(
+  scene: Phaser.Scene,
+  x: number,
+  y: number,
+  textureKey: string,
+  frameRate: number = 6
+): Phaser.GameObjects.Sprite {
+  const sprite = scene.add.sprite(x, y, textureKey);
+  
+  // Create walk animation (if not exists)
+  const animKey = `${textureKey}_walk`;
+  if (!scene.anims.exists(animKey)) {
+    const cols = 6;
+    const rows = 4;
+    const frames: number[] = [];
+    for (let row = 0; row < rows; row++) {
+      frames.push(...Array.from({ length: cols }, (_, col) => row * cols + col));
+    }
+    
+    scene.anims.create({
+      key: animKey,
+      frames: frames.map(f => ({ key: textureKey, frame: f })),
+      frameRate,
+      repeat: -1
+    });
+  }
+  
+  return sprite;
+}

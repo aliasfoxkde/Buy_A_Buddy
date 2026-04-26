@@ -840,6 +840,38 @@ export class WorldScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, bossZones, (player, zone) => {
       this.triggerBossEncounter((zone as any).bossId);
     });
+    
+    // Add achievements button to HUD (press A)
+    this.createAchievementButton();
+  }
+  
+  private createAchievementButton(): void {
+    const { width } = this.scale;
+    
+    // Achievement hint button (top-left, small)
+    const btnBg = this.add.rectangle(50, 40, 30, 30, 0xfbbf24, 0.8);
+    btnBg.setStrokeStyle(2, 0xfbbf24);
+    
+    const btnIcon = this.add.text(50, 40, '🏆', {
+      fontSize: '18px'
+    }).setOrigin(0.5);
+    
+    const btn = this.add.container(0, 0, [btnBg, btnIcon]);
+    btn.setSize(30, 30);
+    btn.setInteractive({ useHandCursor: true });
+    
+    btn.on('pointerdown', () => {
+      this.scene.pause();
+      this.scene.launch('AchievementScene');
+    });
+    
+    btn.on('pointerover', () => {
+      btnBg.setFillStyle(0xffd700);
+    });
+    
+    btn.on('pointerout', () => {
+      btnBg.setFillStyle(0xfbbf24);
+    });
   }
   
   private triggerZoneTransition(targetZone: string): void {
@@ -1012,16 +1044,50 @@ export class WorldScene extends Phaser.Scene {
   }
   
   private checkInteractions(): void {
-    // Check for nearby NPCs
+    // Check for nearby NPCs and show interaction prompt
+    let nearestNPC: string | null = null;
+    let nearestDist = 100;
+    
     for (const [npcId, npc] of this.npcs) {
       const dist = Phaser.Math.Distance.Between(
         this.player.x, this.player.y,
         npc.x, npc.y
       );
       
-      if (dist < 80) {
-        // Show interaction prompt
+      if (dist < 100 && dist < nearestDist) {
+        nearestDist = dist;
+        nearestNPC = npcId;
       }
+    }
+    
+    // Update interaction prompt
+    if (nearestNPC) {
+      const npc = this.npcs.get(nearestNPC);
+      if (npc && !this.interactionPrompt) {
+        this.interactionPrompt = this.add.text(npc.x, npc.y - 60, 'Press E to talk', {
+          fontSize: '14px',
+          fontFamily: 'Arial, sans-serif',
+          color: '#fbbf24',
+          backgroundColor: '#1a1a2e',
+          padding: { x: 8, y: 4 }
+        }).setOrigin(0.5);
+        
+        // Pulse animation
+        this.tweens.add({
+          targets: this.interactionPrompt,
+          alpha: 0.6,
+          duration: 500,
+          yoyo: true,
+          repeat: -1
+        });
+      }
+      
+      if (this.interactionPrompt && npc) {
+        this.interactionPrompt.setPosition(npc.x, npc.y - 60);
+        this.interactionPrompt.setVisible(true);
+      }
+    } else if (this.interactionPrompt) {
+      this.interactionPrompt.setVisible(false);
     }
   }
   
