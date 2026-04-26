@@ -52,8 +52,8 @@ export class VisualEffects {
   /**
    * Hit particles (damage indicator)
    */
-  showHitParticles(x: number, y: number, color: number = 0xff4444): void {
-    for (let i = 0; i < 6; i++) {
+  showHitParticles(x: number, y: number, color: number = 0xff4444, count: number = 8): void {
+    for (let i = 0; i < count; i++) {
       const particle = this.scene.add.circle(x, y, 4, color);
       const angle = (Math.PI * 2 / 6) * i + Math.random() * 0.5;
       const distance = 30 + Math.random() * 20;

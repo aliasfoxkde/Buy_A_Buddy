@@ -536,17 +536,27 @@ export class BattleScene extends Phaser.Scene {
     
     const damage = Math.max(1, baseDamage + Math.floor(Math.random() * 8) - 4);
     
-    this.enemyHp = Math.max(0, this.enemyHp - damage);
+    // Critical hit check (10% base chance)
+    const isCrit = Math.random() < 0.1;
+    const finalDamage = isCrit ? Math.floor(damage * 1.5) : damage;
     
-    this.addBattleLog(`Hero attacks for ${damage} damage!`);
-    this.showDamageNumber(damage, 900);
-    this.updateHealthBars();
+    this.enemyHp = Math.max(0, this.enemyHp - finalDamage);
     
-    // Screen shake on hit
-    this.vfx.shake(0.008, 100);
+    this.addBattleLog(`Hero attacks for ${finalDamage} damage!`);
     
-    // Particles on enemy
-    this.vfx.showHitParticles(900, 300, 0xff4444);
+    // Show damage number
+    this.showDamageNumber(finalDamage, 900, isCrit);
+    
+    // Screen shake on hit (stronger on crit)
+    this.vfx.shake(isCrit ? 0.015 : 0.008, 100);
+    
+    // Particles on enemy (red for normal, gold for crit)
+    this.vfx.showHitParticles(900, 300, isCrit ? 0xfbbf24 : 0xff4444, isCrit ? 20 : 8);
+    
+    // Critical hit text
+    if (isCrit) {
+      this.showCriticalHitText(900, 250);
+    }
     
     this.isPlayerTurn = false;
     this.updateTurnIndicator();
@@ -765,9 +775,54 @@ export class BattleScene extends Phaser.Scene {
     });
   }
   
-  private showDamageNumber(damage: number, x: number): void {
-    // Use particle system for damage numbers
+  private showDamageNumber(damage: number, x: number, isCrit: boolean = false): void {
+    // Create damage text with effects
+    const textColor = isCrit ? '#fbbf24' : '#ef4444';
+    const fontSize = isCrit ? '48px' : '36px';
+    const yOffset = isCrit ? 250 : 280;
+    
+    const text = this.add.text(x, yOffset, `-${damage}`, {
+      fontSize,
+      fontFamily: 'Arial Black, sans-serif',
+      color: textColor,
+      stroke: '#000',
+      strokeThickness: 4
+    }).setOrigin(0.5);
+    text.setDepth(100);
+    
+    // Float up and fade
+    this.tweens.add({
+      targets: text,
+      y: yOffset - 50,
+      alpha: 0,
+      scale: isCrit ? 1.3 : 1.1,
+      duration: 800,
+      ease: 'Power2',
+      onComplete: () => text.destroy()
+    });
+    
+    // Also use particle system
     this.particleSystem.showDamageNumber(x, 300, damage);
+  }
+  
+  private showCriticalHitText(x: number, y: number): void {
+    const text = this.add.text(x, y, 'CRITICAL!', {
+      fontSize: '24px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#fbbf24',
+      stroke: '#000',
+      strokeThickness: 3
+    }).setOrigin(0.5).setDepth(101);
+    
+    this.tweens.add({
+      targets: text,
+      y: y - 50,
+      alpha: 0,
+      scale: 1.5,
+      duration: 600,
+      ease: 'Back.easeOut',
+      onComplete: () => text.destroy()
+    });
   }
   
   private endBattle(victory: boolean, fled: boolean = false): void {
