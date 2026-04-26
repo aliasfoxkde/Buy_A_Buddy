@@ -11,7 +11,7 @@ interface ShopItem {
   name: string;
   price: number;
   icon: string;
-  type: 'weapon' | 'armor' | 'consumable' | 'material';
+  type: 'weapon' | 'armor' | 'consumable' | 'material' | 'accessory';
   quantity?: number;
 }
 
@@ -325,6 +325,14 @@ export class ShopScene extends Phaser.Scene {
         { id: 'gem_blue', name: 'Blue Gem', price: 150, icon: '💎', type: 'material' },
         { id: 'gem_red', name: 'Red Gem', price: 150, icon: '💎', type: 'material' },
         { id: 'wand_wood', name: 'Wooden Wand', price: 75, icon: '🪄', type: 'weapon' }
+      ],
+      // Rare items shop
+      'rare_shop': [
+        { id: 'weapon_silver_sword', name: 'Silver Sword', price: 500, icon: '⚔️', type: 'weapon' },
+        { id: 'armor_mithril', name: 'Mithril Armor', price: 800, icon: '🥋', type: 'armor' },
+        { id: 'potion_health_legendary', name: 'Legendary HP Potion', price: 300, icon: '🧪', type: 'consumable' },
+        { id: 'ring_power', name: 'Ring of Power', price: 600, icon: '💍', type: 'accessory' },
+        { id: 'amulet_luck', name: 'Amulet of Luck', price: 400, icon: '📿', type: 'accessory' }
       ]
     };
     

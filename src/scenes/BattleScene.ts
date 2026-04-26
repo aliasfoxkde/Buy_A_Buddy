@@ -176,16 +176,23 @@ export class BattleScene extends Phaser.Scene {
     enemySprite.setFrame(this.currentEnemy.spriteIndex);
     enemySprite.setScale(1.5);
     
-    // Add enemy name to UI with level
+    // Add enemy name to UI with level and type indicator
     if (this.uiElements) {
       this.uiElements.enemyName?.destroy();
       const playerLevel = gameSystems.getPlayerStats()?.level || 1;
       const enemyLevel = this.currentEnemy.level || playerLevel;
+      
+      // Enemy type indicator
+      let typeIndicator = '';
+      if (this.currentEnemy.range) typeIndicator = ' [Ranged]';
+      if (this.currentEnemy.element === 'air') typeIndicator = ' [Flying]';
+      if (this.currentEnemy.element === 'undead') typeIndicator = ' [Undead]';
+      
       const levelText = enemyLevel > playerLevel ? ' ⚠️' : '';
       
       this.uiElements.enemyName = this.add.text(this.scale.width - 250, 160, 
-        `${this.currentEnemy.name} [Lv.${enemyLevel}]${levelText}`, {
-        fontSize: '20px',
+        `${this.currentEnemy.name}${typeIndicator} [Lv.${enemyLevel}]${levelText}`, {
+        fontSize: '18px',
         fontFamily: 'Arial Black, sans-serif',
         color: enemyLevel > playerLevel ? '#f59e0b' : '#ef4444'
       }).setOrigin(0.5);
@@ -511,9 +518,23 @@ export class BattleScene extends Phaser.Scene {
     // Play attack sound
     audioManager.playAttack();
     
-    // Calculate damage
-    const baseDamage = 15;
-    const damage = Math.max(1, baseDamage + Math.floor(Math.random() * 10) - 5);
+    // Calculate damage with equipment bonus
+    const stats = gameSystems.getPlayerStats();
+    let baseDamage = stats?.attack || 10;
+    
+    // Simple equipment bonus - check inventory for weapons
+    const inventory = gameSystems.inventory.getInventory();
+    for (const slot of inventory.slots) {
+      if (slot?.itemId && (
+        slot.itemId.includes('silver') || 
+        slot.itemId.includes('iron') || 
+        slot.itemId.includes('steel')
+      )) {
+        baseDamage += 5; // Weapon bonus
+      }
+    }
+    
+    const damage = Math.max(1, baseDamage + Math.floor(Math.random() * 8) - 4);
     
     this.enemyHp = Math.max(0, this.enemyHp - damage);
     
