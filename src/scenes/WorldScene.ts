@@ -507,15 +507,35 @@ export class WorldScene extends Phaser.Scene {
   private createZoneTransitions(): void {
     const worldWidth = 20 * 128;
     
+    // Village entrance marker (left side)
+    const villageX = 80;
+    const villageY = 400;
+    const villagePortal = this.add.circle(villageX, villageY, 40, 0x22c55e, 0.2);
+    villagePortal.setStrokeStyle(3, 0x22c55e);
+    this.tweens.add({
+      targets: villagePortal,
+      alpha: 0.6,
+      scale: 1.2,
+      duration: 600,
+      yoyo: true,
+      repeat: -1
+    });
+    this.add.text(villageX, villageY - 60, '🏠 VILLAGE', {
+      fontSize: '14px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#22c55e'
+    }).setOrigin(0.5);
+    
     // Boss portal at the right edge of the map
     const bossX = worldWidth - 100;
     const bossY = 400;
     
-    // Visual indicator - red/green portal (boss themed)
+    // Visual indicator - red portal (boss themed)
     const portal = this.add.circle(bossX, bossY, 60, 0xef4444, 0.2);
+    portal.setStrokeStyle(4, 0xef4444);
     this.tweens.add({
       targets: portal,
-      alpha: 0.5,
+      alpha: 0.6,
       scale: 1.4,
       duration: 400,
       yoyo: true,
@@ -524,10 +544,12 @@ export class WorldScene extends Phaser.Scene {
     });
     
     // "BOSS" text
-    this.add.text(bossX, bossY - 80, '⚔️ BOSS ⚔️', {
-      fontSize: '18px',
+    this.add.text(bossX, bossY - 90, '⚔️ BOSS ZONE ⚔️', {
+      fontSize: '16px',
       fontFamily: 'Arial Black, sans-serif',
-      color: '#ef4444'
+      color: '#ef4444',
+      backgroundColor: '#1a1a2e',
+      padding: { x: 8, y: 4 }
     }).setOrigin(0.5);
     
     // Boss encounter zone
