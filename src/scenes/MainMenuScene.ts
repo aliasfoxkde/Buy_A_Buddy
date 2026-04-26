@@ -45,7 +45,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.createButtons();
     
     // Version
-    this.add.text(width / 2, height - 30, 'v2.0.0', {
+    this.add.text(width / 2, height - 30, 'v4.0.0', {
       fontSize: '14px',
       fontFamily: 'Arial, sans-serif',
       color: '#555'

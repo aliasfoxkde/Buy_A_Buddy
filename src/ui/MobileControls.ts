@@ -12,8 +12,8 @@ export interface JoystickOutput {
 
 export class MobileControls {
   private scene: Phaser.Scene;
-  private joystickRadius: number = 60;
-  private knobRadius: number = 25;
+  private joystickRadius: number = 80;  // Larger for easier touch
+  private knobRadius: number = 35;  // Larger knob
   private joystickX: number = 120;
   private joystickY: number = 0; // Set dynamically
   private baseGraphics!: Phaser.GameObjects.Graphics;
