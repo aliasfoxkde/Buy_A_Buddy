@@ -45,6 +45,7 @@ export class WorldScene extends Phaser.Scene {
   // Interaction
   private nearestNPC: string | null = null;
   private interactionPrompt!: Phaser.GameObjects.Text;
+  private buddyNameText!: Phaser.GameObjects.Text;
   
   // Effects & Mobile
   private vfx!: VisualEffects;
@@ -555,23 +556,31 @@ export class WorldScene extends Phaser.Scene {
   }
   
   private createBuddies(): void {
-    const buddyCount = 1; // Start with 1 buddy
-    const buddySpriteIndex = 0; // Default to first buddy sprite
+    // Use buddies spritesheet for companion
+    const buddySpriteIndex = 0;
     
-    for (let i = 0; i < buddyCount; i++) {
+    // Create buddy with sprite from spritesheet
+    for (let i = 0; i < 1; i++) {
       const buddy = this.add.sprite(
         this.player.x - 50 - (i * 30),
         this.player.y + 20,
         'buddies'
       );
       buddy.setFrame(getBuddyFrame(buddySpriteIndex + i));
-      buddy.setScale(0.6);
+      buddy.setScale(0.7);
       
-      // Animation
+      // Add shadow
+      this.add.ellipse(
+        this.player.x - 50 - (i * 30),
+        this.player.y + 35,
+        40, 15, 0x000000, 0.3
+      );
+      
+      // Bounce animation
       this.tweens.add({
         targets: buddy,
         y: buddy.y + 5,
-        duration: 600 + i * 100,
+        duration: 500 + i * 100,
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut'
@@ -579,6 +588,13 @@ export class WorldScene extends Phaser.Scene {
       
       this.buddies.push(buddy);
     }
+    
+    // Show buddy name in HUD
+    this.buddyNameText = this.add.text(0, 0, 'Buddy', {
+      fontSize: '10px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#a855f7'
+    }).setOrigin(0.5);
   }
   
   private createUI(): void {
