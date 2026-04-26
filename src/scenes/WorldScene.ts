@@ -11,6 +11,7 @@ import { VisualEffects } from '../utils/VisualEffects';
 import { MobileControls } from '../ui/MobileControls';
 import { QUESTS, type Quest } from '../data/quests';
 import { TutorialSystem } from '../systems/TutorialSystem';
+import { TutorialOverlay, getDefaultTutorialSteps } from '../ui/TutorialOverlay';
 import { achievementSystem } from '../systems/AchievementSystem';
 import { Minimap } from '../ui/Minimap';
 import { getDialogue } from '../data/dialogue';
@@ -95,6 +96,9 @@ export class WorldScene extends Phaser.Scene {
     // Initialize visual effects
     this.vfx = new VisualEffects(this);
     
+    // Initialize tutorial overlay for new players
+    this.initTutorial();
+    
     // Initialize mobile controls (if touch device)
     this.mobileControls = new MobileControls(this);
     
@@ -116,6 +120,18 @@ export class WorldScene extends Phaser.Scene {
     
     // Show tutorial hints for new players
     this.showTutorialHints();
+  }
+  
+  private initTutorial(): void {
+    // Only show tutorial for new players
+    if (TutorialOverlay.wasCompleted()) return;
+    
+    const tutorial = new TutorialOverlay(this);
+    const steps = getDefaultTutorialSteps(this);
+    
+    tutorial.start(steps, () => {
+      console.log('Tutorial completed!');
+    });
   }
   
   private showTutorialHints(): void {
