@@ -126,6 +126,7 @@ export class BattleScene extends Phaser.Scene {
           attack: 2,
           defense: 1
         });
+        audioManager.playLevelUp();
       }
     });
   }
@@ -556,6 +557,9 @@ export class BattleScene extends Phaser.Scene {
     // Critical hit text
     if (isCrit) {
       this.showCriticalHitText(900, 250);
+      audioManager.playCrit();
+    } else {
+      audioManager.playHit();
     }
     
     this.isPlayerTurn = false;

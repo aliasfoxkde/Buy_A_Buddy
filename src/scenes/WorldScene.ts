@@ -471,6 +471,8 @@ export class WorldScene extends Phaser.Scene {
       // Pickup zone
       const zone = this.add.zone(pos.x, pos.y, 50, 50);
       (zone as any).itemType = pos.type;
+      (zone as any).emoji = pos.emoji;
+      (zone as any).collectText = itemText;
       this.physics.add.existing(zone);
     }
     
@@ -956,6 +958,13 @@ export class WorldScene extends Phaser.Scene {
       });
     }
     
+    // Add collision for item pickups
+    for (const itemZone of this.worldItems) {
+      this.physics.add.overlap(this.player, itemZone, () => {
+        this.collectItem(itemZone);
+      });
+    }
+    
     // Add collision for zone transitions
     const transitionZones = this.physics.add.group();
     this.children.list.forEach(child => {
@@ -1054,6 +1063,70 @@ export class WorldScene extends Phaser.Scene {
     this.time.delayedCall(800, () => {
       this.scene.pause();
       this.scene.launch('BattleScene', { enemyId: bossId, isBoss: true });
+    });
+  }
+  
+  private collectItem(zone: Phaser.GameObjects.Zone): void {
+    const itemType = (zone as any).itemType;
+    const emoji = (zone as any).emoji;
+    const collectText = (zone as any).collectText;
+    
+    if (!itemType) return;
+    
+    // Add item to inventory
+    const itemId = this.getItemIdForType(itemType);
+    if (itemId) {
+      gameSystems.inventory.addItem(itemId, 1);
+      audioManager.playPickup();
+      
+      // Show pickup notification
+      this.showItemPickupNotification(emoji, itemType);
+      
+      // Remove item from world
+      collectText?.destroy();
+      zone.destroy();
+      
+      // Remove from worldItems array
+      const idx = this.worldItems.indexOf(zone);
+      if (idx > -1) {
+        this.worldItems.splice(idx, 1);
+      }
+    }
+  }
+  
+  private getItemIdForType(type: string): string | null {
+    const mapping: Record<string, string> = {
+      gold: 'gold_coin',
+      potion: 'health_potion',
+      gem: 'rare_gem',
+      herb: 'healing_herb',
+      key: 'dungeon_key'
+    };
+    return mapping[type] || null;
+  }
+  
+  private showItemPickupNotification(emoji: string, type: string): void {
+    const notification = this.add.container(this.player.x, this.player.y - 60);
+    notification.setDepth(100);
+    
+    const bg = this.add.rectangle(0, 0, 100, 30, 0x000000, 0.8);
+    bg.setStrokeStyle(1, 0x22c55e);
+    
+    const text = this.add.text(0, 0, `${emoji} ${type.toUpperCase()}`, {
+      fontSize: '14px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#22c55e'
+    }).setOrigin(0.5);
+    
+    notification.add([bg, text]);
+    
+    // Float up and fade
+    this.tweens.add({
+      targets: notification,
+      y: notification.y - 40,
+      alpha: 0,
+      duration: 1000,
+      onComplete: () => notification.destroy()
     });
   }
   

@@ -16,6 +16,8 @@ export type SoundType =
   | 'attack'
   | 'defend'
   | 'heal'
+  | 'crit'
+  | 'hit'
   | 'levelup'
   | 'victory'
   | 'defeat'
@@ -81,6 +83,8 @@ class AudioManager {
     attack: { frequency: 150, type: 'sawtooth', duration: 0.15, attack: 0.01, decay: 0.14, volume: 0.2 },
     defend: { frequency: 300, type: 'square', duration: 0.2, attack: 0.02, decay: 0.18, volume: 0.12 },
     heal: { frequency: 1200, type: 'sine', duration: 0.5, attack: 0.05, decay: 0.45, volume: 0.15, pitchVariation: 400 },
+    crit: { frequency: 400, type: 'sawtooth', duration: 0.25, attack: 0.01, decay: 0.24, volume: 0.25, pitchVariation: 200 },
+    hit: { frequency: 180, type: 'sawtooth', duration: 0.15, attack: 0.01, decay: 0.14, volume: 0.2 },
     levelup: { frequency: 523, type: 'sine', duration: 0.8, attack: 0.05, decay: 0.75, volume: 0.2, pitchVariation: 262 },
     victory: { frequency: 784, type: 'sine', duration: 1.0, attack: 0.05, decay: 0.95, volume: 0.2, pitchVariation: 392 },
     defeat: { frequency: 300, type: 'sawtooth', duration: 0.8, attack: 0.05, decay: 0.75, volume: 0.18, pitchVariation: 100 },
@@ -372,6 +376,8 @@ class AudioManager {
   playCoin(): void { this.playSound('coin'); }
   playAttack(): void { this.playSound('attack'); }
   playHeal(): void { this.playSound('heal'); }
+  playCrit(): void { this.playSound('crit'); }
+  playHit(): void { this.playSound('hit'); }
   playVictory(): void { this.playSound('victory'); }
   playDefeat(): void { this.playSound('defeat'); }
   playDefend(): void { this.playSound('defend'); }
