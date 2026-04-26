@@ -10,6 +10,7 @@ import { getCharacterFrame, getBuddyFrame, getNPCFrame, getTileFrame } from '../
 import { VisualEffects } from '../utils/VisualEffects';
 import { MobileControls } from '../ui/MobileControls';
 import { QUESTS, type Quest } from '../data/quests';
+import { TutorialSystem } from '../systems/TutorialSystem';
 import { getDialogue } from '../data/dialogue';
 
 export class WorldScene extends Phaser.Scene {
@@ -46,6 +47,7 @@ export class WorldScene extends Phaser.Scene {
   // Effects & Mobile
   private vfx!: VisualEffects;
   private mobileControls!: MobileControls;
+  private tutorial!: TutorialSystem;
   
   // Combat trigger
   private encounterCooldown: boolean = false;
@@ -92,6 +94,9 @@ export class WorldScene extends Phaser.Scene {
     // Initialize mobile controls (if touch device)
     this.mobileControls = new MobileControls(this);
     
+    // Initialize tutorial system
+    this.tutorial = new TutorialSystem(this);
+    
     // Create debug info
     this.createDebugInfo();
     
@@ -100,6 +105,21 @@ export class WorldScene extends Phaser.Scene {
     
     // Initialize quests
     this.initQuests();
+    
+    // Show tutorial hints for new players
+    this.showTutorialHints();
+  }
+  
+  private showTutorialHints(): void {
+    // Only show for new players
+    if (this.tutorial.isStepCompleted('movement')) return;
+    
+    // Delayed hint after 3 seconds
+    this.time.delayedCall(3000, () => {
+      this.tutorial.showHint('movement', () => {
+        this.tutorial.completeStep('movement');
+      });
+    });
   }
   
   private trackEnemyKill(enemyId: string): void {
@@ -727,16 +747,25 @@ export class WorldScene extends Phaser.Scene {
   }
   
   private openInventory(): void {
+    // Complete inventory tutorial step
+    this.tutorial.completeStep('inventory');
+    
     this.scene.pause();
     this.scene.launch('InventoryScene');
   }
   
   private openQuests(): void {
+    // Complete quest tutorial step
+    this.tutorial.completeStep('quests');
+    
     this.scene.pause();
     this.scene.launch('QuestScene');
   }
   
   private openShop(): void {
+    // Complete shop tutorial step
+    this.tutorial.completeStep('shop');
+    
     this.scene.pause();
     this.scene.launch('ShopScene');
   }
@@ -818,6 +847,9 @@ export class WorldScene extends Phaser.Scene {
     if (this.encounterCooldown) return;
     
     this.encounterCooldown = true;
+    
+    // Complete combat tutorial when entering boss fight
+    this.tutorial.completeStep('combat');
     
     // Show warning
     this.showNotification(`BOSS BATTLE: ${bossId.toUpperCase()}!`);
@@ -991,6 +1023,9 @@ export class WorldScene extends Phaser.Scene {
     }
     
     if (nearestNpc) {
+      // Complete NPC tutorial step
+      this.tutorial.completeStep('npc');
+      
       // Start dialogue with NPC
       this.dialogueUI.startDialogue(nearestNpc);
     }
