@@ -5,7 +5,7 @@
 import { test, expect } from '@playwright/test';
 
 // Use deployed URL for testing
-const GAME_URL = 'https://1f2d909b.buy-a-buddy.pages.dev';
+const GAME_URL = 'https://82dac3a9.buy-a-buddy.pages.dev';
 
 test.describe('Buy a Buddy Menu Flow', () => {
   test.beforeEach(async ({ page }) => {
