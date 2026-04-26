@@ -20,6 +20,7 @@ export interface Dialogue {
   lines: DialogueLine[];
   branches?: Record<string, DialogueBranch>;
   questUnlock?: string;
+  action?: string;
 }
 
 export const DIALOGUES: Record<string, Dialogue> = {
@@ -88,6 +89,27 @@ export const DIALOGUES: Record<string, Dialogue> = {
     lines: [
       { speaker: 'Healer', text: 'Blessings upon you, traveler.', emotion: 'neutral' },
       { speaker: 'Healer', text: 'Do you need healing? I can restore your health.', emotion: 'happy' }
+    ],
+    branches: {
+      heal: { text: 'Please heal me.', next: 'healer_heal' },
+      lore: { text: 'Tell me about this place.', next: 'healer_lore' }
+    }
+  },
+  healer_heal: {
+    id: 'healer_heal',
+    npcId: 'healer',
+    lines: [
+      { speaker: 'Healer', text: 'Let me restore your vitality...', emotion: 'neutral' },
+      { speaker: 'Healer', text: 'There. Feel better?', emotion: 'happy' }
+    ],
+    action: 'heal_player'
+  },
+  healer_lore: {
+    id: 'healer_lore',
+    npcId: 'healer',
+    lines: [
+      { speaker: 'Healer', text: 'This village has stood for centuries.', emotion: 'neutral' },
+      { speaker: 'Healer', text: 'We were founded by the First Adventurers.', emotion: 'happy' }
     ]
   },
   healer_blessing: {
@@ -96,6 +118,105 @@ export const DIALOGUES: Record<string, Dialogue> = {
     lines: [
       { speaker: 'Healer', text: 'May the light guide your path.', emotion: 'neutral' },
       { speaker: 'Healer', text: 'Go forth and defeat the darkness!', emotion: 'excited' }
+    ]
+  },
+
+  // Merchant dialogue
+  merchant_greeting: {
+    id: 'merchant_greeting',
+    npcId: 'merchant',
+    lines: [
+      { speaker: 'Merchant', text: 'Welcome to my shop!', emotion: 'happy' },
+      { speaker: 'Merchant', text: 'Take a look at my finest wares.', emotion: 'neutral' }
+    ],
+    branches: {
+      browse: { text: 'Show me your goods.', next: 'merchant_wares' },
+      chat: { text: 'How is business?', next: 'merchant_chat' }
+    }
+  },
+  merchant_wares: {
+    id: 'merchant_wares',
+    npcId: 'merchant',
+    lines: [
+      { speaker: 'Merchant', text: 'Here are my finest weapons and armor!', emotion: 'excited' }
+    ],
+    action: 'open_shop'
+  },
+  merchant_chat: {
+    id: 'merchant_chat',
+    npcId: 'merchant',
+    lines: [
+      { speaker: 'Merchant', text: 'Business is good, thanks to adventurers like you!', emotion: 'happy' },
+      { speaker: 'Merchant', text: 'I have heard there is treasure in the old ruins.', emotion: 'neutral' }
+    ]
+  },
+
+  // Hunter dialogue
+  hunter_greeting: {
+    id: 'hunter_greeting',
+    npcId: 'hunter',
+    lines: [
+      { speaker: 'Hunter', text: 'Ho there, fellow ranger!', emotion: 'happy' },
+      { speaker: 'Hunter', text: 'The forest is full of prey today.', emotion: 'neutral' }
+    ],
+    branches: {
+      hunt: { text: 'I want to hunt.', next: 'hunter_hunt' },
+      tips: { text: 'Any hunting tips?', next: 'hunter_tips' }
+    }
+  },
+  hunter_hunt: {
+    id: 'hunter_hunt',
+    npcId: 'hunter',
+    lines: [
+      { speaker: 'Hunter', text: 'Head east to find the wolf dens!', emotion: 'happy' },
+      { speaker: 'Hunter', text: 'Watch out for the alpha... he is cunning.', emotion: 'angry' }
+    ]
+  },
+  hunter_tips: {
+    id: 'hunter_tips',
+    npcId: 'hunter',
+    lines: [
+      { speaker: 'Hunter', text: 'The key to hunting is patience.', emotion: 'neutral' },
+      { speaker: 'Hunter', text: 'Wait for the right moment, then strike!', emotion: 'happy' }
+    ]
+  },
+
+  // Sage dialogue
+  sage_greeting: {
+    id: 'sage_greeting',
+    npcId: 'sage',
+    lines: [
+      { speaker: 'Sage', text: 'Ah, a seeker of knowledge I see.', emotion: 'neutral' },
+      { speaker: 'Sage', text: 'What wisdom do you seek?', emotion: 'happy' }
+    ],
+    branches: {
+      magic: { text: 'Teach me about magic.', next: 'sage_magic' },
+      world: { text: 'Tell me about the world.', next: 'sage_world' },
+      power: { text: 'How do I grow stronger?', next: 'sage_power' }
+    }
+  },
+  sage_magic: {
+    id: 'sage_magic',
+    npcId: 'sage',
+    lines: [
+      { speaker: 'Sage', text: 'Magic flows through all things.', emotion: 'neutral' },
+      { speaker: 'Sage', text: 'Fire, ice, lightning... all are expressions of power.', emotion: 'happy' }
+    ]
+  },
+  sage_world: {
+    id: 'sage_world',
+    npcId: 'sage',
+    lines: [
+      { speaker: 'Sage', text: 'Many realms exist beyond our own.', emotion: 'neutral' },
+      { speaker: 'Sage', text: 'Dragons once ruled the skies.', emotion: 'happy' }
+    ]
+  },
+  sage_power: {
+    id: 'sage_power',
+    npcId: 'sage',
+    lines: [
+      { speaker: 'Sage', text: 'True strength comes from equipment and skill.', emotion: 'neutral' },
+      { speaker: 'Sage', text: 'Seek the equipment sets for powerful bonuses.', emotion: 'happy' }
     ]
   },
 
