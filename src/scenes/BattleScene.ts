@@ -437,6 +437,13 @@ export class BattleScene extends Phaser.Scene {
     if (this.enemyHp <= 0) {
       this.isBattleOver = true;
       this.addBattleLog('VICTORY!');
+      
+      // Emit enemy defeated event for quest tracking
+      gameSystems.eventBus.emit('enemy:defeated', { 
+        enemyId: this.currentEnemy?.id,
+        enemyName: this.currentEnemy?.name
+      });
+      
       gameSystems.eventBus.emit('battle:end', { victory: true });
       this.time.delayedCall(2000, () => this.endBattle(true));
       return;

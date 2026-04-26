@@ -100,6 +100,37 @@ export class WorldScene extends Phaser.Scene {
     
     // Initialize quests
     this.initQuests();
+    
+    // Listen for enemy defeats (for quest tracking)
+    gameSystems.eventBus.on('enemy:defeated', (event: any) => {
+      if (event.enemyId) {
+        this.trackEnemyKill(event.enemyId);
+      }
+    });
+  }
+  
+  private trackEnemyKill(enemyId: string): void {
+    // Track kills
+    const current = this.enemiesKilled.get(enemyId) || 0;
+    this.enemiesKilled.set(enemyId, current + 1);
+    this.enemiesKilled.set('any', (this.enemiesKilled.get('any') || 0) + 1);
+    
+    // Update quest display
+    this.updateQuestDisplay();
+    
+    // Check quest completion
+    for (const quest of this.currentQuests) {
+      const complete = quest.objectives.every(obj => {
+        if (obj.type === 'kill') {
+          const killed = this.enemiesKilled.get(obj.targetId) || 0;
+          return killed >= obj.count;
+        }
+        return obj.current >= obj.count;
+      });
+      if (complete) {
+        this.completeQuest(quest);
+      }
+    }
   }
   
   private startExplorationMusic(): void {
@@ -126,7 +157,7 @@ export class WorldScene extends Phaser.Scene {
     this.checkInteractions();
     
     // Update quest UI
-    this.updateQuestProgress();
+    this.updateQuestDisplay();
   }
   
   private initQuests(): void {
@@ -140,33 +171,18 @@ export class WorldScene extends Phaser.Scene {
     this.showNotification(`New Quest: ${tutorialQuest?.name || 'Tutorial'}`);
   }
   
-  private updateQuestProgress(): void {
-    // Check quest completion
-    for (const quest of this.currentQuests) {
-      for (const obj of quest.objectives) {
-        if (obj.type === 'kill') {
-          const killed = this.enemiesKilled.get(obj.targetId) || 0;
-          obj.current = killed;
-        }
-      }
+  private updateQuestDisplay(): void {
+    if (!this.questText || this.currentQuests.length === 0) {
+      if (this.questText) this.questText.setText('No Active Quests');
+      return;
     }
-  }
-  
-  private onEnemyDefeated(enemyId: string): void {
-    // Track kills
-    const current = this.enemiesKilled.get(enemyId) || 0;
-    this.enemiesKilled.set(enemyId, current + 1);
-    this.enemiesKilled.set('any', (this.enemiesKilled.get('any') || 0) + 1);
     
-    // Check quest updates
-    this.updateQuestProgress();
-    
-    // Check for quest completion
-    for (const quest of this.currentQuests) {
-      const complete = quest.objectives.every(obj => obj.current >= obj.count);
-      if (complete) {
-        this.completeQuest(quest);
-      }
+    const quest = this.currentQuests[0];
+    const obj = quest.objectives[0];
+    if (obj) {
+      this.questText.setText(`${quest.name}\n${obj.current}/${obj.count} ${obj.targetName}`);
+    } else {
+      this.questText.setText(quest.name);
     }
   }
   
@@ -847,21 +863,6 @@ export class WorldScene extends Phaser.Scene {
     
     // Quest progress update
     this.updateQuestDisplay();
-  }
-  
-  private updateQuestDisplay(): void {
-    if (!this.questText || this.currentQuests.length === 0) {
-      if (this.questText) this.questText.setText('No Active Quests');
-      return;
-    }
-    
-    const quest = this.currentQuests[0];
-    const obj = quest.objectives[0];
-    if (obj) {
-      this.questText.setText(`${quest.name}\n${obj.current}/${obj.count} ${obj.targetName}`);
-    } else {
-      this.questText.setText(quest.name);
-    }
   }
   
   private showInteractionHint(npcId: string): void {

@@ -141,6 +141,7 @@ export type GameEventType =
   | 'audio:play'
   | 'battle:start'
   | 'battle:end'
+  | 'enemy:defeated'
   | 'dialogue:node'
   | 'dialogue:end'
   | 'dialogue:start'
