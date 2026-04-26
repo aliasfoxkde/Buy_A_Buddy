@@ -128,3 +128,26 @@ canvas {
     display: none;
   }
 }
+
+/* Focus styles for accessibility */
+#game-container:focus {
+  outline: 3px solid #a855f7;
+  outline-offset: 4px;
+}
+
+#game-container:focus:not(:focus-visible) {
+  outline: none;
+}
+
+#game-container:focus-visible {
+  outline: 3px solid #a855f7;
+  outline-offset: 4px;
+}
+
+/* High contrast focus for game controls */
+.game-button:focus,
+.game-control:focus {
+  outline: 3px solid #fbbf24;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.3);
+}

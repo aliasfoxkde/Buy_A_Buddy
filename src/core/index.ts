@@ -693,7 +693,7 @@ export class GameState {
   private createDefaultInventory(): InventoryData {
     return {
       slots: Array(24).fill(null).map(() => ({ itemId: null, quantity: 0 })),
-      gold: 100,
+      gold: 200,
       maxSlots: 24
     };
   }

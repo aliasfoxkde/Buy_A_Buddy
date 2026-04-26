@@ -152,7 +152,11 @@ export function getBuddyXPForLevel(level: number): number {
 }
 
 export function getPlayerXPForLevel(level: number): number {
-  return Math.floor(500 * Math.pow(1.3, level - 1));
+  // Faster early game curve
+  if (level <= 5) {
+    return Math.floor(75 * Math.pow(1.4, level - 1));
+  }
+  return Math.floor(300 * Math.pow(1.3, level - 5));
 }
 
 export function getBuddyMaxLevel(rarity: RarityType): number {

@@ -3,7 +3,7 @@
  */
 
 export interface QuestObjective {
-  type: 'kill' | 'collect' | 'talk' | 'visit';
+  type: 'kill' | 'collect' | 'talk' | 'visit' | 'kill_with_buddy' | 'explore' | 'escort';
   targetId: string;
   targetName: string;
   count: number;
@@ -34,8 +34,8 @@ export const QUESTS: Record<string, Quest> = {
       { type: 'kill', targetId: 'slime', targetName: 'Slimes', count: 1, current: 0 }
     ],
     reward: {
-      gold: 50,
-      experience: 100,
+      gold: 75,
+      experience: 150,
       items: ['potion_health_medium']
     }
   },
@@ -47,8 +47,8 @@ export const QUESTS: Record<string, Quest> = {
       { type: 'kill', targetId: 'any', targetName: 'Enemies', count: 3, current: 0 }
     ],
     reward: {
-      gold: 100,
-      experience: 200
+      gold: 150,
+      experience: 300
     }
   },
   quest_tutorial_3: {
@@ -57,8 +57,8 @@ export const QUESTS: Record<string, Quest> = {
     description: 'Collect 500 gold to fund your adventure.',
     objectives: [],
     reward: {
-      gold: 200,
-      experience: 150
+      gold: 250,
+      experience: 200
     },
     isRepeatable: true
   },
@@ -186,6 +186,76 @@ export const QUESTS: Record<string, Quest> = {
       gold: 450,
       experience: 550,
       items: ['armor_mithril']
+    }
+  },
+  
+  // ===== NEW QUESTS =====
+  
+  quest_herb_collector: {
+    id: 'quest_herb_collector',
+    name: 'Herb Collector',
+    description: 'The healer needs herbs for potions. Gather them from the forest.',
+    objectives: [
+      { type: 'collect', targetId: 'herb', targetName: 'Healing Herbs', count: 10, current: 0 }
+    ],
+    reward: {
+      gold: 75,
+      experience: 150,
+      items: ['potion_health_large', 'potion_mana_large']
+    }
+  },
+  
+  quest_training_day: {
+    id: 'quest_training_day',
+    name: 'Training Day',
+    description: 'Defeat 10 enemies with your buddy to master combat coordination.',
+    objectives: [
+      { type: 'kill_with_buddy', targetId: 'any', targetName: 'Enemies', count: 10, current: 0 }
+    ],
+    reward: {
+      gold: 100,
+      experience: 200
+    }
+  },
+  
+  quest_treasure_hunter: {
+    id: 'quest_treasure_hunter',
+    name: 'Treasure Hunter',
+    description: 'Legends speak of treasure in the ancient ruins. Find the hidden chest.',
+    objectives: [
+      { type: 'explore', targetId: 'ruins', targetName: 'Ancient Ruins', count: 1, current: 0 }
+    ],
+    reward: {
+      gold: 300,
+      experience: 400,
+      items: ['weapon_shadow_dagger']
+    }
+  },
+  
+  quest_boss_hunter: {
+    id: 'quest_boss_hunter',
+    name: 'Boss Hunter',
+    description: 'The ultimate challenge: defeat the Slime King!',
+    objectives: [
+      { type: 'kill', targetId: 'slime_boss', targetName: 'Slime King', count: 1, current: 0 }
+    ],
+    reward: {
+      gold: 500,
+      experience: 800,
+      items: ['armor_dragon_scale']
+    }
+  },
+  
+  quest_merchant_delivery: {
+    id: 'quest_merchant_delivery',
+    name: 'Merchant\'s Request',
+    description: 'Deliver a package to the wandering merchant in the eastern woods.',
+    objectives: [
+      { type: 'talk', targetId: 'merchant', targetName: 'Wandering Merchant', count: 1, current: 0 }
+    ],
+    reward: {
+      gold: 150,
+      experience: 200
     }
   }
 };

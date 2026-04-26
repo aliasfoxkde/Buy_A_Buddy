@@ -429,7 +429,7 @@ export class SaveLoadScene extends Phaser.Scene {
       playTime: 0,
       zone: 'village_start',
       completedQuests: 0,
-      gold: 100,
+      gold: 200,
       health: 100,
       mana: 50,
       experience: 0,

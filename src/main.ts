@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.appendChild(container);
   }
   
-  // Set container styles
+  // Set container styles - make focusable for keyboard nav
   container.style.width = '100vw';
   container.style.height = '100vh';
   container.style.display = 'flex';
@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
   container.style.alignItems = 'center';
   container.style.overflow = 'hidden';
   container.style.backgroundColor = '#1a1a2e';
+  container.tabIndex = 0; // Make focusable for keyboard nav
+  container.setAttribute('role', 'application'); // Accessibility role
   
   // Start the game
   console.log('Starting game with container:', container.id);

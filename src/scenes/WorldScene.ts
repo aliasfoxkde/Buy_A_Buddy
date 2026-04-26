@@ -781,7 +781,7 @@ export class WorldScene extends Phaser.Scene {
     }).setOrigin(0, 0.5);
     
     // Gold display
-    this.goldText = this.add.text(240, 52, '💰 100', {
+    this.goldText = this.add.text(240, 52, '💰 200', {
       fontSize: '18px',
       fontFamily: 'Arial, sans-serif',
       color: '#fbbf24'
