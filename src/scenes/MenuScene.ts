@@ -3,6 +3,7 @@
  */
 
 import Phaser from 'phaser';
+import { gameSystems } from '../systems/GameSystems';
 
 export class MenuScene extends Phaser.Scene {
   constructor() {
@@ -10,6 +11,9 @@ export class MenuScene extends Phaser.Scene {
   }
   
   create(): void {
+    // Auto-save when opening menu
+    this.autoSave();
+    
     const { width, height } = this.scale;
     
     // Dark overlay
@@ -93,6 +97,16 @@ export class MenuScene extends Phaser.Scene {
   private openStats(): void {
     this.scene.pause();
     this.scene.launch('StatsScene');
+  }
+  
+  private autoSave(): void {
+    try {
+      // Auto-save to slot 0 (auto-save slot)
+      gameSystems.saveGame('auto');
+      console.log('Auto-saved game');
+    } catch (e) {
+      console.warn('Auto-save failed:', e);
+    }
   }
   
   private openSaveLoad(): void {
