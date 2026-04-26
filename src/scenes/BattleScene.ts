@@ -9,6 +9,7 @@ import { VisualEffects } from '../utils/VisualEffects';
 import { LevelUpUI } from '../ui/LevelUpUI';
 import { DeathScreen } from '../ui/DeathScreen';
 import { ParticleSystem } from '../utils/ParticleSystem';
+import { AchievementPopup } from '../ui/Notifications';
 import { achievementSystem } from '../systems/AchievementSystem';
 import { getRandomEnemy, getEnemy, scaleEnemyStats, EnemyType } from '../data/enemies';
 import { SKILLS, getClassSkills, type Skill } from '../data/skills';
@@ -128,6 +129,16 @@ export class BattleScene extends Phaser.Scene {
         });
         audioManager.playLevelUp();
       }
+    });
+    
+    // Listen for achievement unlocks
+    const achievementPopup = new AchievementPopup(this);
+    gameSystems.eventBus.on('achievement:unlock', (event: any) => {
+      achievementPopup.show({
+        name: event.achievement.name,
+        description: event.achievement.description,
+        icon: event.achievement.icon
+      });
     });
   }
   
