@@ -4,11 +4,14 @@
 
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
+import { SetBonusDisplay } from '../ui/SetBonusDisplay';
 
 export class InventoryScene extends Phaser.Scene {
   private slots: Phaser.GameObjects.Container[] = [];
   private equipmentSlots: Phaser.GameObjects.Container[] = [];
   private selectedSlot: number = -1;
+  private setBonusDisplay!: SetBonusDisplay;
+  private showSetBonus: boolean = false;
   
   constructor() {
     super({ key: 'InventoryScene' });
@@ -30,11 +33,14 @@ export class InventoryScene extends Phaser.Scene {
     // Stats display
     this.createStats(width / 2, 100);
     
+    // Set bonus display button
+    this.createSetBonusButton(width / 2, 290);
+    
     // Equipment slots
-    this.createEquipment(width / 2, 180);
+    this.createEquipment(width / 2, 340);
     
     // Inventory grid
-    this.createInventoryGrid(100, 350);
+    this.createInventoryGrid(100, 500);
     
     // Gold display
     const gold = gameSystems.inventory.getGold();
@@ -59,6 +65,10 @@ export class InventoryScene extends Phaser.Scene {
     // Keyboard
     this.input.keyboard?.on('keydown-I', () => this.close());
     this.input.keyboard?.on('keydown-ESC', () => this.close());
+    
+    // Set bonus display (right side panel)
+    this.setBonusDisplay = new SetBonusDisplay(this);
+    this.setBonusDisplay.create(width - 300, 400);
   }
   
   private createStats(x: number, y: number): void {
@@ -84,9 +94,44 @@ export class InventoryScene extends Phaser.Scene {
     }).setOrigin(0, 0);
   }
   
+  private createSetBonusButton(x: number, y: number): void {
+    const btn = this.add.rectangle(x, y, 180, 40, 0x4c1d95);
+    btn.setStrokeStyle(2, 0xfbbf24);
+    btn.setInteractive({ useHandCursor: true });
+    
+    const btnText = this.add.text(x, y, '🎯 SET BONUSES', {
+      fontSize: '16px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#fbbf24'
+    }).setOrigin(0.5);
+    
+    btn.on('pointerover', () => {
+      btn.setFillStyle(0x5b21b6);
+    });
+    
+    btn.on('pointerout', () => {
+      btn.setFillStyle(0x4c1d95);
+    });
+    
+    btn.on('pointerdown', () => {
+      this.toggleSetBonus();
+    });
+  }
+  
+  private toggleSetBonus(): void {
+    this.showSetBonus = !this.showSetBonus;
+    
+    if (this.showSetBonus) {
+      // Get equipped items
+      const equippedIds = gameSystems.inventory.getEquippedItemIds();
+      this.setBonusDisplay.show(equippedIds);
+    } else {
+      this.setBonusDisplay.hide();
+    }
+  }
+  
   private createEquipment(x: number, y: number): void {
     const slotNames = ['HEAD', 'CHEST', 'WEAPON', 'SHIELD', 'BOOTS', 'RING1', 'RING2'];
-    const slotTypes = ['head', 'chest', 'weapon', 'shield', 'boots', 'accessory1', 'accessory2'] as const;
     
     const startX = x - 250;
     
@@ -178,6 +223,12 @@ export class InventoryScene extends Phaser.Scene {
     if (itemId.includes('amulet')) return '📿';
     if (itemId.includes('coin')) return '🪙';
     if (itemId.includes('gem')) return '💎';
+    if (itemId.includes('bow')) return '🏹';
+    if (itemId.includes('staff')) return '🪄';
+    if (itemId.includes('dagger')) return '🗡️';
+    if (itemId.includes('cloak')) return '🧥';
+    if (itemId.includes('boots')) return '👢';
+    if (itemId.includes('spear')) return '🔱';
     return '📦';
   }
   
@@ -189,11 +240,10 @@ export class InventoryScene extends Phaser.Scene {
     });
     
     this.selectedSlot = index;
-    
-    // Could show item tooltip or context menu
   }
   
   private close(): void {
+    this.setBonusDisplay.destroy();
     this.scene.stop();
     this.scene.resume('WorldScene');
   }

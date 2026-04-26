@@ -535,6 +535,12 @@ export class InventorySystem {
   getEquipment(): EquipmentSlot[] {
     return this.equipment;
   }
+  
+  getEquippedItemIds(): string[] {
+    return this.equipment
+      .filter(slot => slot.item !== null)
+      .map(slot => slot.item!.id);
+  }
 
   getTotalStats(): ItemStats {
     const stats: ItemStats = {};
