@@ -12,6 +12,7 @@ import { MobileControls } from '../ui/MobileControls';
 import { QUESTS, type Quest } from '../data/quests';
 import { TutorialSystem } from '../systems/TutorialSystem';
 import { TutorialOverlay, getDefaultTutorialSteps } from '../ui/TutorialOverlay';
+import { ScreenTransition } from '../ui/ScreenTransitions';
 import { achievementSystem } from '../systems/AchievementSystem';
 import { Minimap } from '../ui/Minimap';
 import { getDialogue } from '../data/dialogue';
@@ -52,6 +53,7 @@ export class WorldScene extends Phaser.Scene {
   private vfx!: VisualEffects;
   private mobileControls!: MobileControls;
   private tutorial!: TutorialSystem;
+  private transition!: ScreenTransition;
   private minimap!: Minimap;
   
   // Combat trigger
@@ -95,6 +97,7 @@ export class WorldScene extends Phaser.Scene {
     
     // Initialize visual effects
     this.vfx = new VisualEffects(this);
+    this.transition = new ScreenTransition(this);
     
     // Initialize tutorial overlay for new players
     this.initTutorial();
