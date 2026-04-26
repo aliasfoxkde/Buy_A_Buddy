@@ -6,6 +6,7 @@ import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
 import { audioManager } from '../audio/AudioManager';
 import { VisualEffects } from '../utils/VisualEffects';
+import { LevelUpUI } from '../ui/LevelUpUI';
 import { getRandomEnemy, scaleEnemyStats, EnemyType } from '../data/enemies';
 
 export class BattleScene extends Phaser.Scene {
@@ -37,6 +38,7 @@ export class BattleScene extends Phaser.Scene {
   private enemyDamage: number = 8;
   private battleMusicStarted: boolean = false;
   private vfx!: VisualEffects;
+  private levelUpUI!: LevelUpUI;
   
   constructor() {
     super({ key: 'BattleScene' });
@@ -87,6 +89,21 @@ export class BattleScene extends Phaser.Scene {
     
     // Initialize visual effects
     this.vfx = new VisualEffects(this);
+    
+    // Initialize level up UI
+    this.levelUpUI = new LevelUpUI(this);
+    
+    // Listen for player level up
+    gameSystems.eventBus.on('entity:levelUp', (event: any) => {
+      if (event.entity === gameSystems.player) {
+        const stats = gameSystems.getPlayerStats();
+        this.levelUpUI.showLevelUp(stats.level, {
+          hp: 10,
+          attack: 2,
+          defense: 1
+        });
+      }
+    });
   }
   
   private startBattleMusic(): void {
@@ -516,8 +533,11 @@ export class BattleScene extends Phaser.Scene {
       const expGain = scaleEnemyStats(this.currentEnemy, gameSystems.getPlayerStats()?.level || 1).xpReward;
       const goldGain = scaleEnemyStats(this.currentEnemy, gameSystems.getPlayerStats()?.level || 1).goldReward;
       
-      // Add gold
+      // Add gold and experience
       gameSystems.inventory.addGold(goldGain);
+      if (gameSystems.player) {
+        gameSystems.player.gainExperience(expGain);
+      }
       
       // Play victory sound
       audioManager.playVictory();
