@@ -7,6 +7,7 @@ import { gameSystems } from '../systems/GameSystems';
 import { audioManager } from '../audio/AudioManager';
 import { VisualEffects } from '../utils/VisualEffects';
 import { LevelUpUI } from '../ui/LevelUpUI';
+import { DeathScreen } from '../ui/DeathScreen';
 import { getRandomEnemy, getEnemy, scaleEnemyStats, EnemyType } from '../data/enemies';
 
 export class BattleScene extends Phaser.Scene {
@@ -39,6 +40,8 @@ export class BattleScene extends Phaser.Scene {
   private battleMusicStarted: boolean = false;
   private vfx!: VisualEffects;
   private levelUpUI!: LevelUpUI;
+  private deathScreen!: DeathScreen;
+  private isPlayerDefeated: boolean = false;
   
   constructor() {
     super({ key: 'BattleScene' });
@@ -95,6 +98,10 @@ export class BattleScene extends Phaser.Scene {
     
     // Initialize level up UI
     this.levelUpUI = new LevelUpUI(this);
+    
+    // Initialize death screen
+    this.deathScreen = new DeathScreen(this);
+    this.deathScreen.hide();
     
     // Listen for player level up
     gameSystems.eventBus.on('entity:levelUp', (event: any) => {
@@ -458,8 +465,15 @@ export class BattleScene extends Phaser.Scene {
     
     if (this.playerHp <= 0) {
       this.isBattleOver = true;
+      this.isPlayerDefeated = true;
       this.addBattleLog('DEFEAT...');
-      this.time.delayedCall(2000, () => this.endBattle(false));
+      
+      // Show death screen
+      this.deathScreen.show({
+        onRespawn: () => this.respawnPlayer(),
+        onQuit: () => this.returnToMenu()
+      });
+      
       return;
     }
     
@@ -487,8 +501,15 @@ export class BattleScene extends Phaser.Scene {
     
     if (this.playerHp <= 0) {
       this.isBattleOver = true;
+      this.isPlayerDefeated = true;
       this.addBattleLog('DEFEAT...');
-      this.time.delayedCall(2000, () => this.endBattle(false));
+      
+      // Show death screen
+      this.deathScreen.show({
+        onRespawn: () => this.respawnPlayer(),
+        onQuit: () => this.returnToMenu()
+      });
+      
       return;
     }
     
@@ -496,6 +517,30 @@ export class BattleScene extends Phaser.Scene {
     if (!this.isPlayerTurn && !this.isBattleOver) {
       this.time.delayedCall(1500, () => this.enemyTurn());
     }
+  }
+  
+  private respawnPlayer(): void {
+    // Respawn player with half HP
+    const stats = gameSystems.getPlayerStats();
+    if (stats && gameSystems.player) {
+      gameSystems.player.stats.currentHealth = Math.floor(stats.maxHealth / 2);
+    }
+    
+    // Return to world
+    this.cameras.main.fadeOut(300);
+    this.time.delayedCall(500, () => {
+      this.scene.stop();
+      this.scene.resume('WorldScene');
+    });
+  }
+  
+  private returnToMenu(): void {
+    // Return to main menu
+    this.cameras.main.fadeOut(500);
+    this.time.delayedCall(600, () => {
+      this.scene.stop('WorldScene');
+      this.scene.start('MainMenuScene');
+    });
   }
   
   private updateHealthBars(): void {
