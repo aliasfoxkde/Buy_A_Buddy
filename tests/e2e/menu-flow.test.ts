@@ -4,6 +4,9 @@
 
 import { test, expect } from '@playwright/test';
 
+// Use deployed URL for testing
+const GAME_URL = 'https://1f2d909b.buy-a-buddy.pages.dev';
+
 test.describe('Buy a Buddy Menu Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Capture console errors
@@ -15,8 +18,7 @@ test.describe('Buy a Buddy Menu Flow', () => {
   });
 
   test('game loads and shows main menu', async ({ page }) => {
-    const baseUrl = 'https://d12168cf.buy-a-buddy.pages.dev';
-    await page.goto(baseUrl);
+    await page.goto(GAME_URL);
     
     // Wait for Phaser to initialize
     await page.waitForTimeout(3000);
@@ -29,8 +31,7 @@ test.describe('Buy a Buddy Menu Flow', () => {
   });
 
   test('can click NEW GAME button', async ({ page }) => {
-    const baseUrl = 'https://d12168cf.buy-a-buddy.pages.dev';
-    await page.goto(baseUrl);
+    await page.goto(GAME_URL);
     
     // Wait for game to load
     await page.waitForTimeout(4000);

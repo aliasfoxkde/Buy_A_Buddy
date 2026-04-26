@@ -68,7 +68,6 @@ export function createGameConfig(): GameConfig {
       SettingsScene,
       SaveLoadScene,
       AchievementScene,
-      StatsScene,
       StatsScene
     ],
     pixelArt: false,

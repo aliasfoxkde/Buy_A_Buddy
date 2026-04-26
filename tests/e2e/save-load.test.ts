@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Save/Load System', () => {
   test('should have localStorage available', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('https://1f2d909b.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     const hasStorage = await page.evaluate(() => {
@@ -23,7 +23,7 @@ test.describe('Save/Load System', () => {
   });
 
   test('should save data to localStorage', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('https://1f2d909b.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     await page.evaluate(() => {
@@ -42,7 +42,7 @@ test.describe('Save/Load System', () => {
       localStorage.setItem('buyabuddy_test', JSON.stringify({ value: 42 }));
     });
     
-    await page.goto('/');
+    await page.goto('https://1f2d909b.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     const loaded = await page.evaluate(() => {
