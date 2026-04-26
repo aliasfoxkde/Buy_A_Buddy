@@ -160,10 +160,6 @@ export class WorldScene extends Phaser.Scene {
     }
   }
   
-  private updateQuestDisplay(): void {
-    this.updateQuestHUD();
-  }
-  
   private startExplorationMusic(): void {
     if (!this.musicStarted) {
       audioManager.playExplorationMusic();
@@ -376,6 +372,18 @@ export class WorldScene extends Phaser.Scene {
       // Add shadow
       this.add.ellipse(npc.position.x, npc.position.y + 50, 60, 20, 0x000000, 0.2);
       
+      // NPC highlight circle (visible indicator that NPC is interactive)
+      const highlight = this.add.circle(npc.position.x, npc.position.y, 45, 0x3b82f6, 0.15);
+      highlight.setStrokeStyle(3, 0x3b82f6, 0.5);
+      this.tweens.add({
+        targets: highlight,
+        alpha: 0.5,
+        scale: 1.1,
+        duration: 1000,
+        yoyo: true,
+        repeat: -1
+      });
+      
       // Add name above
       const nameText = this.add.text(npc.position.x, npc.position.y - 70, npc.name, {
         fontSize: '14px',
@@ -413,41 +421,37 @@ export class WorldScene extends Phaser.Scene {
   }
   
   private createWorldItems(): void {
+    // Add visible collectible items with emoji display
     const items = [
-      { x: 250, y: 300 },
-      { x: 450, y: 450 },
-      { x: 700, y: 250 },
-      { x: 950, y: 550 },
-      { x: 1100, y: 350 }
+      { x: 250, y: 300, type: 'coin', emoji: '🪙' },
+      { x: 450, y: 450, type: 'potion', emoji: '🧪' },
+      { x: 700, y: 250, type: 'coin', emoji: '🪙' },
+      { x: 950, y: 550, type: 'gem', emoji: '💎' },
+      { x: 1100, y: 350, type: 'coin', emoji: '🪙' }
     ];
     
     for (const pos of items) {
-      const item = this.add.sprite(pos.x, pos.y, 'items');
-      item.setFrame(0); // Coin
-      item.setScale(0.5);
+      // Emoji visual instead of sprite
+      const itemText = this.add.text(pos.x, pos.y, pos.emoji, {
+        fontSize: '32px'
+      }).setOrigin(0.5);
+      
+      // Glow effect
+      itemText.setShadow(0, 0, '#fbbf24', 8, true, true);
       
       // Floating animation
       this.tweens.add({
-        targets: item,
-        y: item.y - 10,
-        duration: 800,
+        targets: itemText,
+        y: pos.y - 15,
+        duration: 1000,
         yoyo: true,
         repeat: -1,
         ease: 'Sine.easeInOut'
       });
       
-      // Sparkle effect
-      this.tweens.add({
-        targets: item,
-        alpha: 0.7,
-        duration: 400,
-        yoyo: true,
-        repeat: -1
-      });
-      
       // Pickup zone
-      const zone = this.add.zone(pos.x, pos.y, 40, 40);
-      (zone as any).itemType = 'coin';
+      const zone = this.add.zone(pos.x, pos.y, 50, 50);
+      (zone as any).itemType = pos.type;
       this.physics.add.existing(zone);
     }
     
@@ -680,15 +684,55 @@ export class WorldScene extends Phaser.Scene {
     const { width } = this.scale;
     
     // Quest panel background
-    const questBg = this.add.rectangle(width - 180, 20, 200, 80, 0x000000, 0.5);
+    const questBg = this.add.rectangle(width - 180, 40, 220, 90, 0x000000, 0.6);
     questBg.setStrokeStyle(2, 0x22c55e);
     
-    // Quest text
-    this.questText = this.add.text(width - 180, 20, 'No Active Quests', {
-      fontSize: '14px',
+    // Quest header
+    this.add.text(width - 180, 10, '📜 OBJECTIVE', {
+      fontSize: '12px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#22c55e'
+    }).setOrigin(0.5);
+    
+    // Quest objective text
+    this.questText = this.add.text(width - 180, 40, 'No Active Quests', {
+      fontSize: '13px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#aaa',
+      align: 'center',
+      wordWrap: { width: 200 }
+    }).setOrigin(0.5);
+    
+    // Progress indicator
+    this.questProgressText = this.add.text(width - 180, 70, '', {
+      fontSize: '11px',
       fontFamily: 'Arial, sans-serif',
       color: '#22c55e'
     }).setOrigin(0.5);
+    
+    // Update with active quest
+    this.updateQuestDisplay();
+  }
+  
+  private questProgressText!: Phaser.GameObjects.Text;
+  
+  private updateQuestDisplay(): void {
+    const activeQuests = gameSystems.quests.getActiveQuests();
+    
+    if (activeQuests.length > 0) {
+      const quest = activeQuests[0];
+      const questDef = gameSystems.quests.getQuest(quest.questId);
+      if (questDef) {
+        this.questText.setText(questDef.name);
+        // Show progress
+        const progress = quest.objectives[0]?.current || 0;
+        const required = quest.objectives[0]?.required || 1;
+        this.questProgressText.setText(`${progress}/${required}`);
+      }
+    } else {
+      this.questText.setText('No Active Quests');
+      this.questProgressText.setText('Talk to NPCs for quests');
+    }
   }
   
   private createBottomButtons(): void {
