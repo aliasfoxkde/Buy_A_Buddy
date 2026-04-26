@@ -90,59 +90,50 @@ export class StatsScene extends Phaser.Scene {
     }
     
     // Progress section
-    this.add.text(centerX, 300, 'PROGRESS', {
+    this.add.text(centerX, 300, '🏆 LIFETIME PROGRESS', {
       fontSize: '18px',
       fontFamily: 'Arial Black, sans-serif',
       color: '#fbbf24'
     }).setOrigin(0.5);
     
-    // Enemies defeated
-    this.add.text(centerX - 150, 340, 'Enemies Defeated:', {
-      fontSize: '14px',
-      fontFamily: 'Arial, sans-serif',
-      color: '#fff'
-    });
-    this.add.text(centerX + 150, 340, '0', {
-      fontSize: '14px',
-      fontFamily: 'Arial Black, sans-serif',
-      color: '#ef4444'
-    }).setOrigin(1, 0);
+    // Progress data
+    const progress = this.getProgressData();
     
-    // Quests completed
-    this.add.text(centerX - 150, 370, 'Quests Completed:', {
-      fontSize: '14px',
-      fontFamily: 'Arial, sans-serif',
-      color: '#fff'
-    });
-    this.add.text(centerX + 150, 370, '0', {
-      fontSize: '14px',
-      fontFamily: 'Arial Black, sans-serif',
-      color: '#22c55e'
-    }).setOrigin(1, 0);
+    const progressStats = [
+      { label: 'Highest Level', value: progress.highestLevel.toString(), color: '#a855f7' },
+      { label: 'Enemies Defeated', value: progress.enemiesDefeated.toString(), color: '#ef4444' },
+      { label: 'Quests Completed', value: progress.questsCompleted.toString(), color: '#22c55e' },
+      { label: 'Gold Earned', value: this.formatNumber(progress.totalGoldEarned), color: '#fbbf24' },
+      { label: 'Damage Dealt', value: this.formatNumber(progress.totalDamageDealt), color: '#f97316' },
+      { label: 'Healing Done', value: this.formatNumber(progress.totalHealingDone), color: '#ec4899' }
+    ];
     
-    // Achievements unlocked
-    this.add.text(centerX - 150, 400, 'Achievements:', {
-      fontSize: '14px',
-      fontFamily: 'Arial, sans-serif',
-      color: '#fff'
-    });
-    this.add.text(centerX + 150, 400, '0/12', {
-      fontSize: '14px',
-      fontFamily: 'Arial Black, sans-serif',
-      color: '#fbbf24'
-    }).setOrigin(1, 0);
+    yOffset = 340;
+    for (const stat of progressStats) {
+      this.add.text(centerX - 150, yOffset, `${stat.label}:`, {
+        fontSize: '13px',
+        fontFamily: 'Arial, sans-serif',
+        color: '#888'
+      }).setOrigin(0, 0);
+      this.add.text(centerX + 150, yOffset, stat.value, {
+        fontSize: '13px',
+        fontFamily: 'Arial Black, sans-serif',
+        color: stat.color
+      }).setOrigin(1, 0);
+      yOffset += 28;
+    }
     
-    // Equipment sets completed
-    this.add.text(centerX - 150, 430, 'Sets Complete:', {
-      fontSize: '14px',
+    // Exp bar visualization
+    const expProgress = stats.experience / this.getExpForNextLevel(stats.level);
+    const barBg = this.add.rectangle(centerX, yOffset + 20, 300, 16, 0x444);
+    barBg.setStrokeStyle(1, 0x666);
+    const expBar = this.add.rectangle(centerX - 150, yOffset + 20, expProgress * 300, 14, 0xf59e0b);
+    expBar.setOrigin(0, 0.5);
+    this.add.text(centerX, yOffset + 20, `Next Level: ${Math.round(expProgress * 100)}%`, {
+      fontSize: '11px',
       fontFamily: 'Arial, sans-serif',
       color: '#fff'
-    });
-    this.add.text(centerX + 150, 430, '0/7', {
-      fontSize: '14px',
-      fontFamily: 'Arial Black, sans-serif',
-      color: '#a855f7'
-    }).setOrigin(1, 0);
+    }).setOrigin(0.5);
     
     // Close button
     const closeBtn = this.add.rectangle(width / 2, height - 50, 120, 50, 0xef4444);
@@ -161,6 +152,31 @@ export class StatsScene extends Phaser.Scene {
   
   private getExpForNextLevel(level: number): number {
     return Math.floor(100 * Math.pow(1.5, level - 1));
+  }
+  
+  private getProgressData(): any {
+    try {
+      const saved = localStorage.getItem('buyabuddy_progress');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {
+      // Use defaults
+    }
+    return {
+      enemiesDefeated: 0,
+      questsCompleted: 0,
+      highestLevel: 1,
+      totalGoldEarned: 0,
+      totalDamageDealt: 0,
+      totalHealingDone: 0
+    };
+  }
+  
+  private formatNumber(num: number): string {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
   }
   
   private close(): void {
