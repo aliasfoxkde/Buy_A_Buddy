@@ -15,6 +15,7 @@ import { MenuScene } from '../scenes/MenuScene';
 import { SettingsScene } from '../scenes/SettingsScene';
 import { SaveLoadScene } from '../scenes/SaveLoadScene';
 import { AchievementScene } from '../scenes/AchievementScene';
+import { StatsScene } from '../scenes/StatsScene';
 
 export interface GameConfig {
   type: number;
@@ -66,7 +67,8 @@ export function createGameConfig(): GameConfig {
       MenuScene,
       SettingsScene,
       SaveLoadScene,
-      AchievementScene
+      AchievementScene,
+      StatsScene
     ],
     pixelArt: false,
     render: {

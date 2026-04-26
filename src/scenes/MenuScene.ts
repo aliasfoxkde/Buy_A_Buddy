@@ -33,6 +33,7 @@ export class MenuScene extends Phaser.Scene {
       { text: 'SAVE / LOAD', action: () => this.openSaveLoad() },
       { text: 'INVENTORY', action: () => this.openInventory() },
       { text: 'QUEST LOG', action: () => this.openQuests() },
+      { text: 'CHARACTER STATS', action: () => this.openStats() },
       { text: 'SETTINGS', action: () => this.openSettings() },
       { text: 'MAIN MENU', action: () => this.goToMainMenu() }
     ];
@@ -87,6 +88,11 @@ export class MenuScene extends Phaser.Scene {
   private openQuests(): void {
     this.scene.pause();
     this.scene.launch('QuestScene');
+  }
+  
+  private openStats(): void {
+    this.scene.pause();
+    this.scene.launch('StatsScene');
   }
   
   private openSaveLoad(): void {
