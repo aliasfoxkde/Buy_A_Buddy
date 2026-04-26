@@ -814,7 +814,12 @@ export class WorldScene extends Phaser.Scene {
     // Skill bar
     const skillBar = this.add.container(0, 0);
     
+    // Skill icons for the hotbar
+    const skillIcons = ['⚔️', '🛡️', '💚', '🔥', '⚡', '💥'];
+    
     for (let i = 0; i < 6; i++) {
+      const icon = skillIcons[i] || '❓';
+      
       const btn = this.add.rectangle(
         width / 2 - 150 + i * 60,
         buttonY,
@@ -825,13 +830,21 @@ export class WorldScene extends Phaser.Scene {
       btn.setStrokeStyle(2, 0xa855f7);
       btn.setInteractive({ useHandCursor: true });
       
+      // Skill icon
+      const skillIcon = this.add.text(
+        width / 2 - 150 + i * 60,
+        buttonY - 5,
+        icon,
+        { fontSize: '24px' }
+      ).setOrigin(0.5);
+      
       // Key hint
       const key = this.add.text(
         width / 2 - 150 + i * 60,
         buttonY + 18,
         (i + 1).toString(),
         {
-          fontSize: '16px',
+          fontSize: '14px',
           fontFamily: 'Arial Black, sans-serif',
           color: '#888'
         }
@@ -844,8 +857,11 @@ export class WorldScene extends Phaser.Scene {
       btn.on('pointerout', () => {
         btn.setFillStyle(0x2d1b4e);
       });
+      btn.on('pointerdown', () => {
+        this.triggerWorldSkill(i);
+      });
       
-      skillBar.add([btn, key]);
+      skillBar.add([btn, skillIcon, key]);
     }
     
     // Menu button
@@ -865,6 +881,11 @@ export class WorldScene extends Phaser.Scene {
     });
     
     skillBar.add([menuBtn, menuIcon]);
+  }
+  
+  private triggerWorldSkill(slot: number): void {
+    const skillNames = ['Attack', 'Defend', 'Heal', 'Fire', 'Lightning', 'Explosion'];
+    this.showNotification(`${skillNames[slot] || 'Skill'} → Enter battle to use!`);
   }
   
   private setupInput(): void {
