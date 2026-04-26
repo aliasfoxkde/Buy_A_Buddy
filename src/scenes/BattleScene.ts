@@ -168,13 +168,18 @@ export class BattleScene extends Phaser.Scene {
     enemySprite.setFrame(this.currentEnemy.spriteIndex);
     enemySprite.setScale(1.5);
     
-    // Add enemy name to UI
+    // Add enemy name to UI with level
     if (this.uiElements) {
       this.uiElements.enemyName?.destroy();
-      this.uiElements.enemyName = this.add.text(this.scale.width - 250, 160, this.currentEnemy.name, {
+      const playerLevel = gameSystems.getPlayerStats()?.level || 1;
+      const enemyLevel = this.currentEnemy.level || playerLevel;
+      const levelText = enemyLevel > playerLevel ? ' ⚠️' : '';
+      
+      this.uiElements.enemyName = this.add.text(this.scale.width - 250, 160, 
+        `${this.currentEnemy.name} [Lv.${enemyLevel}]${levelText}`, {
         fontSize: '20px',
         fontFamily: 'Arial Black, sans-serif',
-        color: '#ef4444'
+        color: enemyLevel > playerLevel ? '#f59e0b' : '#ef4444'
       }).setOrigin(0.5);
     }
   }

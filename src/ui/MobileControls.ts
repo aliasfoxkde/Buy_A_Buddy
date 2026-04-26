@@ -40,15 +40,19 @@ export class MobileControls {
   }
 
   private create(): void {
-    const { height } = this.scene.scale;
+    const { height, width } = this.scene.scale;
     this.joystickY = height - 150;
 
-    // Joystick base (semi-transparent)
+    // Joystick base (semi-transparent with border)
     this.baseGraphics = this.scene.add.graphics();
-    this.baseGraphics.fillStyle(0xffffff, 0.15);
+    this.baseGraphics.fillStyle(0x3b82f6, 0.2);
     this.baseGraphics.fillCircle(this.joystickX, this.joystickY, this.joystickRadius);
-    this.baseGraphics.lineStyle(3, 0xffffff, 0.3);
+    this.baseGraphics.lineStyle(3, 0x3b82f6, 0.6);
     this.baseGraphics.strokeCircle(this.joystickX, this.joystickY, this.joystickRadius);
+    
+    // Inner ring for visual feedback
+    this.baseGraphics.fillStyle(0x3b82f6, 0.1);
+    this.baseGraphics.fillCircle(this.joystickX, this.joystickY, this.joystickRadius * 0.5);
 
     // Joystick knob
     this.knobGraphics = this.scene.add.graphics();
@@ -115,10 +119,15 @@ export class MobileControls {
 
   private updateKnob(x: number, y: number): void {
     this.knobGraphics.clear();
-    this.knobGraphics.fillStyle(0xffffff, 0.4);
+    // Knob with gradient effect
+    this.knobGraphics.fillStyle(0x60a5fa, 0.7);
     this.knobGraphics.fillCircle(x, y, this.knobRadius);
-    this.knobGraphics.lineStyle(2, 0xffffff, 0.6);
+    this.knobGraphics.lineStyle(2, 0x93c5fd, 0.8);
     this.knobGraphics.strokeCircle(x, y, this.knobRadius);
+    
+    // Inner highlight
+    this.knobGraphics.fillStyle(0xffffff, 0.3);
+    this.knobGraphics.fillCircle(x - 5, y - 5, this.knobRadius * 0.3);
   }
 
   /**
