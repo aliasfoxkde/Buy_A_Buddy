@@ -4,6 +4,7 @@
 
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
+import { QUESTS, type Quest } from '../data/quests';
 
 export class QuestScene extends Phaser.Scene {
   private questContainers: Phaser.GameObjects.Container[] = [];

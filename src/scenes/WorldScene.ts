@@ -100,37 +100,40 @@ export class WorldScene extends Phaser.Scene {
     
     // Initialize quests
     this.initQuests();
-    
-    // Listen for enemy defeats (for quest tracking)
-    gameSystems.eventBus.on('enemy:defeated', (event: any) => {
-      if (event.enemyId) {
-        this.trackEnemyKill(event.enemyId);
-      }
-    });
   }
   
   private trackEnemyKill(enemyId: string): void {
-    // Track kills
+    // Track kills in local map
     const current = this.enemiesKilled.get(enemyId) || 0;
     this.enemiesKilled.set(enemyId, current + 1);
     this.enemiesKilled.set('any', (this.enemiesKilled.get('any') || 0) + 1);
     
-    // Update quest display
-    this.updateQuestDisplay();
+    // Update QuestSystem with progress for all kill quests
+    gameSystems.quests.updateObjective('quest_tutorial_1', 'kill', enemyId, current + 1);
+    gameSystems.quests.updateObjective('quest_tutorial_2', 'kill', enemyId, current + 1);
+    gameSystems.quests.updateObjective('quest_goblin_trouble', 'kill', enemyId, current + 1);
+    gameSystems.quests.updateObjective('quest_wolf_pack', 'kill', enemyId, current + 1);
+    gameSystems.quests.updateObjective('quest_skeleton_king', 'kill', enemyId, current + 1);
     
-    // Check quest completion
-    for (const quest of this.currentQuests) {
-      const complete = quest.objectives.every(obj => {
-        if (obj.type === 'kill') {
-          const killed = this.enemiesKilled.get(obj.targetId) || 0;
-          return killed >= obj.count;
-        }
-        return obj.current >= obj.count;
-      });
-      if (complete) {
-        this.completeQuest(quest);
+    // Update HUD quest display
+    this.updateQuestHUD();
+  }
+  
+  private updateQuestHUD(): void {
+    const activeQuests = gameSystems.quests.getActiveQuests();
+    if (activeQuests.length > 0) {
+      const quest = activeQuests[0];
+      const obj = quest.objectives[0];
+      if (this.questText && obj) {
+        this.questText.setText(`${quest.questId}\n${obj.current}/${obj.required} ${obj.target}`);
       }
+    } else if (this.questText) {
+      this.questText.setText('Quests Complete!');
     }
+  }
+  
+  private updateQuestDisplay(): void {
+    this.updateQuestHUD();
   }
   
   private startExplorationMusic(): void {
@@ -161,29 +164,11 @@ export class WorldScene extends Phaser.Scene {
   }
   
   private initQuests(): void {
-    // Start tutorial quest
-    const tutorialQuest = QUESTS['quest_tutorial_1'];
-    if (tutorialQuest && !this.currentQuests.find(q => q.id === tutorialQuest.id)) {
-      this.currentQuests.push({ ...tutorialQuest });
-    }
+    // Start tutorial quest using QuestSystem
+    gameSystems.quests.startQuest('quest_tutorial_1');
     
     // Show quest notification
-    this.showNotification(`New Quest: ${tutorialQuest?.name || 'Tutorial'}`);
-  }
-  
-  private updateQuestDisplay(): void {
-    if (!this.questText || this.currentQuests.length === 0) {
-      if (this.questText) this.questText.setText('No Active Quests');
-      return;
-    }
-    
-    const quest = this.currentQuests[0];
-    const obj = quest.objectives[0];
-    if (obj) {
-      this.questText.setText(`${quest.name}\n${obj.current}/${obj.count} ${obj.targetName}`);
-    } else {
-      this.questText.setText(quest.name);
-    }
+    this.showNotification(`New Quest: ${QUESTS['quest_tutorial_1']?.name || 'Tutorial'}`);
   }
   
   private completeQuest(quest: Quest): void {
