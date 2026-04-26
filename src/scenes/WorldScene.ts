@@ -484,42 +484,58 @@ export class WorldScene extends Phaser.Scene {
   }
   
   private createEncounterZones(): void {
-    // Create encounter zones throughout the world
-    const encounterPositions = [
-      { x: 600, y: 400 },
-      { x: 1000, y: 200 },
-      { x: 1400, y: 500 },
-      { x: 1600, y: 300 },
-      { x: 1900, y: 450 }
+    // Create encounter zones throughout the world with varied enemy types
+    const encounterTypes = [
+      { x: 600, y: 400, enemy: 'goblin', icon: '👺' },
+      { x: 1000, y: 200, enemy: 'wolf', icon: '🐺' },
+      { x: 1400, y: 500, enemy: 'skeleton', icon: '💀' },
+      { x: 1600, y: 300, enemy: 'slime', icon: '🟢' },
+      { x: 1900, y: 450, enemy: 'orc', icon: '👹' }
     ];
     
-    for (const pos of encounterPositions) {
-      // Visual indicator (red glow with enemy type label)
-      const indicator = this.add.circle(pos.x, pos.y, 35, 0xff0000, 0.15);
-      indicator.setStrokeStyle(2, 0xff4444);
+    for (const pos of encounterTypes) {
+      // Pulsing danger circle with enemy icon
+      const indicator = this.add.circle(pos.x, pos.y, 45, 0xff0000, 0.2);
+      indicator.setStrokeStyle(3, 0xff4444);
+      
+      // Inner icon
+      const icon = this.add.text(pos.x, pos.y, pos.icon, {
+        fontSize: '28px'
+      }).setOrigin(0.5);
       
       // Pulse animation
       this.tweens.add({
         targets: indicator,
-        alpha: 0.4,
-        scale: 1.2,
-        duration: 600,
+        alpha: 0.5,
+        scale: 1.4,
+        duration: 500,
         yoyo: true,
         repeat: -1
       });
       
-      // Enemy type label
-      const label = this.add.text(pos.x, pos.y - 50, `⚔️ DANGER ⚔️`, {
-        fontSize: '12px',
+      // Icon bob animation
+      this.tweens.add({
+        targets: icon,
+        y: pos.y - 8,
+        duration: 400,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      });
+      
+      // Enemy type label with background
+      const labelBg = this.add.rectangle(pos.x, pos.y - 65, 100, 25, 0x1a1a2e, 0.9);
+      labelBg.setStrokeStyle(1, 0xef4444);
+      const label = this.add.text(pos.x, pos.y - 65, `${pos.icon} ${pos.enemy.toUpperCase()}`, {
+        fontSize: '11px',
         fontFamily: 'Arial Black, sans-serif',
-        color: '#ef4444',
-        backgroundColor: '#1a1a2e',
-        padding: { x: 6, y: 3 }
+        color: '#ef4444'
       }).setOrigin(0.5);
       
-      // Encounter zone
+      // Add zone
       const zone = this.add.zone(pos.x, pos.y, 80, 80);
       (zone as any).isEncounter = true;
+      (zone as any).enemyType = pos.enemy;
       this.physics.add.existing(zone);
       this.encounterZones.push(zone);
     }
