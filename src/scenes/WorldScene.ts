@@ -59,6 +59,9 @@ export class WorldScene extends Phaser.Scene {
   // Combat trigger
   private encounterCooldown: boolean = false;
   private encounterZones: Phaser.GameObjects.Zone[] = [];
+  private safeZoneIndicator!: Phaser.GameObjects.Container;
+  private villageX: number = 80;
+  private villageY: number = 400;
   
   // Quest tracking
   private currentQuests: Quest[] = [];
@@ -529,8 +532,8 @@ export class WorldScene extends Phaser.Scene {
     const worldWidth = 20 * 128;
     
     // Village entrance marker (left side)
-    const villageX = 80;
-    const villageY = 400;
+    const villageX = this.villageX;
+    const villageY = this.villageY;
     const villagePortal = this.add.circle(villageX, villageY, 40, 0x22c55e, 0.2);
     villagePortal.setStrokeStyle(3, 0x22c55e);
     this.tweens.add({
@@ -989,6 +992,14 @@ export class WorldScene extends Phaser.Scene {
       this.triggerBossEncounter((zone as any).bossId);
     });
     
+    // Village safe zone - heal player
+    const villageZone = this.add.zone(this.villageX, this.villageY, 80, 80);
+    (villageZone as any).isSafeZone = true;
+    this.physics.add.existing(villageZone);
+    this.physics.add.overlap(this.player, villageZone, () => {
+      this.handleSafeZone();
+    });
+    
     // Add achievements button to HUD (press A)
     this.createAchievementButton();
   }
@@ -1063,6 +1074,59 @@ export class WorldScene extends Phaser.Scene {
     this.time.delayedCall(800, () => {
       this.scene.pause();
       this.scene.launch('BattleScene', { enemyId: bossId, isBoss: true });
+    });
+  }
+  
+  private handleSafeZone(): void {
+    const stats = gameSystems.getPlayerStats();
+    if (!stats) return;
+    
+    // Check if player needs healing
+    if (stats.health < stats.maxHealth) {
+      const healAmount = Math.min(stats.maxHealth - stats.health, 20);
+      if (healAmount > 0) {
+        gameSystems.player?.heal(healAmount);
+        
+        // Show heal indicator
+        this.showHealIndicator(healAmount);
+      }
+    }
+    
+    // Show "Safe Zone" indicator
+    if (!this.safeZoneIndicator) {
+      this.safeZoneIndicator = this.add.container(this.player.x, this.player.y - 80);
+      const bg = this.add.rectangle(0, 0, 120, 30, 0x22c55e, 0.9);
+      bg.setStrokeStyle(2, 0x22c55e);
+      const text = this.add.text(0, 0, '🛡️ SAFE ZONE 🛡️', {
+        fontSize: '12px',
+        fontFamily: 'Arial, sans-serif',
+        color: '#fff'
+      }).setOrigin(0.5);
+      this.safeZoneIndicator.add([bg, text]);
+    } else {
+      this.safeZoneIndicator.setPosition(this.player.x, this.player.y - 80);
+      this.safeZoneIndicator.setVisible(true);
+    }
+  }
+  
+  private showHealIndicator(amount: number): void {
+    const notification = this.add.container(this.player.x, this.player.y - 50);
+    notification.setDepth(100);
+    
+    const text = this.add.text(0, 0, `💚 +${amount} HP`, {
+      fontSize: '14px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#22c55e'
+    }).setOrigin(0.5);
+    
+    notification.add(text);
+    
+    this.tweens.add({
+      targets: notification,
+      y: notification.y - 30,
+      alpha: 0,
+      duration: 800,
+      onComplete: () => notification.destroy()
     });
   }
   
