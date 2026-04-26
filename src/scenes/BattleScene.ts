@@ -11,6 +11,7 @@ import { DeathScreen } from '../ui/DeathScreen';
 import { ParticleSystem } from '../utils/ParticleSystem';
 import { achievementSystem } from '../systems/AchievementSystem';
 import { getRandomEnemy, getEnemy, scaleEnemyStats, EnemyType } from '../data/enemies';
+import { SKILLS, getClassSkills, type Skill } from '../data/skills';
 
 export class BattleScene extends Phaser.Scene {
   private playerEntity: any = null;
@@ -45,6 +46,9 @@ export class BattleScene extends Phaser.Scene {
   private deathScreen!: DeathScreen;
   private particleSystem!: ParticleSystem;
   private isPlayerDefeated: boolean = false;
+  private skillCooldowns: Map<string, number> = new Map();
+  private availableSkills: Skill[] = [];
+  private skillButtons: Phaser.GameObjects.Container[] = [];
   
   constructor() {
     super({ key: 'BattleScene' });
@@ -108,6 +112,10 @@ export class BattleScene extends Phaser.Scene {
     
     // Initialize particle system
     this.particleSystem = new ParticleSystem(this);
+    
+    // Initialize skills
+    this.availableSkills = getClassSkills('default');
+    this.createSkillPanel(width, height);
     
     // Listen for player level up
     gameSystems.eventBus.on('entity:levelUp', (event: any) => {
@@ -283,6 +291,150 @@ export class BattleScene extends Phaser.Scene {
     });
   }
   
+  private createSkillPanel(width: number, height: number): void {
+    const panelY = height - 60;
+    
+    // Skill bar background
+    const skillBg = this.add.rectangle(width / 2, panelY, 600, 50, 0x0a0a15);
+    skillBg.setStrokeStyle(1, 0x3b82f6);
+    
+    // Create skill buttons
+    this.skillButtons = [];
+    this.availableSkills.forEach((skill, i) => {
+      const x = 150 + i * 100;
+      const btn = this.createSkillButton(x, panelY, skill);
+      this.skillButtons.push(btn);
+    });
+  }
+  
+  private createSkillButton(x: number, y: number, skill: Skill): Phaser.GameObjects.Container {
+    const container = this.add.container(x, y);
+    
+    // Skill background
+    const bg = this.add.rectangle(0, 0, 80, 40, 0x2d1b4e);
+    bg.setStrokeStyle(2, skill.manaCost > 0 ? 0x3b82f6 : 0x555);
+    
+    // Skill icon
+    const icon = this.add.text(-25, 0, skill.icon, {
+      fontSize: '20px'
+    }).setOrigin(0.5);
+    
+    // Skill name
+    const name = this.add.text(10, 0, skill.name.substring(0, 6), {
+      fontSize: '10px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#aaa'
+    }).setOrigin(0, 0.5);
+    
+    // Cooldown overlay
+    const cooldown = this.skillCooldowns.get(skill.id) || 0;
+    if (cooldown > 0) {
+      bg.setFillStyle(0x333333, 0.8);
+      const cdText = this.add.text(0, 0, `${cooldown}`, {
+        fontSize: '16px',
+        fontFamily: 'Arial Black, sans-serif',
+        color: '#ef4444'
+      }).setOrigin(0.5);
+      container.add([bg, cdText]);
+    } else {
+      container.add([bg, icon, name]);
+    }
+    
+    container.setSize(80, 40);
+    container.setInteractive({ useHandCursor: true });
+    
+    // Skill click handler
+    container.on('pointerdown', () => {
+      if (this.isPlayerTurn && cooldown === 0) {
+        this.useSkill(skill);
+      }
+    });
+    
+    container.on('pointerover', () => {
+      bg.setStrokeStyle(2, 0xfbbf24);
+    });
+    
+    container.on('pointerout', () => {
+      bg.setStrokeStyle(2, skill.manaCost > 0 ? 0x3b82f6 : 0x555);
+    });
+    
+    return container;
+  }
+  
+  private useSkill(skill: Skill): void {
+    if (!this.isPlayerTurn || this.isBattleOver) return;
+    
+    // Check mana
+    const stats = gameSystems.getPlayerStats();
+    if (stats && stats.mana < skill.manaCost) {
+      this.addBattleLog('Not enough mana!');
+      return;
+    }
+    
+    this.isPlayerTurn = false;
+    
+    // Apply skill effect
+    if (skill.type === 'attack' && skill.damage) {
+      const baseDamage = stats?.attack || 10;
+      const damage = Math.floor(baseDamage * skill.damage);
+      this.enemyHp = Math.max(0, this.enemyHp - damage);
+      this.addBattleLog(`${skill.name}! -${damage} HP`);
+      this.showDamageNumber(damage, 900);
+      
+      // Decrease enemy HP bar
+      const enemyPercent = this.enemyHp / this.enemyMaxHp;
+      if (this.uiElements?.enemyHp) {
+        (this.uiElements.enemyHp as Phaser.GameObjects.Rectangle).setScale(enemyPercent, 1);
+      }
+      
+    } else if (skill.type === 'heal' && skill.healAmount) {
+      this.playerHp = Math.min(this.playerMaxHp, this.playerHp + skill.healAmount);
+      this.addBattleLog(`${skill.name}! +${skill.healAmount} HP`);
+      this.particleSystem.showHealNumber(300, 280, skill.healAmount);
+      
+      // Update player HP bar
+      const playerPercent = this.playerHp / this.playerMaxHp;
+      if (this.uiElements?.playerHp) {
+        (this.uiElements.playerHp as Phaser.GameObjects.Rectangle).setScale(playerPercent, 1);
+      }
+      
+    } else if (skill.type === 'defense' && skill.defenseBonus) {
+      this.addBattleLog(`${skill.name}! Defense up!`);
+      // Defense would be applied during enemy turn
+    }
+    
+    // Set cooldown
+    if (skill.cooldown > 0) {
+      this.skillCooldowns.set(skill.id, skill.cooldown);
+    }
+    
+    // Disable all skill buttons
+    this.skillButtons.forEach(btn => btn.removeInteractive());
+    
+    // Check battle end
+    this.checkBattleEnd();
+  }
+  
+  private updateSkillCooldowns(): void {
+    // Reduce cooldowns at start of player turn
+    for (const [skillId, cooldown] of this.skillCooldowns) {
+      if (cooldown > 0) {
+        this.skillCooldowns.set(skillId, cooldown - 1);
+      }
+    }
+    
+    // Re-enable skill buttons if player turn
+    if (this.isPlayerTurn) {
+      this.skillButtons.forEach((btn, i) => {
+        const skill = this.availableSkills[i];
+        const cooldown = this.skillCooldowns.get(skill.id) || 0;
+        if (cooldown === 0) {
+          btn.setInteractive({ useHandCursor: true });
+        }
+      });
+    }
+  }
+  
   private createButton(x: number, y: number, text: string, action: () => void): Phaser.GameObjects.Container {
     const container = this.add.container(x, y);
     
@@ -353,6 +505,9 @@ export class BattleScene extends Phaser.Scene {
   private playerAttack(): void {
     if (!this.isPlayerTurn || this.isBattleOver) return;
     
+    // Update skill cooldowns at start of turn
+    this.updateSkillCooldowns();
+    
     // Play attack sound
     audioManager.playAttack();
     
@@ -379,6 +534,9 @@ export class BattleScene extends Phaser.Scene {
   
   private playerDefend(): void {
     if (!this.isPlayerTurn || this.isBattleOver) return;
+    
+    // Update skill cooldowns
+    this.updateSkillCooldowns();
     
     audioManager.playDefend();
     this.addBattleLog('Hero takes a defensive stance!');

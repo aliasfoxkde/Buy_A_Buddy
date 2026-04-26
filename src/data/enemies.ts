@@ -23,6 +23,7 @@ export interface EnemyType {
   level?: number;
   gold?: { min: number; max: number };
   experience?: number;
+  range?: boolean; // For ranged enemies
 }
 
 export const ENEMIES: Record<string, EnemyType> = {
@@ -124,6 +125,96 @@ export const ENEMIES: Record<string, EnemyType> = {
     level: 8,
     gold: { min: 150, max: 250 },
     experience: 300
+  },
+  // Flying enemies
+  bat: {
+    id: 'bat',
+    name: 'Cave Bat',
+    spriteIndex: 4,
+    maxHp: 30,
+    damage: 12,
+    defense: 2,
+    xpReward: 20,
+    goldReward: 12,
+    difficulty: 'easy',
+    attack: 12,
+    speed: 10,
+    element: 'air',
+    level: 1,
+    gold: { min: 8, max: 16 },
+    experience: 20
+  },
+  hawk: {
+    id: 'hawk',
+    name: 'Hunting Hawk',
+    spriteIndex: 5,
+    maxHp: 45,
+    damage: 16,
+    defense: 4,
+    xpReward: 45,
+    goldReward: 25,
+    difficulty: 'medium',
+    attack: 16,
+    speed: 12,
+    element: 'air',
+    level: 3,
+    gold: { min: 15, max: 35 },
+    experience: 45
+  },
+  // Ranged enemies
+  goblin_archer: {
+    id: 'goblin_archer',
+    name: 'Goblin Archer',
+    spriteIndex: 7,
+    maxHp: 50,
+    damage: 20,
+    defense: 5,
+    xpReward: 55,
+    goldReward: 35,
+    difficulty: 'medium',
+    attack: 20,
+    speed: 6,
+    range: true,
+    element: 'earth',
+    level: 4,
+    gold: { min: 20, max: 50 },
+    experience: 55
+  },
+  // Elite enemies
+  goblin_elite: {
+    id: 'goblin_elite',
+    name: 'Goblin Elite',
+    spriteIndex: 6,
+    maxHp: 120,
+    damage: 22,
+    defense: 10,
+    xpReward: 100,
+    goldReward: 75,
+    difficulty: 'hard',
+    attack: 22,
+    speed: 5,
+    critChance: 0.15,
+    element: 'earth',
+    level: 5,
+    gold: { min: 50, max: 100 },
+    experience: 100
+  },
+  skeleton_elite: {
+    id: 'skeleton_elite',
+    name: 'Skeleton Knight',
+    spriteIndex: 3,
+    maxHp: 150,
+    damage: 25,
+    defense: 15,
+    xpReward: 120,
+    goldReward: 80,
+    difficulty: 'hard',
+    attack: 25,
+    speed: 3,
+    element: 'undead',
+    level: 6,
+    gold: { min: 60, max: 100 },
+    experience: 120
   }
 };
 
