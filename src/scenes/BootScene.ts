@@ -33,6 +33,9 @@ export class BootScene extends Phaser.Scene {
     // Initialize audio (must be done on user interaction)
     this.initAudio();
     
+    // Load saved settings and apply to audio
+    this.loadAudioSettings();
+    
     // Initialize game systems
     this.initGameSystems();
     
@@ -40,6 +43,23 @@ export class BootScene extends Phaser.Scene {
     this.time.delayedCall(500, () => {
       this.scene.start('MainMenuScene');
     });
+  }
+  
+  private loadAudioSettings(): void {
+    // Load and apply saved settings from localStorage
+    const settings = gameSystems.storage.loadSettings() as any;
+    if (settings) {
+      if (settings.masterVolume !== undefined) {
+        audioManager.setMasterVolume(settings.masterVolume);
+      }
+      if (settings.musicVolume !== undefined) {
+        audioManager.setMusicVolume(settings.musicVolume);
+      }
+      if (settings.sfxVolume !== undefined) {
+        audioManager.setSFXVolume(settings.sfxVolume);
+      }
+      console.log('Audio settings loaded:', settings);
+    }
   }
   
   private async initAudio(): Promise<void> {
