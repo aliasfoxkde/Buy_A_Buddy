@@ -4,6 +4,7 @@
 
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
+import { getDialogue, getNPCDialogue } from '../data/dialogue';
 
 interface DialogueOption {
   text: string;
@@ -57,78 +58,49 @@ export class DialogueUI {
   private loadDialogue(npcId: string): void {
     this.dialogueData.clear();
     
-    // Simple dialogues for NPCs
-    const dialogues: Record<string, Record<string, DialogueNode>> = {
-      'npc_mentor': {
-        'start': {
-          speaker: 'Mentor',
-          text: 'Welcome, young adventurer! Your journey has just begun. There are many challenges ahead.',
-          options: [
-            { text: 'What should I do first?', nextNode: 'advice' },
-            { text: 'Goodbye.', action: 'end' }
-          ]
-        },
-        'advice': {
-          speaker: 'Mentor',
-          text: 'Visit the village shops to gather supplies, then venture into the forest.',
-          options: [
-            { text: 'Thanks!', action: 'end' }
-          ]
-        }
-      },
-      'npc_shopkeeper': {
-        'start': {
-          speaker: 'Shopkeeper',
-          text: 'Welcome to my shop! Take a look at my wares.',
-          options: [
-            { text: 'Open Shop', action: 'open_shop' },
-            { text: 'Goodbye.', action: 'end' }
-          ]
-        }
-      },
-      'npc_blacksmith': {
-        'start': {
-          speaker: 'Blacksmith',
-          text: 'Need a weapon? My hammers are ready!',
-          options: [
-            { text: 'Show weapons.', action: 'open_weapon_shop' },
-            { text: 'Later.', action: 'end' }
-          ]
-        }
-      },
-      'npc_guard': {
-        'start': {
-          speaker: 'Guard',
-          text: 'The road ahead is dangerous. Be prepared!',
-          options: [
-            { text: 'I will be careful.', action: 'end' }
-          ]
-        }
-      },
-      'npc_innkeeper': {
-        'start': {
-          speaker: 'Innkeeper',
-          text: 'Rest your weary bones. A night here will restore your health.',
-          options: [
-            { text: 'I will rest.', action: 'rest' },
-            { text: 'Not now.', action: 'end' }
-          ]
-        }
-      }
-    };
+    // Get dialogues from data module
+    const npcDialogues = getNPCDialogue(npcId.replace(/\d+$/, ''));
     
-    const npcDialogue = dialogues[npcId];
-    if (npcDialogue) {
-      for (const [nodeId, node] of Object.entries(npcDialogue)) {
-        this.dialogueData.set(nodeId, node);
-      }
-    } else {
-      // Default dialogue
+    if (npcDialogues.length === 0) {
+      // Default dialogue if no data found
       this.dialogueData.set('start', {
-        speaker: '???',
-        text: '...',
+        speaker: npcId,
+        text: 'Hello, traveler!',
         options: [{ text: 'Goodbye.', action: 'end' }]
       });
+      return;
+    }
+    
+    // Convert dialogue data to UI format
+    const dialogue = npcDialogues[0];
+    const greetingLines = dialogue.lines.map(l => l.text).join(' ');
+    
+    this.dialogueData.set('start', {
+      speaker: dialogue.lines[0]?.speaker || npcId,
+      text: greetingLines,
+      options: dialogue.branches ? 
+        Object.entries(dialogue.branches).map(([key, branch]) => ({
+          text: branch.text,
+          nextNode: branch.next || 'end'
+        })) :
+        [{ text: 'Goodbye.', action: 'end' }]
+    });
+    
+    // Add branch dialogues
+    if (dialogue.branches) {
+      for (const [key, branch] of Object.entries(dialogue.branches)) {
+        if (branch.next) {
+          const nextDialogue = getDialogue(branch.next);
+          if (nextDialogue) {
+            const nextLines = nextDialogue.lines.map(l => l.text).join(' ');
+            this.dialogueData.set(branch.next, {
+              speaker: nextDialogue.lines[0]?.speaker || 'NPC',
+              text: nextLines,
+              options: [{ text: 'Goodbye.', action: 'end' }]
+            });
+          }
+        }
+      }
     }
   }
   
