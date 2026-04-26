@@ -1265,4 +1265,31 @@ export class WorldScene extends Phaser.Scene {
     // FPS counter (built into Phaser)
     // Could add coordinates display
   }
+  
+  shutdown(): void {
+    // Clean up event listeners
+    this.input.keyboard?.off('keydown');
+    
+    // Destroy UI elements if they exist
+    if (this.mobileControls) this.mobileControls.destroy();
+    if (this.minimap) this.minimap.destroy();
+    if (this.dialogueUI) this.dialogueUI.destroy();
+    if (this.healthBar) this.healthBar.destroy();
+    if (this.manaBar) this.manaBar.destroy();
+    if (this.expBar) this.expBar.destroy();
+    if (this.goldText) this.goldText.destroy();
+    if (this.levelText) this.levelText.destroy();
+    if (this.interactionPrompt) this.interactionPrompt.destroy();
+    if (this.buddyNameText) this.buddyNameText.destroy();
+    
+    // Clear Map collections
+    this.npcs.clear();
+    this.worldItems.forEach(item => item.destroy());
+    this.worldItems = [];
+    this.encounterZones.forEach(zone => zone.destroy());
+    this.encounterZones = [];
+    this.enemiesKilled.clear();
+    
+    console.log('WorldScene shutdown complete');
+  }
 }

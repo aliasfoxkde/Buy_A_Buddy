@@ -300,4 +300,17 @@ export class DialogueUI {
   public update(): void {
     // Update loop if needed
   }
+  
+  public destroy(): void {
+    this.isActive = false;
+    this.optionButtons.forEach(btn => btn.destroy());
+    this.optionButtons = [];
+    if (this.uiContainer) {
+      this.uiContainer.destroy();
+    }
+  }
+  
+  public isDialogueActive(): boolean {
+    return this.isActive;
+  }
 }

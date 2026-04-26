@@ -887,4 +887,32 @@ export class BattleScene extends Phaser.Scene {
       this.scene.resume('WorldScene');
     });
   }
+  
+  shutdown(): void {
+    // Clear all timers
+    this.time.removeAllEvents();
+    
+    // Destroy UI elements if they exist
+    if (this.uiElements) {
+      this.uiElements.playerHp?.destroy();
+      this.uiElements.playerHpText?.destroy();
+      this.uiElements.enemyHp?.destroy();
+      this.uiElements.enemyHpText?.destroy();
+      this.uiElements.playerMp?.destroy();
+      this.uiElements.playerMpText?.destroy();
+      this.uiElements.enemyName?.destroy();
+      this.uiElements.turnIndicator?.destroy();
+      this.uiElements.logText?.destroy();
+      this.uiElements.actionButtons.forEach(btn => btn.destroy());
+      this.uiElements = null;
+    }
+    
+    this.skillButtons.forEach(btn => btn.destroy());
+    this.skillButtons = [];
+    
+    // Clear cooldowns
+    this.skillCooldowns.clear();
+    
+    console.log('BattleScene shutdown complete');
+  }
 }
