@@ -234,6 +234,9 @@ export class WorldScene extends Phaser.Scene {
     // Show completion
     this.showNotification(`Quest Complete: ${quest.name}!`);
     
+    // Track for progress stats
+    gameSystems.trackQuestComplete(quest.id);
+    
     // Track for achievements
     achievementSystem.onQuestComplete();
     

@@ -128,6 +128,7 @@ export class BattleScene extends Phaser.Scene {
           defense: 1
         });
         audioManager.playLevelUp();
+        gameSystems.updateHighestLevel(stats.level);
       }
     });
     
@@ -709,6 +710,11 @@ export class BattleScene extends Phaser.Scene {
         enemyName: this.currentEnemy?.name
       });
       
+      // Track for progress stats
+      if (this.currentEnemy) {
+        gameSystems.trackKill(this.currentEnemy.id);
+      }
+      
       // Track for achievements
       if (this.currentEnemy) {
         achievementSystem.onEnemyDefeated(this.currentEnemy.id);
@@ -851,6 +857,7 @@ export class BattleScene extends Phaser.Scene {
       
       // Add gold and experience
       gameSystems.inventory.addGold(goldGain);
+      gameSystems.addGold(goldGain);
       if (gameSystems.player) {
         gameSystems.player.gainExperience(expGain);
       }

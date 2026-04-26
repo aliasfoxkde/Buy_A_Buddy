@@ -303,6 +303,77 @@ export class GameSystems {
     };
   }
   
+  // ===== Progress Tracking =====
+  
+  trackKill(enemyId: string): void {
+    try {
+      const progress = this.getProgressData();
+      progress.enemiesDefeated = (progress.enemiesDefeated || 0) + 1;
+      this.saveProgressData(progress);
+    } catch (e) {
+      console.warn('Failed to track kill:', e);
+    }
+  }
+  
+  trackQuestComplete(_questId: string): void {
+    try {
+      const progress = this.getProgressData();
+      progress.questsCompleted = (progress.questsCompleted || 0) + 1;
+      this.saveProgressData(progress);
+    } catch (e) {
+      console.warn('Failed to track quest:', e);
+    }
+  }
+  
+  updateHighestLevel(level: number): void {
+    try {
+      const progress = this.getProgressData();
+      if (level > (progress.highestLevel || 1)) {
+        progress.highestLevel = level;
+        this.saveProgressData(progress);
+      }
+    } catch (e) {
+      console.warn('Failed to update highest level:', e);
+    }
+  }
+  
+  addGold(amount: number): void {
+    try {
+      const progress = this.getProgressData();
+      progress.totalGoldEarned = (progress.totalGoldEarned || 0) + amount;
+      this.saveProgressData(progress);
+    } catch (e) {
+      console.warn('Failed to track gold:', e);
+    }
+  }
+  
+  private getProgressData(): any {
+    try {
+      const saved = localStorage.getItem('buyabuddy_progress');
+      return saved ? JSON.parse(saved) : {
+        enemiesDefeated: 0,
+        questsCompleted: 0,
+        highestLevel: 1,
+        totalGoldEarned: 0,
+        totalDamageDealt: 0,
+        totalHealingDone: 0
+      };
+    } catch {
+      return {
+        enemiesDefeated: 0,
+        questsCompleted: 0,
+        highestLevel: 1,
+        totalGoldEarned: 0,
+        totalDamageDealt: 0,
+        totalHealingDone: 0
+      };
+    }
+  }
+  
+  private saveProgressData(data: any): void {
+    localStorage.setItem('buyabuddy_progress', JSON.stringify(data));
+  }
+  
   /**
    * Get current zone info
    */

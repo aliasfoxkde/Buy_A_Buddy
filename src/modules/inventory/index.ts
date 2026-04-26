@@ -3,6 +3,7 @@
  */
 
 import { EventBus, InventoryData, InventorySlot, generateId } from '../../core';
+import { calculateSetBonuses } from '../../data/equipmentSets';
 
 export type ItemType = 
   | 'weapon' 
@@ -545,10 +546,25 @@ export class InventorySystem {
   getTotalStats(): ItemStats {
     const stats: ItemStats = {};
     
+    // Add individual equipment stats
     for (const slot of this.equipment) {
       if (slot.item?.stats) {
         Object.assign(stats, slot.item.stats);
       }
+    }
+    
+    // Add set bonuses
+    const equippedIds = this.getEquippedItemIds();
+    const activeBonuses = calculateSetBonuses(equippedIds);
+    
+    for (const { bonus } of activeBonuses) {
+      if (bonus.stats.attack) stats.attack = (stats.attack || 0) + bonus.stats.attack;
+      if (bonus.stats.defense) stats.defense = (stats.defense || 0) + bonus.stats.defense;
+      if (bonus.stats.health) stats.health = (stats.health || 0) + bonus.stats.health;
+      if (bonus.stats.mana) stats.mana = (stats.mana || 0) + bonus.stats.mana;
+      if (bonus.stats.speed) stats.speed = (stats.speed || 0) + bonus.stats.speed;
+      if (bonus.stats.critChance) stats.criticalChance = (stats.criticalChance || 0) + bonus.stats.critChance;
+      if (bonus.stats.critMultiplier) stats.criticalDamage = (stats.criticalDamage || 0) + bonus.stats.critMultiplier;
     }
     
     return stats;
