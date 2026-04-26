@@ -11,6 +11,8 @@ import { VisualEffects } from '../utils/VisualEffects';
 import { MobileControls } from '../ui/MobileControls';
 import { QUESTS, type Quest } from '../data/quests';
 import { TutorialSystem } from '../systems/TutorialSystem';
+import { achievementSystem } from '../systems/AchievementSystem';
+import { Minimap } from '../ui/Minimap';
 import { getDialogue } from '../data/dialogue';
 
 export class WorldScene extends Phaser.Scene {
@@ -48,6 +50,7 @@ export class WorldScene extends Phaser.Scene {
   private vfx!: VisualEffects;
   private mobileControls!: MobileControls;
   private tutorial!: TutorialSystem;
+  private minimap!: Minimap;
   
   // Combat trigger
   private encounterCooldown: boolean = false;
@@ -96,6 +99,10 @@ export class WorldScene extends Phaser.Scene {
     
     // Initialize tutorial system
     this.tutorial = new TutorialSystem(this);
+    
+    // Initialize minimap (top-right corner)
+    this.minimap = new Minimap(this, 20 * 128, 15 * 128);
+    this.minimap.create(width - 100, 80);
     
     // Create debug info
     this.createDebugInfo();
@@ -173,6 +180,11 @@ export class WorldScene extends Phaser.Scene {
     // Update buddy following
     this.updateBuddies();
     
+    // Update minimap
+    if (this.minimap && this.player) {
+      this.minimap.updatePosition(this.player.x, this.player.y);
+    }
+    
     // Update UI
     this.updateUI();
     
@@ -192,8 +204,14 @@ export class WorldScene extends Phaser.Scene {
   }
   
   private completeQuest(quest: Quest): void {
+    // Play quest complete sound
+    audioManager.playQuestComplete();
+    
     // Show completion
     this.showNotification(`Quest Complete: ${quest.name}!`);
+    
+    // Track for achievements
+    achievementSystem.onQuestComplete();
     
     // Apply rewards
     if (quest.reward.gold) {
@@ -730,6 +748,8 @@ export class WorldScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-Q', () => this.openQuests());
     
     // ESC to open menu
+    this.input.keyboard?.on('keydown-M', () => this.minimap.toggle());
+    
     this.input.keyboard?.on('keydown-ESC', () => this.openMenu());
     
     // Menu button click

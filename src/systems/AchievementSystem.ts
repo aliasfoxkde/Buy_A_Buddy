@@ -3,6 +3,7 @@
  */
 
 import { gameSystems } from '../systems/GameSystems';
+import { audioManager } from '../audio/AudioManager';
 
 export type AchievementId = 
   | 'first_blood'
@@ -139,6 +140,9 @@ export class AchievementSystem {
     achievement.unlocked = true;
     achievement.unlockedAt = Date.now();
     this.saveProgress();
+    
+    // Play achievement sound
+    audioManager.playAchievement();
     
     // Notify listeners
     this.listeners.forEach(callback => callback(achievement));

@@ -23,7 +23,9 @@ export type SoundType =
   | 'door'
   | 'step'
   | 'swing'
-  | 'potion';
+  | 'potion'
+  | 'achievement'
+  | 'quest_complete';
 
 export type MusicType =
   | 'menu'
@@ -86,7 +88,9 @@ class AudioManager {
     door: { frequency: 200, type: 'square', duration: 0.3, attack: 0.05, decay: 0.25, volume: 0.1 },
     step: { frequency: 100, type: 'triangle', duration: 0.05, attack: 0.01, decay: 0.04, volume: 0.05 },
     swing: { frequency: 250, type: 'sawtooth', duration: 0.12, attack: 0.01, decay: 0.11, volume: 0.18 },
-    potion: { frequency: 900, type: 'sine', duration: 0.2, attack: 0.02, decay: 0.18, volume: 0.15, pitchVariation: 300 }
+    potion: { frequency: 900, type: 'sine', duration: 0.2, attack: 0.02, decay: 0.18, volume: 0.15, pitchVariation: 300 },
+    achievement: { frequency: 784, type: 'sine', duration: 0.6, attack: 0.02, decay: 0.58, volume: 0.18, pitchVariation: 392},
+    quest_complete: { frequency: 659, type: 'triangle', duration: 0.5, attack: 0.02, decay: 0.48, volume: 0.15, pitchVariation: 165 }
   };
   
   // Music tracks (longer melodies with more variety)
@@ -372,6 +376,8 @@ class AudioManager {
   playDefeat(): void { this.playSound('defeat'); }
   playDefend(): void { this.playSound('defend'); }
   playLevelUp(): void { this.playSound('levelup'); }
+  playAchievement(): void { this.playSound('achievement'); }
+  playQuestComplete(): void { this.playSound('quest_complete'); }
   playPotion(): void { this.playSound('potion'); }
   
   playMenuMusic(): void { this.playMusic('menu'); }
