@@ -398,6 +398,291 @@ export const ARMOR: Record<string, EquipmentDefinition> = {
     sellPrice: 800,
     level: 18,
     description: 'Forged from dragon scales.'
+  },
+  
+  // ============ SET BONUS EQUIPMENT ============
+  // Steel Warrior Set
+  armor_steel_chest: {
+    id: 'armor_steel_chest',
+    name: 'Steel Cuirass',
+    type: 'armor',
+    slot: 'chest',
+    defense: 18,
+    attack: 5,
+    rarity: 'uncommon',
+    buyPrice: 200,
+    sellPrice: 100,
+    level: 8,
+    description: 'Part of the Steel Warrior set.'
+  },
+  
+  armor_steel_helmet: {
+    id: 'armor_steel_helmet',
+    name: 'Steel Helm',
+    type: 'armor',
+    slot: 'head',
+    defense: 12,
+    attack: 3,
+    rarity: 'uncommon',
+    buyPrice: 150,
+    sellPrice: 75,
+    level: 8,
+    description: 'Part of the Steel Warrior set.'
+  },
+  
+  // Iron Knight Set
+  armor_iron_chest: {
+    id: 'armor_iron_chest',
+    name: 'Iron Breastplate',
+    type: 'armor',
+    slot: 'chest',
+    defense: 15,
+    health: 20,
+    rarity: 'uncommon',
+    buyPrice: 180,
+    sellPrice: 90,
+    level: 6,
+    description: 'Part of the Iron Knight set.'
+  },
+  
+  armor_iron_shield: {
+    id: 'armor_iron_shield',
+    name: 'Iron Buckler',
+    type: 'armor',
+    slot: 'hands',
+    defense: 10,
+    health: 15,
+    rarity: 'uncommon',
+    buyPrice: 120,
+    sellPrice: 60,
+    level: 6,
+    description: 'Part of the Iron Knight set.'
+  },
+  
+  // Arcane Mage Set
+  weapon_arcane_staff: {
+    id: 'weapon_arcane_staff',
+    name: 'Arcane Staff',
+    type: 'weapon',
+    slot: 'weapon',
+    attack: 8,
+    mana: 50,
+    critChance: 0.1,
+    rarity: 'uncommon',
+    buyPrice: 300,
+    sellPrice: 150,
+    level: 8,
+    description: 'Channels arcane energy. Part of the Arcane Mage set.'
+  },
+  
+  armor_arcane_robes: {
+    id: 'armor_arcane_robes',
+    name: 'Arcane Vestments',
+    type: 'armor',
+    slot: 'chest',
+    defense: 3,
+    mana: 40,
+    critChance: 0.05,
+    rarity: 'uncommon',
+    buyPrice: 250,
+    sellPrice: 125,
+    level: 8,
+    description: 'Part of the Arcane Mage set.'
+  },
+  
+  accessory_arcane_amulet: {
+    id: 'accessory_arcane_amulet',
+    name: 'Arcane Pendant',
+    type: 'accessory',
+    slot: 'accessory2',
+    mana: 30,
+    critChance: 0.05,
+    rarity: 'uncommon',
+    buyPrice: 200,
+    sellPrice: 100,
+    level: 8,
+    description: 'Amplifies magic. Part of the Arcane Mage set.'
+  },
+  
+  // Forest Ranger Set
+  weapon_longbow: {
+    id: 'weapon_longbow',
+    name: 'Hunter\'s Bow',
+    type: 'weapon',
+    slot: 'weapon',
+    attack: 12,
+    speed: 5,
+    critChance: 0.12,
+    rarity: 'uncommon',
+    buyPrice: 280,
+    sellPrice: 140,
+    level: 7,
+    description: 'Swift and accurate. Part of the Forest Ranger set.'
+  },
+  
+  armor_leather_chest: {
+    id: 'armor_leather_chest',
+    name: 'Ranger\'s Tunic',
+    type: 'armor',
+    slot: 'chest',
+    defense: 8,
+    speed: 3,
+    rarity: 'uncommon',
+    buyPrice: 150,
+    sellPrice: 75,
+    level: 5,
+    description: 'Light and flexible. Part of the Forest Ranger set.'
+  },
+  
+  accessory_ranger_ring: {
+    id: 'accessory_ranger_ring',
+    name: 'Tracker\'s Band',
+    type: 'accessory',
+    slot: 'accessory1',
+    speed: 5,
+    critChance: 0.05,
+    rarity: 'uncommon',
+    buyPrice: 180,
+    sellPrice: 90,
+    level: 7,
+    description: 'Part of the Forest Ranger set.'
+  },
+  
+  // Dragon Slayer Set
+  weapon_dragon_spear: {
+    id: 'weapon_dragon_spear',
+    name: 'Dragonspear',
+    type: 'weapon',
+    slot: 'weapon',
+    attack: 35,
+    critChance: 0.15,
+    critMultiplier: 0.3,
+    rarity: 'epic',
+    buyPrice: 0,
+    sellPrice: 1000,
+    level: 18,
+    description: 'Forged to slay dragons. Part of the Dragon Slayer set.'
+  },
+  
+  armor_dragon_helm: {
+    id: 'armor_dragon_helm',
+    name: 'Dragon Crown',
+    type: 'armor',
+    slot: 'head',
+    defense: 25,
+    health: 50,
+    element: 'fire',
+    rarity: 'epic',
+    buyPrice: 0,
+    sellPrice: 600,
+    level: 18,
+    description: 'Part of the Dragon Slayer set.'
+  },
+  
+  accessory_dragon_necklace: {
+    id: 'accessory_dragon_necklace',
+    name: 'Wyrm Tooth Necklace',
+    type: 'accessory',
+    slot: 'accessory2',
+    attack: 15,
+    critChance: 0.1,
+    health: 30,
+    rarity: 'epic',
+    buyPrice: 0,
+    sellPrice: 800,
+    level: 18,
+    description: 'Trophy from a dragon. Part of the Dragon Slayer set.'
+  },
+  
+  // Nature Walker Set
+  weapon_nature_staff: {
+    id: 'weapon_nature_staff',
+    name: 'Living Branch',
+    type: 'weapon',
+    slot: 'weapon',
+    attack: 6,
+    mana: 40,
+    health: 30,
+    rarity: 'uncommon',
+    buyPrice: 220,
+    sellPrice: 110,
+    level: 7,
+    description: 'Grows from an ancient tree. Part of the Nature Walker set.'
+  },
+  
+  armor_nature_vest: {
+    id: 'armor_nature_vest',
+    name: 'Vineweave',
+    type: 'armor',
+    slot: 'chest',
+    defense: 10,
+    health: 35,
+    rarity: 'uncommon',
+    buyPrice: 180,
+    sellPrice: 90,
+    level: 7,
+    description: 'Woven from living vines. Part of the Nature Walker set.'
+  },
+  
+  accessory_nature_ring: {
+    id: 'accessory_nature_ring',
+    name: 'Acorn Ring',
+    type: 'accessory',
+    slot: 'accessory1',
+    health: 20,
+    defense: 5,
+    rarity: 'uncommon',
+    buyPrice: 150,
+    sellPrice: 75,
+    level: 7,
+    description: 'Blessed by forest spirits. Part of the Nature Walker set.'
+  },
+  
+  // Shadow Assassin Set
+  weapon_shadow_dagger: {
+    id: 'weapon_shadow_dagger',
+    name: 'Shadow Blade',
+    type: 'weapon',
+    slot: 'weapon',
+    attack: 15,
+    speed: 10,
+    critChance: 0.18,
+    critMultiplier: 0.35,
+    rarity: 'rare',
+    buyPrice: 0,
+    sellPrice: 500,
+    level: 12,
+    description: 'Appears from shadows. Part of the Shadow Assassin set.'
+  },
+  
+  armor_shadow_cloak: {
+    id: 'armor_shadow_cloak',
+    name: 'Umbral Shroud',
+    type: 'armor',
+    slot: 'chest',
+    defense: 5,
+    speed: 8,
+    critChance: 0.08,
+    rarity: 'rare',
+    buyPrice: 0,
+    sellPrice: 400,
+    level: 12,
+    description: 'Woven from darkness. Part of the Shadow Assassin set.'
+  },
+  
+  accessory_shadow_ring: {
+    id: 'accessory_shadow_ring',
+    name: 'Night\'s Eye',
+    type: 'accessory',
+    slot: 'accessory1',
+    speed: 7,
+    critChance: 0.1,
+    critMultiplier: 0.15,
+    rarity: 'rare',
+    buyPrice: 0,
+    sellPrice: 350,
+    level: 12,
+    description: 'See in total darkness. Part of the Shadow Assassin set.'
   }
 };
 
