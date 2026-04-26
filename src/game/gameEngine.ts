@@ -10,7 +10,6 @@ import { CharacterSelectScene } from '../scenes/CharacterSelectScene';
 import { BattleScene } from '../scenes/BattleScene';
 import { InventoryScene } from '../scenes/InventoryScene';
 import { QuestScene } from '../scenes/QuestScene';
-import { CraftingScene } from '../scenes/CraftingScene';
 import { ShopScene } from '../scenes/ShopScene';
 import { MenuScene } from '../scenes/MenuScene';
 import { SettingsScene } from '../scenes/SettingsScene';
@@ -62,7 +61,6 @@ export function createGameConfig(): GameConfig {
       BattleScene,
       InventoryScene,
       QuestScene,
-      CraftingScene,
       ShopScene,
       MenuScene,
       SettingsScene,

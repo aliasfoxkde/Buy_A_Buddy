@@ -671,6 +671,42 @@ export class WorldScene extends Phaser.Scene {
     
     // Quest key
     this.input.keyboard?.on('keydown-Q', () => this.openQuests());
+    
+    // ESC to open menu
+    this.input.keyboard?.on('keydown-ESC', () => this.openMenu());
+    
+    // Menu button click
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      // Bottom-left corner click opens menu
+      if (pointer.x < 80 && pointer.y > this.scale.height - 80) {
+        this.openMenu();
+      }
+    });
+  }
+  
+  private openMenu(): void {
+    this.scene.pause();
+    this.scene.launch('MenuScene');
+  }
+  
+  private openInventory(): void {
+    this.scene.pause();
+    this.scene.launch('InventoryScene');
+  }
+  
+  private openQuests(): void {
+    this.scene.pause();
+    this.scene.launch('QuestScene');
+  }
+  
+  private openShop(): void {
+    this.scene.pause();
+    this.scene.launch('ShopScene');
+  }
+  
+  private openSettings(): void {
+    this.scene.pause();
+    this.scene.launch('SettingsScene');
   }
   
   private setupCollisions(): void {
@@ -876,16 +912,6 @@ export class WorldScene extends Phaser.Scene {
   private useSkill(slotIndex: number): void {
     // Use skill from slot
     console.log(`Using skill in slot ${slotIndex}`);
-  }
-  
-  private openInventory(): void {
-    this.scene.pause();
-    this.scene.launch('InventoryScene');
-  }
-  
-  private openQuests(): void {
-    this.scene.pause();
-    this.scene.launch('QuestScene');
   }
   
   private createDebugInfo(): void {
