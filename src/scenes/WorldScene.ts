@@ -671,6 +671,9 @@ export class WorldScene extends Phaser.Scene {
     // Quest display (top right)
     this.createQuestDisplay();
     
+    // Controls help (bottom-left)
+    this.createControlsHelp();
+    
     // Add to container
     hudContainer.add([healthBg, this.healthBar, healthText, manaBg, this.manaBar, manaText, expBg, this.expBar, this.levelText, this.goldText]);
     
@@ -679,6 +682,8 @@ export class WorldScene extends Phaser.Scene {
   }
   
   private questText!: Phaser.GameObjects.Text;
+  private questProgressText!: Phaser.GameObjects.Text;
+  private isMobile: boolean = false;
   
   private createQuestDisplay(): void {
     const { width } = this.scale;
@@ -714,7 +719,28 @@ export class WorldScene extends Phaser.Scene {
     this.updateQuestDisplay();
   }
   
-  private questProgressText!: Phaser.GameObjects.Text;
+  private createControlsHelp(): void {
+    const { height } = this.scale;
+    
+    // Controls panel (bottom-left)
+    const controlsBg = this.add.rectangle(100, height - 30, 180, 40, 0x000000, 0.6);
+    controlsBg.setStrokeStyle(1, 0x555555);
+    
+    // Controls text
+    const controlsText = this.add.text(20, height - 30, 
+      'WASD/Arrows: Move | E: Interact | M: Map | I: Inventory',
+      {
+        fontSize: '9px',
+        fontFamily: 'Arial, sans-serif',
+        color: '#888888'
+      }
+    ).setOrigin(0, 0.5);
+    
+    // Mobile hint
+    if (this.isMobile) {
+      controlsText.setText('Joystick: Move | Tap: Interact | Bottom: Skills');
+    }
+  }
   
   private updateQuestDisplay(): void {
     const activeQuests = gameSystems.quests.getActiveQuests();

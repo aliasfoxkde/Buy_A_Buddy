@@ -788,6 +788,23 @@ export class BattleScene extends Phaser.Scene {
       // Play victory sound
       audioManager.playVictory();
       
+      // Victory text overlay
+      const victoryText = this.add.text(640, 200, 'VICTORY!', {
+        fontSize: '64px',
+        fontFamily: 'Arial Black, sans-serif',
+        color: '#fbbf24',
+        stroke: '#000',
+        strokeThickness: 6
+      }).setOrigin(0.5).setAlpha(0).setDepth(200);
+      
+      this.tweens.add({
+        targets: victoryText,
+        alpha: 1,
+        scale: 1.2,
+        duration: 500,
+        ease: 'Back.easeOut'
+      });
+      
       // Victory particles using particle system
       this.particleSystem.victoryBurst(640, 300);
       
