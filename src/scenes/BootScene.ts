@@ -11,6 +11,19 @@ export class BootScene extends Phaser.Scene {
   private loadingText!: Phaser.GameObjects.Text;
   private progressBar!: Phaser.GameObjects.Graphics;
   
+  private loadingTip!: Phaser.GameObjects.Text;
+  private tipIndex: number = 0;
+  private tips: string[] = [
+    'Tip: Press E to interact with NPCs',
+    'Tip: Walk into red zones to start battles',
+    'Tip: Check your quest objective in the top-right',
+    'Tip: Talk to the Mentor for your first quest',
+    'Tip: Collect gold to buy better equipment',
+    'Tip: Skills use mana - manage it wisely',
+    'Tip: Defeat bosses for rare items',
+    'Tip: Complete quests for bonus rewards'
+  ];
+  
   constructor() {
     super({ key: 'BootScene' });
   }
@@ -93,6 +106,14 @@ export class BootScene extends Phaser.Scene {
       color: '#888'
     }).setOrigin(0.5);
     
+    // Random tip
+    this.tipIndex = Math.floor(Math.random() * this.tips.length);
+    this.loadingTip = this.add.text(width / 2, height / 2 + 100, this.tips[this.tipIndex], {
+      fontSize: '14px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#fbbf24'
+    }).setOrigin(0.5);
+    
     // Progress bar background
     this.progressBar = this.add.graphics();
     this.loadingBar = this.add.graphics();
@@ -117,6 +138,13 @@ export class BootScene extends Phaser.Scene {
     
     // Update text
     this.loadingText.setText(`Loading... ${Math.floor(percent * 100)}%`);
+    
+    // Cycle tips as loading progresses
+    const newTipIndex = Math.floor(percent * this.tips.length) % this.tips.length;
+    if (newTipIndex !== this.tipIndex) {
+      this.tipIndex = newTipIndex;
+      this.loadingTip.setText(this.tips[this.tipIndex]);
+    }
   }
   
   private setupLoadingEvents(): void {
