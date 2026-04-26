@@ -4,6 +4,7 @@
 
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
+import { ParticleSystem } from '../utils/ParticleSystem';
 
 export class LevelUpUI {
   private scene: Phaser.Scene;
@@ -83,6 +84,14 @@ export class LevelUpUI {
       yoyo: true,
       repeat: -1,
       ease: 'Sine.easeInOut'
+    });
+    
+    // Emit particles for level up celebration
+    this.scene.time.delayedCall(300, () => {
+      if (this.scene instanceof Phaser.Scene) {
+        const particleSystem = new ParticleSystem(this.scene);
+        particleSystem.levelUpCelebration(width / 2, height / 2);
+      }
     });
     
     // Fade in

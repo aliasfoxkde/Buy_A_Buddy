@@ -8,6 +8,8 @@ import { audioManager } from '../audio/AudioManager';
 import { VisualEffects } from '../utils/VisualEffects';
 import { LevelUpUI } from '../ui/LevelUpUI';
 import { DeathScreen } from '../ui/DeathScreen';
+import { ParticleSystem } from '../utils/ParticleSystem';
+import { achievementSystem } from '../systems/AchievementSystem';
 import { getRandomEnemy, getEnemy, scaleEnemyStats, EnemyType } from '../data/enemies';
 
 export class BattleScene extends Phaser.Scene {
@@ -41,6 +43,7 @@ export class BattleScene extends Phaser.Scene {
   private vfx!: VisualEffects;
   private levelUpUI!: LevelUpUI;
   private deathScreen!: DeathScreen;
+  private particleSystem!: ParticleSystem;
   private isPlayerDefeated: boolean = false;
   
   constructor() {
@@ -102,6 +105,9 @@ export class BattleScene extends Phaser.Scene {
     // Initialize death screen
     this.deathScreen = new DeathScreen(this);
     this.deathScreen.hide();
+    
+    // Initialize particle system
+    this.particleSystem = new ParticleSystem(this);
     
     // Listen for player level up
     gameSystems.eventBus.on('entity:levelUp', (event: any) => {
@@ -494,6 +500,11 @@ export class BattleScene extends Phaser.Scene {
         enemyName: this.currentEnemy?.name
       });
       
+      // Track for achievements
+      if (this.currentEnemy) {
+        achievementSystem.onEnemyDefeated(this.currentEnemy.id);
+      }
+      
       gameSystems.eventBus.emit('battle:end', { victory: true });
       this.time.delayedCall(2000, () => this.endBattle(true));
       return;
@@ -571,21 +582,8 @@ export class BattleScene extends Phaser.Scene {
   }
   
   private showDamageNumber(damage: number, x: number): void {
-    const text = this.add.text(x, 300, `-${damage}`, {
-      fontSize: '32px',
-      fontFamily: 'Arial Black, sans-serif',
-      color: '#ef4444'
-    }).setOrigin(0.5);
-    text.setDepth(100);
-    
-    this.tweens.add({
-      targets: text,
-      y: 200,
-      alpha: 0,
-      duration: 1000,
-      ease: 'Power2',
-      onComplete: () => text.destroy()
-    });
+    // Use particle system for damage numbers
+    this.particleSystem.showDamageNumber(x, 300, damage);
   }
   
   private endBattle(victory: boolean, fled: boolean = false): void {
@@ -606,8 +604,14 @@ export class BattleScene extends Phaser.Scene {
       // Play victory sound
       audioManager.playVictory();
       
-      // Victory particles
-      this.vfx.showLevelUpBurst(640, 300);
+      // Victory particles using particle system
+      this.particleSystem.victoryBurst(640, 300);
+      
+      // Show gold pickup
+      this.particleSystem.showGoldPickup(640, 350, goldGain);
+      
+      // Show XP gain
+      this.particleSystem.showXPGain(640, 250, expGain);
       
       this.addBattleLog(`Victory! +${expGain} EXP, +${goldGain} Gold`);
     } else if (!fled) {
