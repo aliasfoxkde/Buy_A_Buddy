@@ -136,11 +136,31 @@ export class BootScene extends Phaser.Scene {
   }
   
   private loadAllSprites(): void {
-    const sprites = SpriteConfig.getAllPaths();
+    // Load character spritesheets (NOT images - they are spritesheets)
+    // Characters: 1536x1024 = 6 cols x 4 rows, 256x256 per frame
+    this.load.spritesheet('characters', '/images/sprites/characters.png', {
+      frameWidth: 256,
+      frameHeight: 256
+    });
     
-    for (const sprite of sprites) {
-      this.load.image(sprite.key, sprite.path);
-    }
+    // Buddies: 1536x1024 = 6 cols x 4 rows
+    this.load.spritesheet('buddies', '/images/sprites/buddies.png', {
+      frameWidth: 256,
+      frameHeight: 256
+    });
+    
+    // Enemies: 1536x1024 = 6 cols x 4 rows
+    this.load.spritesheet('enemies', '/images/sprites/enemies.png', {
+      frameWidth: 256,
+      frameHeight: 256
+    });
+    
+    // Load other sprites as images
+    this.load.image('weapons', '/images/sprites/weapons.png');
+    this.load.image('armor', '/images/sprites/armor.png');
+    this.load.image('items', '/images/sprites/items.png');
+    this.load.image('npc', '/images/sprites/npc.png');
+    this.load.image('bosses', '/images/sprites/bosses.png');
     
     // Load tile spritesheets (6 cols x 4 rows = 24 frames)
     this.load.spritesheet('tiles_ground', '/images/sprites/tiles_ground.png', {

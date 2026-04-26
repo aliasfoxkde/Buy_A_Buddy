@@ -466,19 +466,31 @@ export class WorldScene extends Phaser.Scene {
     ];
     
     for (const pos of encounterPositions) {
-      // Visual indicator (subtle red glow)
-      const indicator = this.add.circle(pos.x, pos.y, 40, 0xff0000, 0.08);
+      // Visual indicator (red glow with enemy type label)
+      const indicator = this.add.circle(pos.x, pos.y, 35, 0xff0000, 0.15);
+      indicator.setStrokeStyle(2, 0xff4444);
+      
+      // Pulse animation
       this.tweens.add({
         targets: indicator,
-        alpha: 0.2,
+        alpha: 0.4,
         scale: 1.2,
-        duration: 800,
+        duration: 600,
         yoyo: true,
         repeat: -1
       });
       
+      // Enemy type label
+      const label = this.add.text(pos.x, pos.y - 50, `⚔️ DANGER ⚔️`, {
+        fontSize: '12px',
+        fontFamily: 'Arial Black, sans-serif',
+        color: '#ef4444',
+        backgroundColor: '#1a1a2e',
+        padding: { x: 6, y: 3 }
+      }).setOrigin(0.5);
+      
       // Encounter zone
-      const zone = this.add.zone(pos.x, pos.y, 60, 60);
+      const zone = this.add.zone(pos.x, pos.y, 80, 80);
       (zone as any).isEncounter = true;
       this.physics.add.existing(zone);
       this.encounterZones.push(zone);
@@ -540,7 +552,7 @@ export class WorldScene extends Phaser.Scene {
     // Create player sprite with correct frame
     this.player = this.add.sprite(pos.x, pos.y, 'characters');
     this.player.setFrame(getCharacterFrame(spriteIndex));
-    this.player.setScale(0.8);
+    this.player.setScale(1.0);
     
     // Add shadow
     this.add.ellipse(pos.x, pos.y + 60, 60, 20, 0x000000, 0.3);
