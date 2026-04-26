@@ -9,6 +9,8 @@ import { audioManager } from '../audio/AudioManager';
 import { getCharacterFrame, getBuddyFrame, getNPCFrame, getTileFrame } from '../utils/spriteUtils';
 import { VisualEffects } from '../utils/VisualEffects';
 import { MobileControls } from '../ui/MobileControls';
+import { QUESTS, type Quest } from '../data/quests';
+import { getDialogue } from '../data/dialogue';
 
 export class WorldScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Sprite;
@@ -48,6 +50,10 @@ export class WorldScene extends Phaser.Scene {
   // Combat trigger
   private encounterCooldown: boolean = false;
   private encounterZones: Phaser.GameObjects.Zone[] = [];
+  
+  // Quest tracking
+  private currentQuests: Quest[] = [];
+  private enemiesKilled: Map<string, number> = new Map();
   
   constructor() {
     super({ key: 'WorldScene' });
@@ -91,6 +97,9 @@ export class WorldScene extends Phaser.Scene {
     
     // Start exploration music
     this.startExplorationMusic();
+    
+    // Initialize quests
+    this.initQuests();
   }
   
   private startExplorationMusic(): void {
@@ -115,6 +124,103 @@ export class WorldScene extends Phaser.Scene {
     
     // Check interactions
     this.checkInteractions();
+    
+    // Update quest UI
+    this.updateQuestProgress();
+  }
+  
+  private initQuests(): void {
+    // Start tutorial quest
+    const tutorialQuest = QUESTS['quest_tutorial_1'];
+    if (tutorialQuest && !this.currentQuests.find(q => q.id === tutorialQuest.id)) {
+      this.currentQuests.push({ ...tutorialQuest });
+    }
+    
+    // Show quest notification
+    this.showNotification(`New Quest: ${tutorialQuest?.name || 'Tutorial'}`);
+  }
+  
+  private updateQuestProgress(): void {
+    // Check quest completion
+    for (const quest of this.currentQuests) {
+      for (const obj of quest.objectives) {
+        if (obj.type === 'kill') {
+          const killed = this.enemiesKilled.get(obj.targetId) || 0;
+          obj.current = killed;
+        }
+      }
+    }
+  }
+  
+  private onEnemyDefeated(enemyId: string): void {
+    // Track kills
+    const current = this.enemiesKilled.get(enemyId) || 0;
+    this.enemiesKilled.set(enemyId, current + 1);
+    this.enemiesKilled.set('any', (this.enemiesKilled.get('any') || 0) + 1);
+    
+    // Check quest updates
+    this.updateQuestProgress();
+    
+    // Check for quest completion
+    for (const quest of this.currentQuests) {
+      const complete = quest.objectives.every(obj => obj.current >= obj.count);
+      if (complete) {
+        this.completeQuest(quest);
+      }
+    }
+  }
+  
+  private completeQuest(quest: Quest): void {
+    // Show completion
+    this.showNotification(`Quest Complete: ${quest.name}!`);
+    
+    // Apply rewards
+    if (quest.reward.gold) {
+      gameSystems.inventory.addGold(quest.reward.gold);
+    }
+    
+    if (quest.reward.experience) {
+      // XP handled in battle scene
+    }
+    
+    if (quest.reward.items) {
+      for (const item of quest.reward.items) {
+        gameSystems.inventory.addItem(item, 1);
+      }
+    }
+    
+    // Remove from active quests
+    this.currentQuests = this.currentQuests.filter(q => q.id !== quest.id);
+    
+    // Visual effect
+    if (this.vfx) {
+      this.vfx.showLevelUpBurst(this.player.x, this.player.y - 50);
+    }
+  }
+  
+  private showNotification(text: string): void {
+    // Create notification popup
+    const notification = this.add.text(
+      this.cameras.main.scrollX + this.scale.width / 2,
+      120,
+      text,
+      {
+        fontSize: '24px',
+        fontFamily: 'Arial Black, sans-serif',
+        color: '#fbbf24',
+        stroke: '#000',
+        strokeThickness: 4
+      }
+    ).setOrigin(0.5).setDepth(1000);
+    
+    this.tweens.add({
+      targets: notification,
+      alpha: 0,
+      y: 80,
+      duration: 3000,
+      delay: 1000,
+      onComplete: () => notification.destroy()
+    });
   }
   
   private createWorld(): void {
@@ -226,6 +332,9 @@ export class WorldScene extends Phaser.Scene {
       const sprite = this.add.sprite(npc.position.x, npc.position.y, 'npc');
       sprite.setFrame(getNPCFrame(npc.spriteIndex));
       sprite.setScale(1);
+      
+      // Add shadow
+      this.add.ellipse(npc.position.x, npc.position.y + 50, 60, 20, 0x000000, 0.2);
       
       // Add name above
       const nameText = this.add.text(npc.position.x, npc.position.y - 70, npc.name, {
@@ -452,11 +561,31 @@ export class WorldScene extends Phaser.Scene {
       color: '#fbbf24'
     }).setOrigin(0, 0.5);
     
+    // Quest display (top right)
+    this.createQuestDisplay();
+    
     // Add to container
     hudContainer.add([healthBg, this.healthBar, healthText, manaBg, this.manaBar, manaText, expBg, this.expBar, this.levelText, this.goldText]);
     
     // Bottom buttons
     this.createBottomButtons();
+  }
+  
+  private questText!: Phaser.GameObjects.Text;
+  
+  private createQuestDisplay(): void {
+    const { width } = this.scale;
+    
+    // Quest panel background
+    const questBg = this.add.rectangle(width - 180, 20, 200, 80, 0x000000, 0.5);
+    questBg.setStrokeStyle(2, 0x22c55e);
+    
+    // Quest text
+    this.questText = this.add.text(width - 180, 20, 'No Active Quests', {
+      fontSize: '14px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#22c55e'
+    }).setOrigin(0.5);
   }
   
   private createBottomButtons(): void {
@@ -679,6 +808,24 @@ export class WorldScene extends Phaser.Scene {
     // Text updates
     this.levelText.setText(`LVL ${stats.level}`);
     this.goldText.setText(`💰 ${stats.gold}`);
+    
+    // Quest progress update
+    this.updateQuestDisplay();
+  }
+  
+  private updateQuestDisplay(): void {
+    if (!this.questText || this.currentQuests.length === 0) {
+      if (this.questText) this.questText.setText('No Active Quests');
+      return;
+    }
+    
+    const quest = this.currentQuests[0];
+    const obj = quest.objectives[0];
+    if (obj) {
+      this.questText.setText(`${quest.name}\n${obj.current}/${obj.count} ${obj.targetName}`);
+    } else {
+      this.questText.setText(quest.name);
+    }
   }
   
   private showInteractionHint(npcId: string): void {
