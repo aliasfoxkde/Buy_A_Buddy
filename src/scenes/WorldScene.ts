@@ -20,6 +20,8 @@ import { getDialogue } from '../data/dialogue';
 export class WorldScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Sprite;
   private buddies: Phaser.GameObjects.Sprite[] = [];
+  private buddySkillCooldown: number = 0;
+  private buddyIndicator!: Phaser.GameObjects.Text;
   private npcs: Map<string, Phaser.GameObjects.Sprite> = new Map();
   private worldItems: Phaser.GameObjects.Zone[] = [];
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -198,6 +200,9 @@ export class WorldScene extends Phaser.Scene {
     
     // Update buddy following
     this.updateBuddies();
+    
+    // Update buddy auto-heal skill
+    this.updateBuddySkill(delta / 1000);
     
     // Update minimap
     if (this.minimap && this.player) {
@@ -665,6 +670,14 @@ export class WorldScene extends Phaser.Scene {
       });
       
       this.buddies.push(buddy);
+      
+      // Buddy skill indicator (small icon above buddy)
+      const skillIcon = this.add.text(buddy.x, buddy.y - 30, '💚', {
+        fontSize: '14px'
+      }).setOrigin(0.5);
+      
+      // Store reference for animation
+      (buddy as any).skillIcon = skillIcon;
     }
     
     // Show buddy name in HUD
@@ -673,6 +686,47 @@ export class WorldScene extends Phaser.Scene {
       fontFamily: 'Arial, sans-serif',
       color: '#a855f7'
     }).setOrigin(0.5);
+  }
+  
+  private updateBuddySkill(delta: number): void {
+    if (this.buddySkillCooldown > 0) {
+      this.buddySkillCooldown -= delta;
+      return;
+    }
+    
+    // Buddy auto-heals nearby player when low HP
+    const stats = gameSystems.getPlayerStats();
+    if (stats && stats.health < stats.maxHealth * 0.5) {
+      const healAmount = Math.floor(stats.maxHealth * 0.1);
+      gameSystems.player?.heal(healAmount);
+      this.showBuddyHealNotification(healAmount);
+      this.buddySkillCooldown = 10; // 10 second cooldown
+    }
+  }
+  
+  private showBuddyHealNotification(amount: number): void {
+    if (this.buddies.length === 0) return;
+    
+    const buddy = this.buddies[0];
+    const notification = this.add.container(buddy.x, buddy.y - 50);
+    notification.setDepth(100);
+    
+    const text = this.add.text(0, 0, `💚 Buddy healed +${amount} HP`, {
+      fontSize: '12px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#22c55e',
+      backgroundColor: '#1a1a2e',
+      padding: { x: 6, y: 3 }
+    }).setOrigin(0.5);
+    notification.add(text);
+    
+    this.tweens.add({
+      targets: notification,
+      y: notification.y - 30,
+      alpha: 0,
+      duration: 1000,
+      onComplete: () => notification.destroy()
+    });
   }
   
   private createUI(): void {
