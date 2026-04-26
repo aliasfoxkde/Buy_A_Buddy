@@ -11,7 +11,7 @@ interface ShopItem {
   name: string;
   price: number;
   icon: string;
-  type: 'weapon' | 'armor' | 'consumable' | 'material' | 'accessory';
+  type: 'weapon' | 'armor' | 'consumable' | 'material' | 'accessory' | 'set';
   quantity?: number;
 }
 
@@ -98,7 +98,7 @@ export class ShopScene extends Phaser.Scene {
       { text: '⚔️ Weapons', type: 'weapon' },
       { text: '🛡️ Armor', type: 'armor' },
       { text: '🧪 Potions', type: 'consumable' },
-      { text: '📦 Materials', type: 'material' }
+      { text: '💎 Sets', type: 'set' }
     ];
     
     tabs.forEach((tab, i) => {
@@ -337,10 +337,13 @@ export class ShopScene extends Phaser.Scene {
     };
     
     this.shopItems = itemsByShop[this.shopType] || itemsByShop['general_store'];
+    
+    // Add set equipment items
+    this.addSetItems();
   }
   
   private getItemsForShop(): ShopItem[] {
-    const types = ['weapon', 'armor', 'consumable', 'material'];
+    const types = ['weapon', 'armor', 'consumable', 'set'];
     const selectedType = types[this.selectedTab];
     
     return this.shopItems.filter(item => item.type === selectedType);
@@ -353,6 +356,33 @@ export class ShopScene extends Phaser.Scene {
     }
     
     this.createItemsGrid(100, 170);
+  }
+  
+  private addSetItems(): void {
+    // Steel Warrior set
+    this.shopItems.push({ id: 'weapon_steel_sword', name: 'Steel Sword', price: 150, icon: '⚔️', type: 'set' });
+    this.shopItems.push({ id: 'armor_steel_chest', name: 'Steel Cuirass', price: 200, icon: '🛡️', type: 'set' });
+    this.shopItems.push({ id: 'armor_steel_helmet', name: 'Steel Helm', price: 120, icon: '⛑️', type: 'set' });
+    
+    // Iron Knight set
+    this.shopItems.push({ id: 'weapon_iron_sword', name: 'Iron Sword', price: 100, icon: '⚔️', type: 'set' });
+    this.shopItems.push({ id: 'armor_iron_chest', name: 'Iron Breastplate', price: 150, icon: '🛡️', type: 'set' });
+    this.shopItems.push({ id: 'armor_iron_shield', name: 'Iron Buckler', price: 90, icon: '🛡️', type: 'set' });
+    
+    // Arcane Mage set
+    this.shopItems.push({ id: 'weapon_arcane_staff', name: 'Arcane Staff', price: 250, icon: '🪄', type: 'set' });
+    this.shopItems.push({ id: 'armor_arcane_robes', name: 'Arcane Vestments', price: 180, icon: '👘', type: 'set' });
+    this.shopItems.push({ id: 'accessory_arcane_amulet', name: 'Arcane Pendant', price: 150, icon: '📿', type: 'set' });
+    
+    // Forest Ranger set
+    this.shopItems.push({ id: 'weapon_longbow', name: 'Hunter Bow', price: 200, icon: '🏹', type: 'set' });
+    this.shopItems.push({ id: 'armor_leather_chest', name: 'Ranger Tunic', price: 120, icon: '🧥', type: 'set' });
+    this.shopItems.push({ id: 'accessory_ranger_ring', name: 'Tracker Band', price: 130, icon: '💍', type: 'set' });
+    
+    // Nature Walker set
+    this.shopItems.push({ id: 'weapon_nature_staff', name: 'Living Branch', price: 180, icon: '🪄', type: 'set' });
+    this.shopItems.push({ id: 'armor_nature_vest', name: 'Vineweave', price: 150, icon: '🌿', type: 'set' });
+    this.shopItems.push({ id: 'accessory_nature_ring', name: 'Acorn Ring', price: 100, icon: '💍', type: 'set' });
   }
   
   private addToCart(index: number, item: ShopItem): void {
