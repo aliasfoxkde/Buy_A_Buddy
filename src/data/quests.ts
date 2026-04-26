@@ -99,6 +99,94 @@ export const QUESTS: Record<string, Quest> = {
       experience: 500,
       items: ['armor_chainmail']
     }
+  },
+  quest_spider_nest: {
+    id: 'quest_spider_nest',
+    name: 'Clear the Caves',
+    description: 'Giant spiders have infested the old mines. Clear them out!',
+    objectives: [
+      { type: 'kill', targetId: 'spider', targetName: 'Giant Spiders', count: 4, current: 0 }
+    ],
+    reward: {
+      gold: 250,
+      experience: 350,
+      items: ['potion_health_large']
+    }
+  },
+  quest_orc_warrior: {
+    id: 'quest_orc_warrior',
+    name: 'Orc Invasion',
+    description: 'Orc warriors are raiding from the mountains. Stop their attacks!',
+    objectives: [
+      { type: 'kill', targetId: 'orc', targetName: 'Orc Warriors', count: 3, current: 0 }
+    ],
+    reward: {
+      gold: 350,
+      experience: 450,
+      items: ['weapon_steel_sword']
+    }
+  },
+  quest_bat_cave: {
+    id: 'quest_bat_cave',
+    name: 'Cave Dwellers',
+    description: 'The bat caves are overflowing. Clear out the flying pests!',
+    objectives: [
+      { type: 'kill', targetId: 'bat', targetName: 'Cave Bats', count: 5, current: 0 }
+    ],
+    reward: {
+      gold: 150,
+      experience: 200
+    },
+    isRepeatable: true
+  },
+  quest_snake_pit: {
+    id: 'quest_snake_pit',
+    name: 'Snake Handler',
+    description: 'Venomous snakes have been spotted near the village. Eliminate them!',
+    objectives: [
+      { type: 'kill', targetId: 'snake', targetName: 'Cave Snakes', count: 4, current: 0 }
+    ],
+    reward: {
+      gold: 200,
+      experience: 250,
+      items: ['antidote']
+    }
+  },
+  quest_hawk_hunter: {
+    id: 'quest_hawk_hunter',
+    name: 'Sky Hunters',
+    description: 'Hunting hawks are attacking from above. Put an end to their reign!',
+    objectives: [
+      { type: 'kill', targetId: 'hawk', targetName: 'Hunting Hawks', count: 3, current: 0 }
+    ],
+    reward: {
+      gold: 300,
+      experience: 400
+    }
+  },
+  quest_collect_gold: {
+    id: 'quest_collect_gold',
+    name: 'Gold Collector',
+    description: 'Gather gold from your adventures. Every bit counts!',
+    objectives: [],
+    reward: {
+      gold: 500,
+      experience: 300
+    },
+    isRepeatable: true
+  },
+  quest_troll_slayer: {
+    id: 'quest_troll_slayer',
+    name: 'Troll Trouble',
+    description: 'Forest trolls are blocking the mountain pass. Defeat the tough creatures!',
+    objectives: [
+      { type: 'kill', targetId: 'troll', targetName: 'Forest Trolls', count: 2, current: 0 }
+    ],
+    reward: {
+      gold: 450,
+      experience: 550,
+      items: ['armor_mithril']
+    }
   }
 };
 
