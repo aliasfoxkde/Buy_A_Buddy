@@ -304,6 +304,63 @@ export const ENEMIES: Record<string, EnemyType> = {
     critMultiplier: 1.5,
     gold: { min: 100, max: 140 },
     experience: 180
+  },
+  // Fire element enemy
+  fire_elemental: {
+    id: 'fire_elemental',
+    name: 'Fire Elemental',
+    spriteIndex: 13,
+    maxHp: 90,
+    damage: 24,
+    defense: 5,
+    xpReward: 90,
+    goldReward: 60,
+    difficulty: 'hard',
+    attack: 24,
+    speed: 5,
+    element: 'fire',
+    level: 5,
+    critChance: 0.1,
+    gold: { min: 50, max: 70 },
+    experience: 90
+  },
+  // Ice element enemy
+  ice_golem: {
+    id: 'ice_golem',
+    name: 'Ice Golem',
+    spriteIndex: 14,
+    maxHp: 140,
+    damage: 20,
+    defense: 18,
+    xpReward: 110,
+    goldReward: 75,
+    difficulty: 'hard',
+    attack: 20,
+    speed: 2,
+    element: 'ice',
+    level: 6,
+    gold: { min: 60, max: 90 },
+    experience: 110
+  },
+  // Dark element mini-boss
+  shadow_lord: {
+    id: 'shadow_lord',
+    name: 'Shadow Lord',
+    spriteIndex: 15,
+    maxHp: 350,
+    damage: 35,
+    defense: 12,
+    xpReward: 350,
+    goldReward: 250,
+    difficulty: 'hard',
+    attack: 35,
+    speed: 5,
+    element: 'dark',
+    level: 10,
+    critChance: 0.25,
+    critMultiplier: 2.0,
+    gold: { min: 200, max: 300 },
+    experience: 350
   }
 };
 
