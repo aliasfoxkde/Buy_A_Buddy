@@ -887,11 +887,22 @@ export class WorldScene extends Phaser.Scene {
     // Skill bar
     const skillBar = this.add.container(0, 0);
     
-    // Skill icons for the hotbar
+    // Skill icons and names for the hotbar
     const skillIcons = ['⚔️', '🛡️', '💚', '🔥', '⚡', '💥'];
+    const skillNames = ['Attack', 'Defend', 'Heal', 'Fire', 'Lightning', 'Explosion'];
+    const skillDescs = [
+      'Basic melee attack',
+      'Raise defense temporarily',
+      'Restore health',
+      'Fire damage attack',
+      'Lightning damage',
+      'Area explosion damage'
+    ];
     
     for (let i = 0; i < 6; i++) {
       const icon = skillIcons[i] || '❓';
+      const name = skillNames[i];
+      const desc = skillDescs[i];
       
       const btn = this.add.rectangle(
         width / 2 - 150 + i * 60,
@@ -923,18 +934,35 @@ export class WorldScene extends Phaser.Scene {
         }
       ).setOrigin(0.5);
       
-      // Hover effect
+      // Skill name for tooltip
+      const skillName = this.add.text(
+        width / 2 - 150 + i * 60,
+        buttonY - 70,
+        name,
+        {
+          fontSize: '12px',
+          fontFamily: 'Arial, sans-serif',
+          color: '#fff',
+          backgroundColor: '#1a1a2e'
+        }
+      ).setOrigin(0.5);
+      skillName.setVisible(false);
+      skillName.setDepth(1000);
+      
+      // Hover effect with tooltip
       btn.on('pointerover', () => {
         btn.setFillStyle(0x3d2b5e);
+        skillName.setVisible(true);
       });
       btn.on('pointerout', () => {
         btn.setFillStyle(0x2d1b4e);
+        skillName.setVisible(false);
       });
       btn.on('pointerdown', () => {
         this.triggerWorldSkill(i);
       });
       
-      skillBar.add([btn, skillIcon, key]);
+      skillBar.add([btn, skillIcon, key, skillName]);
     }
     
     // Menu button
