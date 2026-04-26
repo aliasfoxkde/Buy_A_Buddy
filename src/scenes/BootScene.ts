@@ -155,12 +155,17 @@ export class BootScene extends Phaser.Scene {
       frameHeight: 256
     });
     
-    // Load other sprites as images
+    // Load other sprites as spritesheets
     this.load.image('weapons', '/images/sprites/weapons.png');
     this.load.image('armor', '/images/sprites/armor.png');
     this.load.image('items', '/images/sprites/items.png');
-    this.load.image('npc', '/images/sprites/npc.png');
     this.load.image('bosses', '/images/sprites/bosses.png');
+    
+    // NPC spritesheet (6 cols x 4 rows = 24 frames)
+    this.load.spritesheet('npc', '/images/sprites/npc.png', {
+      frameWidth: 256,
+      frameHeight: 256
+    });
     
     // Load tile spritesheets (6 cols x 4 rows = 24 frames)
     this.load.spritesheet('tiles_ground', '/images/sprites/tiles_ground.png', {
@@ -195,11 +200,6 @@ export class BootScene extends Phaser.Scene {
       frameHeight: 256
     });
     
-    this.load.spritesheet('npc', '/images/sprites/npc.png', {
-      frameWidth: 256,
-      frameHeight: 256
-    });
-    
     this.load.spritesheet('skills', '/images/sprites/skills.png', {
       frameWidth: 256,
       frameHeight: 256
@@ -211,12 +211,6 @@ export class BootScene extends Phaser.Scene {
     });
     
     this.load.spritesheet('buildings', '/images/sprites/buildings.png', {
-      frameWidth: 256,
-      frameHeight: 256
-    });
-    
-    // Enemy spritesheet (6 cols x 4 rows = 24 frames)
-    this.load.spritesheet('enemies', '/images/sprites/enemies.png', {
       frameWidth: 256,
       frameHeight: 256
     });
