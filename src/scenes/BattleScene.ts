@@ -7,7 +7,7 @@ import { gameSystems } from '../systems/GameSystems';
 import { audioManager } from '../audio/AudioManager';
 import { VisualEffects } from '../utils/VisualEffects';
 import { LevelUpUI } from '../ui/LevelUpUI';
-import { getRandomEnemy, scaleEnemyStats, EnemyType } from '../data/enemies';
+import { getRandomEnemy, getEnemy, scaleEnemyStats, EnemyType } from '../data/enemies';
 
 export class BattleScene extends Phaser.Scene {
   private playerEntity: any = null;
@@ -45,6 +45,9 @@ export class BattleScene extends Phaser.Scene {
   }
   
   create(): void {
+    // Get scene data (passed from WorldScene)
+    const sceneData = this.scene.settings.data as any || {};
+    
     const { width, height } = this.scale;
     
     // Dark background
@@ -114,6 +117,11 @@ export class BattleScene extends Phaser.Scene {
   }
   
   private initializeBattle(): void {
+    // Get scene data (passed from WorldScene)
+    const sceneData = this.scene.settings.data as any || {};
+    const isBoss = sceneData.isBoss || false;
+    const specifiedEnemyId = sceneData.enemyId || null;
+    
     // Get player stats from game systems
     const stats = gameSystems.getPlayerStats();
     if (stats) {
@@ -121,9 +129,20 @@ export class BattleScene extends Phaser.Scene {
       this.playerHp = stats.health;
     }
     
-    // Select random enemy based on player level
+    // Select enemy based on context
     const playerLevel = stats?.level || 1;
-    this.currentEnemy = getRandomEnemy(playerLevel);
+    if (isBoss && specifiedEnemyId) {
+      // Boss encounter - use specified boss
+      const bossEnemy = getEnemy(specifiedEnemyId);
+      if (bossEnemy) {
+        this.currentEnemy = bossEnemy;
+      } else {
+        this.currentEnemy = getRandomEnemy(playerLevel);
+      }
+    } else {
+      // Normal encounter - random enemy
+      this.currentEnemy = getRandomEnemy(playerLevel);
+    }
     
     // Scale enemy stats
     const scaledEnemy = scaleEnemyStats(this.currentEnemy, playerLevel);

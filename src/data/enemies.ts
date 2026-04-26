@@ -85,6 +85,45 @@ export const ENEMIES: Record<string, EnemyType> = {
     speed: 4,
     gold: { min: 30, max: 50 },
     experience: 60
+  },
+  // Boss enemies
+  slime_boss: {
+    id: 'slime_boss',
+    name: 'Mega Slime King',
+    spriteIndex: 0,
+    maxHp: 200,
+    damage: 25,
+    defense: 10,
+    xpReward: 200,
+    goldReward: 150,
+    difficulty: 'hard',
+    attack: 25,
+    speed: 3,
+    critChance: 0.15,
+    critMultiplier: 1.5,
+    element: 'water',
+    level: 5,
+    gold: { min: 100, max: 200 },
+    experience: 200
+  },
+  goblin_boss: {
+    id: 'goblin_boss',
+    name: 'Goblin Warlord',
+    spriteIndex: 6,
+    maxHp: 300,
+    damage: 30,
+    defense: 15,
+    xpReward: 300,
+    goldReward: 200,
+    difficulty: 'hard',
+    attack: 30,
+    speed: 4,
+    critChance: 0.2,
+    critMultiplier: 2.0,
+    element: 'earth',
+    level: 8,
+    gold: { min: 150, max: 250 },
+    experience: 300
   }
 };
 

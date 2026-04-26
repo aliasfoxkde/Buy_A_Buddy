@@ -444,6 +444,42 @@ export class WorldScene extends Phaser.Scene {
       this.physics.add.existing(zone);
       this.encounterZones.push(zone);
     }
+    
+    // Zone transition points
+    this.createZoneTransitions();
+  }
+  
+  private createZoneTransitions(): void {
+    const worldWidth = 20 * 128;
+    
+    // Boss portal at the right edge of the map
+    const bossX = worldWidth - 100;
+    const bossY = 400;
+    
+    // Visual indicator - red/green portal (boss themed)
+    const portal = this.add.circle(bossX, bossY, 60, 0xef4444, 0.2);
+    this.tweens.add({
+      targets: portal,
+      alpha: 0.5,
+      scale: 1.4,
+      duration: 400,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut'
+    });
+    
+    // "BOSS" text
+    this.add.text(bossX, bossY - 80, '⚔️ BOSS ⚔️', {
+      fontSize: '18px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#ef4444'
+    }).setOrigin(0.5);
+    
+    // Boss encounter zone
+    const bossZone = this.add.zone(bossX, bossY, 100, 100);
+    (bossZone as any).isBossEncounter = true;
+    (bossZone as any).bossId = 'slime_boss';
+    this.physics.add.existing(bossZone);
   }
   
   private createPlayer(): void {
@@ -731,6 +767,71 @@ export class WorldScene extends Phaser.Scene {
         this.triggerEncounter();
       });
     }
+    
+    // Add collision for zone transitions
+    const transitionZones = this.physics.add.group();
+    this.children.list.forEach(child => {
+      if ((child as any).isTransition) {
+        transitionZones.add(child);
+      }
+    });
+    
+    this.physics.add.overlap(this.player, transitionZones, (player, zone) => {
+      this.triggerZoneTransition((zone as any).targetZone);
+    });
+    
+    // Add collision for boss encounter zones
+    const bossZones = this.physics.add.group();
+    this.children.list.forEach(child => {
+      if ((child as any).isBossEncounter) {
+        bossZones.add(child);
+      }
+    });
+    
+    this.physics.add.overlap(this.player, bossZones, (player, zone) => {
+      this.triggerBossEncounter((zone as any).bossId);
+    });
+  }
+  
+  private triggerZoneTransition(targetZone: string): void {
+    if (this.encounterCooldown) return;
+    this.encounterCooldown = true;
+    
+    // Show transition message
+    this.showNotification(`Entering ${targetZone}...`);
+    
+    // Screen fade to black
+    this.cameras.main.fade(800, 0, 0, 0);
+    
+    this.time.delayedCall(1000, () => {
+      // For now, just show a notification - zone system would load new map
+      this.showNotification(`Welcome to ${targetZone}!`);
+      
+      // Reset cooldown
+      this.time.delayedCall(3000, () => {
+        this.encounterCooldown = false;
+      });
+    });
+  }
+  
+  private triggerBossEncounter(bossId: string): void {
+    if (this.encounterCooldown) return;
+    
+    this.encounterCooldown = true;
+    
+    // Show warning
+    this.showNotification(`BOSS BATTLE: ${bossId.toUpperCase()}!`);
+    
+    // Pause movement
+    (this.player.body as Phaser.Physics.Arcade.Body).setVelocity(0, 0);
+    
+    // Screen effect - red flash
+    this.cameras.main.flash(500, 255, 0, 0, true);
+    
+    this.time.delayedCall(800, () => {
+      this.scene.pause();
+      this.scene.launch('BattleScene', { enemyId: bossId, isBoss: true });
+    });
   }
   
   private triggerEncounter(): void {
