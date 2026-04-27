@@ -13,7 +13,7 @@ test.describe('Main Menu', () => {
       }
     });
     
-    await page.goto('https://523ded95.buy-a-buddy.pages.dev');
+    await page.goto('https://0ed4c6f6.buy-a-buddy.pages.dev');
     await page.waitForTimeout(3000);
     
     // Check canvas is visible
@@ -30,7 +30,7 @@ test.describe('Main Menu', () => {
   });
 
   test('should render game canvas', async ({ page }) => {
-    await page.goto('https://523ded95.buy-a-buddy.pages.dev');
+    await page.goto('https://0ed4c6f6.buy-a-buddy.pages.dev');
     await page.waitForTimeout(3000);
     
     const canvas = page.locator('canvas');

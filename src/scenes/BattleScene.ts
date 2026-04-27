@@ -604,6 +604,15 @@ export class BattleScene extends Phaser.Scene {
     
     this.addBattleLog(`Hero attacks for ${finalDamage} damage!`);
     
+    // Buddy assist chance (30%)
+    if (Math.random() < 0.3) {
+      const buddyDamage = 8 + Math.floor(Math.random() * 5);
+      this.enemyHp = Math.max(0, this.enemyHp - buddyDamage);
+      this.addBattleLog(`Buddy assists for ${buddyDamage} damage! 💚`);
+      // Show buddy assist effect
+      this.particleSystem.emit('heal', 850, 320, 5);
+    }
+    
     // Show damage number
     this.showDamageNumber(finalDamage, 900, isCrit);
     
