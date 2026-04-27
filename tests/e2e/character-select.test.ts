@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Character Select', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('https://68284ecb.buy-a-buddy.pages.dev');
+    await page.goto('https://6459fae8.buy-a-buddy.pages.dev');
     await page.waitForTimeout(3000);
   });
 

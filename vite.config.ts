@@ -38,6 +38,14 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: isDev,
+    chunkSizeWarningLimit: 600,
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: !isDev,
+        drop_debugger: !isDev,
+      },
+    },
   },
   server: {
     port: 5173,

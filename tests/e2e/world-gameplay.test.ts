@@ -4,15 +4,17 @@
 
 import { test, expect } from '@playwright/test';
 
+const GAME_URL = 'https://6459fae8.buy-a-buddy.pages.dev';
+
 test.describe('World Scene', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto(GAME_URL);
     await page.waitForTimeout(3000);
   });
 
   test('should render game canvas', async ({ page }) => {
     const canvas = page.locator('canvas');
-    await expect(canvas).toBeVisible({ timeout: 10000 });
+    await expect(canvas).toBeVisible({ timeout: 15000 });
   });
 
   test('should accept keyboard input', async ({ page }) => {

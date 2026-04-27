@@ -1299,6 +1299,9 @@ export class WorldScene extends Phaser.Scene {
     
     this.encounterCooldown = true;
     
+    // Play boss warning sound
+    audioManager.playSound('defeat'); // Use defeat as warning
+    
     // Complete combat tutorial when entering boss fight
     this.tutorial.completeStep('combat');
     
@@ -1427,14 +1430,37 @@ export class WorldScene extends Phaser.Scene {
     
     notification.add([bg, text]);
     
-    // Float up and fade
+    // Float up and fade with scale bounce
     this.tweens.add({
       targets: notification,
       y: notification.y - 40,
       alpha: 0,
-      duration: 1000,
+      scaleX: 1.2,
+      scaleY: 1.2,
+      duration: 800,
+      ease: 'Back.easeOut',
       onComplete: () => notification.destroy()
     });
+    
+    // Add sparkle effect
+    for (let i = 0; i < 5; i++) {
+      const sparkle = this.add.circle(
+        notification.x + Phaser.Math.Between(-30, 30),
+        notification.y + Phaser.Math.Between(-20, 20),
+        2,
+        0xfbbf24
+      );
+      
+      this.tweens.add({
+        targets: sparkle,
+        alpha: 0,
+        scale: 0,
+        y: sparkle.y - 30,
+        duration: 500,
+        delay: i * 50,
+        onComplete: () => sparkle.destroy()
+      });
+    }
   }
   
   private triggerEncounter(): void {

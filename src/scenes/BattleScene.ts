@@ -131,6 +131,31 @@ export class BattleScene extends Phaser.Scene {
         });
         audioManager.playLevelUp();
         gameSystems.updateHighestLevel(stats.level);
+        
+        // Add celebration particles
+        this.particleSystem.levelUpCelebration(this.scale.width / 2, this.scale.height / 2);
+        
+        // Add floating stars
+        for (let i = 0; i < 10; i++) {
+          const star = this.add.text(
+            Phaser.Math.Between(200, 1000),
+            Phaser.Math.Between(200, 500),
+            '⭐',
+            { fontSize: '20px' }
+          ).setOrigin(0.5);
+          
+          this.tweens.add({
+            targets: star,
+            y: star.y - 100,
+            alpha: 0,
+            scale: 0,
+            rotation: Math.PI * 2,
+            duration: 1500,
+            delay: i * 100,
+            ease: 'Power2',
+            onComplete: () => star.destroy()
+          });
+        }
       }
     });
     

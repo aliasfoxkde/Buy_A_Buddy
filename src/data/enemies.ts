@@ -24,6 +24,11 @@ export interface EnemyType {
   gold?: { min: number; max: number };
   experience?: number;
   range?: boolean; // For ranged enemies
+  
+  // Boss-specific fields
+  boss?: boolean;
+  enrageThreshold?: number;
+  enrageMultiplier?: number;
 }
 
 export const ENEMIES: Record<string, EnemyType> = {
@@ -361,6 +366,109 @@ export const ENEMIES: Record<string, EnemyType> = {
     critMultiplier: 2.0,
     gold: { min: 200, max: 300 },
     experience: 350
+  },
+  
+  // Thunder element
+  thunder_bird: {
+    id: 'thunder_bird',
+    name: 'Thunder Bird',
+    spriteIndex: 16,
+    maxHp: 75,
+    damage: 22,
+    defense: 4,
+    xpReward: 80,
+    goldReward: 55,
+    difficulty: 'medium',
+    attack: 22,
+    speed: 8,
+    element: 'air',
+    level: 4,
+    critChance: 0.15,
+    gold: { min: 45, max: 65 },
+    experience: 80
+  },
+  
+  // Earth element tank
+  stone_golem: {
+    id: 'stone_golem',
+    name: 'Stone Golem',
+    spriteIndex: 17,
+    maxHp: 200,
+    damage: 18,
+    defense: 22,
+    xpReward: 100,
+    goldReward: 70,
+    difficulty: 'hard',
+    attack: 18,
+    speed: 2,
+    element: 'earth',
+    level: 7,
+    gold: { min: 60, max: 80 },
+    experience: 100
+  },
+  
+  // Poison element
+  venom_scorpion: {
+    id: 'venom_scorpion',
+    name: 'Venom Scorpion',
+    spriteIndex: 18,
+    maxHp: 60,
+    damage: 28,
+    defense: 3,
+    xpReward: 85,
+    goldReward: 50,
+    difficulty: 'medium',
+    attack: 28,
+    speed: 7,
+    element: 'nature',
+    level: 5,
+    critChance: 0.25,
+    gold: { min: 40, max: 60 },
+    experience: 85
+  },
+  
+  // Light holy enemy
+  holy_knight: {
+    id: 'holy_knight',
+    name: 'Holy Knight',
+    spriteIndex: 19,
+    maxHp: 180,
+    damage: 30,
+    defense: 15,
+    xpReward: 150,
+    goldReward: 120,
+    difficulty: 'hard',
+    attack: 30,
+    speed: 5,
+    element: 'light',
+    level: 8,
+    critChance: 0.15,
+    gold: { min: 100, max: 140 },
+    experience: 150
+  },
+  
+  // Final boss - dragon
+  ancient_dragon: {
+    id: 'ancient_dragon',
+    name: 'Ancient Dragon',
+    spriteIndex: 20,
+    maxHp: 800,
+    damage: 55,
+    defense: 25,
+    xpReward: 800,
+    goldReward: 500,
+    difficulty: 'hard',
+    attack: 55,
+    speed: 4,
+    element: 'fire',
+    level: 15,
+    critChance: 0.3,
+    critMultiplier: 2.5,
+    boss: true,
+    enrageThreshold: 0.3,
+    enrageMultiplier: 1.5,
+    gold: { min: 400, max: 600 },
+    experience: 800
   }
 };
 

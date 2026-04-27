@@ -369,6 +369,21 @@ export const ARMOR: Record<string, EquipmentDefinition> = {
     description: 'Sturdy defensive shield.'
   },
   
+  armor_holy_plate: {
+    id: 'armor_holy_plate',
+    name: 'Holy Plate',
+    type: 'armor',
+    slot: 'chest',
+    defense: 25,
+    health: 60,
+    attack: 10,
+    rarity: 'epic',
+    buyPrice: 0,
+    sellPrice: 800,
+    level: 15,
+    description: 'Divine armor blessed by the light.'
+  },
+  
   // ============ MAGIC ARMOR ============
   armor_mage_robes: {
     id: 'armor_mage_robes',
@@ -776,6 +791,69 @@ export const ACCESSORIES: Record<string, EquipmentDefinition> = {
     sellPrice: 2000,
     level: 20,
     description: 'Heart of a fallen dragon.'
+  },
+  
+  // New accessories for elemental challenges
+  accessory_ice_crystal: {
+    id: 'accessory_ice_crystal',
+    name: 'Ice Crystal',
+    type: 'accessory',
+    slot: 'accessory1',
+    health: 30,
+    mana: 20,
+    defense: 8,
+    critChance: 0.05,
+    rarity: 'rare',
+    buyPrice: 800,
+    sellPrice: 400,
+    level: 8,
+    description: 'A crystal imbued with frost magic.'
+  },
+  
+  accessory_fire_essence: {
+    id: 'accessory_fire_essence',
+    name: 'Fire Essence',
+    type: 'accessory',
+    slot: 'accessory2',
+    attack: 15,
+    critChance: 0.08,
+    critMultiplier: 0.15,
+    rarity: 'rare',
+    buyPrice: 800,
+    sellPrice: 400,
+    level: 8,
+    description: 'Concentrated flame energy.'
+  },
+  
+  accessory_thunder_eye: {
+    id: 'accessory_thunder_eye',
+    name: 'Thunder Eye',
+    type: 'accessory',
+    slot: 'accessory1',
+    speed: 20,
+    critChance: 0.12,
+    attack: 5,
+    rarity: 'epic',
+    buyPrice: 1500,
+    sellPrice: 750,
+    level: 12,
+    description: 'An eye that sees through lightning.'
+  },
+  
+  accessory_holy_crown: {
+    id: 'accessory_holy_crown',
+    name: 'Holy Crown',
+    type: 'accessory',
+    slot: 'accessory2',
+    health: 80,
+    mana: 40,
+    defense: 12,
+    attack: 8,
+    rarity: 'epic',
+    buyPrice: 2000,
+    sellPrice: 1000,
+    level: 15,
+    description: 'Blessed by the divine light.'
   }
 };
 

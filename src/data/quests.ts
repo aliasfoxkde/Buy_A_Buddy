@@ -257,6 +257,80 @@ export const QUESTS: Record<string, Quest> = {
       gold: 150,
       experience: 200
     }
+  },
+  
+  // Elemental challenges
+  quest_elemental_fire: {
+    id: 'quest_elemental_fire',
+    name: 'Fire Within',
+    description: 'The Fire Elemental threatens the village. Defeat it to restore peace.',
+    objectives: [
+      { type: 'kill', targetId: 'fire_elemental', targetName: 'Fire Elementals', count: 3, current: 0 }
+    ],
+    reward: {
+      gold: 250,
+      experience: 350,
+      items: ['accessory_fire_essence']
+    }
+  },
+  
+  quest_elemental_ice: {
+    id: 'quest_elemental_ice',
+    name: 'Frozen Fury',
+    description: 'The Ice Golem blocks the mountain pass. Defeat it to restore trade routes.',
+    objectives: [
+      { type: 'kill', targetId: 'ice_golem', targetName: 'Ice Golems', count: 2, current: 0 }
+    ],
+    reward: {
+      gold: 300,
+      experience: 400,
+      items: ['accessory_ice_crystal']
+    }
+  },
+  
+  // Thunder bird quest
+  quest_thunder_bird: {
+    id: 'quest_thunder_bird',
+    name: 'Storm Chaser',
+    description: 'The Thunder Bird guards the sky. Defeat it to prove your worth.',
+    objectives: [
+      { type: 'kill', targetId: 'thunder_bird', targetName: 'Thunder Birds', count: 3, current: 0 }
+    ],
+    reward: {
+      gold: 200,
+      experience: 300
+    }
+  },
+  
+  // Holy knight quest
+  quest_holy_challenge: {
+    id: 'quest_holy_challenge',
+    name: 'Holy War',
+    description: 'A Holy Knight challenges all who pass. Prove your strength in combat.',
+    objectives: [
+      { type: 'kill', targetId: 'holy_knight', targetName: 'Holy Knights', count: 2, current: 0 }
+    ],
+    reward: {
+      gold: 400,
+      experience: 500,
+      items: ['armor_holy_plate']
+    }
+  },
+  
+  // Dragon slayer ultimate quest
+  quest_dragon_slayer: {
+    id: 'quest_dragon_slayer',
+    name: 'Dragon Slayer',
+    description: 'The Ancient Dragon awakens! Only the strongest can defeat it.',
+    objectives: [
+      { type: 'kill', targetId: 'ancient_dragon', targetName: 'Ancient Dragon', count: 1, current: 0 }
+    ],
+    reward: {
+      gold: 1000,
+      experience: 2000,
+      items: ['weapon_dragon_spear', 'accessory_dragon_necklace']
+    },
+    isRepeatable: false
   }
 };
 
