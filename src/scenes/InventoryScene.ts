@@ -5,11 +5,13 @@
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
 import { SetBonusDisplay } from '../ui/SetBonusDisplay';
+import { TooltipManager } from '../ui/TooltipManager';
 
 export class InventoryScene extends Phaser.Scene {
   private slots: Phaser.GameObjects.Container[] = [];
   private equipmentSlots: Phaser.GameObjects.Container[] = [];
   private selectedSlot: number = -1;
+  private tooltip!: TooltipManager;
   private setBonusDisplay!: SetBonusDisplay;
   private showSetBonus: boolean = false;
   
@@ -19,6 +21,9 @@ export class InventoryScene extends Phaser.Scene {
   
   create(): void {
     const { width, height } = this.scale;
+    
+    // Initialize tooltip manager
+    this.tooltip = new TooltipManager(this);
     
     // Background
     this.add.rectangle(width / 2, height / 2, width, height, 0x1a1a2e, 0.95);
@@ -208,6 +213,20 @@ export class InventoryScene extends Phaser.Scene {
         this.selectSlot(i);
       });
       
+      // Add hover tooltip for items
+      container.on('pointerover', (pointer: Phaser.Input.Pointer) => {
+        if (slot && slot.itemId) {
+          this.tooltip.showItemTooltip(slot.itemId, pointer.x, pointer.y, {
+            quantity: slot.quantity,
+            slot: i
+          });
+        }
+      });
+      
+      container.on('pointerout', () => {
+        this.tooltip.hide();
+      });
+      
       this.slots.push(container);
     }
   }
@@ -243,6 +262,9 @@ export class InventoryScene extends Phaser.Scene {
   }
   
   private close(): void {
+    if (this.tooltip) {
+      this.tooltip.hide();
+    }
     this.setBonusDisplay.destroy();
     this.scene.stop();
     this.scene.resume('WorldScene');
