@@ -167,6 +167,27 @@ export const EQUIPMENT_SETS: Record<string, EquipmentSet> = {
         description: '+30 Speed, +20% Crit, +40% Crit Damage'
       }
     ]
+  },
+  
+  // Holy warrior set
+  holy_warrior: {
+    id: 'holy_warrior',
+    name: 'Holy Warrior',
+    pieces: ['armor_holy_plate', 'accessory_holy_crown', 'accessory_ice_crystal'],
+    bonus: [
+      {
+        pieces: 2,
+        stats: { defense: 15, health: 50 },
+        name: 'Divine Shield',
+        description: '+15 Defense, +50 Health'
+      },
+      {
+        pieces: 3,
+        stats: { defense: 30, health: 100, attack: 15 },
+        name: 'Holy Retribution',
+        description: '+30 Defense, +100 Health, +15 Attack'
+      }
+    ]
   }
 };
 
