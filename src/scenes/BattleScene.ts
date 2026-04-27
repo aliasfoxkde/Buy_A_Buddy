@@ -48,6 +48,8 @@ export class BattleScene extends Phaser.Scene {
   private deathScreen!: DeathScreen;
   private particleSystem!: ParticleSystem;
   private isPlayerDefeated: boolean = false;
+  private comboCount: number = 0;
+  private maxComboReached: number = 0;
   private skillCooldowns: Map<string, number> = new Map();
   private availableSkills: Skill[] = [];
   private skillButtons: Phaser.GameObjects.Container[] = [];
@@ -484,6 +486,7 @@ export class BattleScene extends Phaser.Scene {
       this.playerHp = Math.min(this.playerMaxHp, this.playerHp + skill.healAmount);
       this.addBattleLog(`${skill.name}! +${skill.healAmount} HP`);
       this.particleSystem.showHealNumber(300, 280, skill.healAmount);
+      this.particleSystem.healBurst(350, 300, skill.healAmount);
       
       // Update player HP bar
       const playerPercent = this.playerHp / this.playerMaxHp;
@@ -651,8 +654,15 @@ export class BattleScene extends Phaser.Scene {
     // Critical hit text
     if (isCrit) {
       this.showCriticalHitText(900, 250);
+      this.particleSystem.criticalBurst(900, 300);
+      this.comboCount++;
+      if (this.comboCount > 1) {
+        this.particleSystem.comboHit(640, 150, this.comboCount);
+      }
+      this.maxComboReached = Math.max(this.maxComboReached, this.comboCount);
       audioManager.playCrit();
     } else {
+      this.comboCount = 0;
       audioManager.playHit();
     }
     
@@ -669,6 +679,9 @@ export class BattleScene extends Phaser.Scene {
     
     audioManager.playDefend();
     this.addBattleLog('Hero takes a defensive stance!');
+    
+    // Show shield effect
+    this.particleSystem.shieldEffect(350, 300);
     
     this.isPlayerTurn = false;
     this.updateTurnIndicator();

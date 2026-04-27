@@ -232,4 +232,117 @@ export class ParticleSystem {
     });
     this.particles.clear();
   }
+  
+  /**
+   * Combo hit effect - multiple particles in sequence
+   */
+  public comboHit(x: number, y: number, comboCount: number): void {
+    const colors = [0xff4444, 0xff8844, 0xffaa00, 0xffdd00];
+    const color = colors[Math.min(comboCount - 1, colors.length - 1)];
+    
+    const text = this.scene.add.text(x, y, `${comboCount}x COMBO!`, {
+      fontSize: '28px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#' + color.toString(16).padStart(6, '0'),
+      stroke: '#000',
+      strokeThickness: 3
+    }).setOrigin(0.5).setDepth(100);
+    
+    this.scene.tweens.add({
+      targets: text,
+      y: y - 50,
+      alpha: 0,
+      scale: 1.5,
+      duration: 800,
+      ease: 'Back.easeOut',
+      onComplete: () => text.destroy()
+    });
+  }
+  
+  /**
+   * Critical hit burst effect
+   */
+  public criticalBurst(x: number, y: number): void {
+    // Create a star burst effect
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const star = this.scene.add.text(x, y, '✦', {
+        fontSize: '16px',
+        color: '#fbbf24'
+      }).setOrigin(0.5);
+      
+      const targetX = x + Math.cos(angle) * 60;
+      const targetY = y + Math.sin(angle) * 60;
+      
+      this.scene.tweens.add({
+        targets: star,
+        x: targetX,
+        y: targetY,
+        alpha: 0,
+        scale: 0,
+        duration: 400,
+        ease: 'Power2',
+        onComplete: () => star.destroy()
+      });
+    }
+  }
+  
+  /**
+   * Shield effect - defensive aura
+   */
+  public shieldEffect(x: number, y: number): void {
+    const shield = this.scene.add.text(x, y, '🛡️', {
+      fontSize: '32px'
+    }).setOrigin(0.5).setDepth(50);
+    
+    this.scene.tweens.add({
+      targets: shield,
+      scale: 1.5,
+      alpha: 0,
+      duration: 600,
+      ease: 'Power2',
+      onComplete: () => shield.destroy()
+    });
+  }
+  
+  /**
+   * Heal burst effect
+   */
+  public healBurst(x: number, y: number, amount: number): void {
+    // Floating hearts
+    for (let i = 0; i < 5; i++) {
+      const heart = this.scene.add.text(x + Phaser.Math.Between(-30, 30), y, '💚', {
+        fontSize: '20px'
+      }).setOrigin(0.5);
+      
+      this.scene.tweens.add({
+        targets: heart,
+        y: heart.y - 60 - (i * 10),
+        x: heart.x + Phaser.Math.Between(-20, 20),
+        alpha: 0,
+        duration: 800 + (i * 100),
+        delay: i * 50,
+        ease: 'Power2',
+        onComplete: () => heart.destroy()
+      });
+    }
+    
+    // Heal number
+    const text = this.scene.add.text(x, y, `+${amount} HP`, {
+      fontSize: '24px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#22c55e',
+      stroke: '#000',
+      strokeThickness: 2
+    }).setOrigin(0.5).setDepth(100);
+    
+    this.scene.tweens.add({
+      targets: text,
+      y: text.y - 80,
+      alpha: 0,
+      duration: 1000,
+      ease: 'Power2',
+      onComplete: () => text.destroy()
+    });
+  }
 }
