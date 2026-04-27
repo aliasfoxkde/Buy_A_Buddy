@@ -170,13 +170,16 @@ export function getBuddyMaxLevel(rarity: RarityType): number {
 export const BATTLE_CONFIG = {
   maxTeamSize: 3,
   baseDamage: 10,
-  critChance: 0.15,
+  critChance: 0.1,
   critMultiplier: 1.5,
   defendDamageReduction: 0.5,
   energyPerTurn: 3,
   specialAbilityCost: 5,
   fleeChanceBase: 0.3,
   fleeChancePerLevel: 0.02,
+  buddyAssistChance: 0.3,
+  buddyAssistDamageBase: 8,
+  buddyAssistDamageVariance: 5,
 } as const;
 
 // ==========================================

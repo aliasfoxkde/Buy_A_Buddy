@@ -13,6 +13,7 @@ import { AchievementPopup } from '../ui/Notifications';
 import { achievementSystem } from '../systems/AchievementSystem';
 import { getRandomEnemy, getEnemy, scaleEnemyStats, EnemyType } from '../data/enemies';
 import { SKILLS, getClassSkills, type Skill } from '../data/skills';
+import { BATTLE_CONFIG } from '../config/constants';
 
 export class BattleScene extends Phaser.Scene {
   private playerEntity: any = null;
@@ -596,17 +597,17 @@ export class BattleScene extends Phaser.Scene {
     
     const damage = Math.max(1, baseDamage + Math.floor(Math.random() * 8) - 4);
     
-    // Critical hit check (10% base chance)
-    const isCrit = Math.random() < 0.1;
-    const finalDamage = isCrit ? Math.floor(damage * 1.5) : damage;
+    // Critical hit check (from config)
+    const isCrit = Math.random() < BATTLE_CONFIG.critChance;
+    const finalDamage = isCrit ? Math.floor(damage * BATTLE_CONFIG.critMultiplier) : damage;
     
     this.enemyHp = Math.max(0, this.enemyHp - finalDamage);
     
     this.addBattleLog(`Hero attacks for ${finalDamage} damage!`);
     
-    // Buddy assist chance (30%)
-    if (Math.random() < 0.3) {
-      const buddyDamage = 8 + Math.floor(Math.random() * 5);
+    // Buddy assist chance (from config)
+    if (Math.random() < BATTLE_CONFIG.buddyAssistChance) {
+      const buddyDamage = BATTLE_CONFIG.buddyAssistDamageBase + Math.floor(Math.random() * BATTLE_CONFIG.buddyAssistDamageVariance);
       this.enemyHp = Math.max(0, this.enemyHp - buddyDamage);
       this.addBattleLog(`Buddy assists for ${buddyDamage} damage! 💚`);
       // Show buddy assist effect
