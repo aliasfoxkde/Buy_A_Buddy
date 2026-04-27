@@ -50,6 +50,7 @@ export class BattleScene extends Phaser.Scene {
   private skillCooldowns: Map<string, number> = new Map();
   private availableSkills: Skill[] = [];
   private skillButtons: Phaser.GameObjects.Container[] = [];
+  private skillTooltip?: Phaser.GameObjects.Container;
   
   constructor() {
     super({ key: 'BattleScene' });
@@ -372,13 +373,59 @@ export class BattleScene extends Phaser.Scene {
     
     container.on('pointerover', () => {
       bg.setStrokeStyle(2, 0xfbbf24);
+      // Show skill tooltip
+      this.showSkillTooltip(skill, x + 50, y - 30);
     });
     
     container.on('pointerout', () => {
       bg.setStrokeStyle(2, skill.manaCost > 0 ? 0x3b82f6 : 0x555);
+      this.hideSkillTooltip();
     });
     
     return container;
+  }
+  
+  private showSkillTooltip(skill: Skill, x: number, y: number): void {
+    // Create a simple tooltip for the skill
+    const tooltipBg = this.add.container(x, y).setDepth(1000);
+    
+    const bg = this.add.rectangle(0, 0, 180, 80, 0x1a1a2e);
+    bg.setStrokeStyle(2, 0x3b82f6);
+    
+    const nameText = this.add.text(-80, -30, skill.name, {
+      fontSize: '14px',
+      fontFamily: 'Arial Black, sans-serif',
+      color: '#fff'
+    }).setOrigin(0, 0.5);
+    
+    const descText = this.add.text(-80, -10, skill.description || '', {
+      fontSize: '10px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#aaa'
+    }).setOrigin(0, 0.5);
+    
+    let infoText = '';
+    if (skill.damage) infoText += `Damage: ${skill.damage}\n`;
+    if (skill.healAmount) infoText += `Heal: ${skill.healAmount}\n`;
+    if (skill.manaCost) infoText += `Mana: ${skill.manaCost}`;
+    
+    const statText = this.add.text(-80, 15, infoText, {
+      fontSize: '10px',
+      fontFamily: 'Arial, sans-serif',
+      color: '#22c55e'
+    }).setOrigin(0, 0.5);
+    
+    tooltipBg.add([bg, nameText, descText, statText]);
+    
+    // Store reference for cleanup
+    this.skillTooltip = tooltipBg;
+  }
+  
+  private hideSkillTooltip(): void {
+    if (this.skillTooltip) {
+      this.skillTooltip.destroy();
+      this.skillTooltip = undefined;
+    }
   }
   
   private useSkill(skill: Skill): void {
