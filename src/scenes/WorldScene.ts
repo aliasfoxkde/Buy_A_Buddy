@@ -17,6 +17,48 @@ import { achievementSystem } from '../systems/AchievementSystem';
 import { Minimap } from '../ui/Minimap';
 import { getDialogue } from '../data/dialogue';
 
+/**
+ * Extended zone data interfaces
+ */
+interface WorldItemZone {
+  npcId?: string;
+  itemType?: string;
+  emoji?: string;
+  collectText?: string;
+  isTransition?: boolean;
+  targetZone?: string;
+  isEncounter?: boolean;
+  enemyType?: string;
+  isBossEncounter?: boolean;
+  bossId?: string;
+  isSafeZone?: boolean;
+  isVillageZone?: boolean;
+  isShopZone?: boolean;
+  shopType?: string;
+}
+
+interface BuddyData {
+  skillIcon?: Phaser.GameObjects.Text;
+  [key: string]: unknown;
+}
+
+interface BossZoneData {
+  isBossEncounter: boolean;
+  bossId: string;
+}
+
+interface TransitionZoneData {
+  isTransition: boolean;
+  targetZone: string;
+}
+
+interface SafeZoneData {
+  isSafeZone: boolean;
+  isVillageZone?: boolean;
+  isShopZone?: boolean;
+  shopType?: string;
+}
+
 export class WorldScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Sprite;
   private buddies: Phaser.GameObjects.Sprite[] = [];
@@ -505,7 +547,7 @@ export class WorldScene extends Phaser.Scene {
       
       // Add interaction zone
       const zone = this.add.zone(npc.position.x, npc.position.y, 60, 60);
-      (zone as any).npcId = npc.id;
+      (zone as Phaser.GameObjects.Zone & WorldItemZone).npcId = npc.id;
       this.physics.add.existing(zone);
     }
   }
@@ -541,9 +583,10 @@ export class WorldScene extends Phaser.Scene {
       
       // Pickup zone
       const zone = this.add.zone(pos.x, pos.y, 50, 50);
-      (zone as any).itemType = pos.type;
-      (zone as any).emoji = pos.emoji;
-      (zone as any).collectText = itemText;
+      const zoneData = zone as Phaser.GameObjects.Zone & WorldItemZone;
+      zoneData.itemType = pos.type;
+      zoneData.emoji = pos.emoji;
+      zoneData.collectText = pos.emoji; // Use emoji as the collect text
       this.physics.add.existing(zone);
     }
     
@@ -602,8 +645,8 @@ export class WorldScene extends Phaser.Scene {
       
       // Add zone
       const zone = this.add.zone(pos.x, pos.y, 80, 80);
-      (zone as any).isEncounter = true;
-      (zone as any).enemyType = pos.enemy;
+      (zone as Phaser.GameObjects.Zone & WorldItemZone).isEncounter = true;
+      (zone as Phaser.GameObjects.Zone & WorldItemZone).enemyType = pos.enemy;
       this.physics.add.existing(zone);
       this.encounterZones.push(zone);
     }
@@ -661,9 +704,9 @@ export class WorldScene extends Phaser.Scene {
     }).setOrigin(0.5);
     
     // Boss encounter zone
-    const bossZone = this.add.zone(bossX, bossY, 100, 100);
-    (bossZone as any).isBossEncounter = true;
-    (bossZone as any).bossId = 'slime_boss';
+    const bossZone = this.add.zone(bossX, bossY, 100, 100) as Phaser.GameObjects.Zone & BossZoneData;
+    bossZone.isBossEncounter = true;
+    bossZone.bossId = 'slime_boss';
     this.physics.add.existing(bossZone);
   }
   
@@ -740,7 +783,8 @@ export class WorldScene extends Phaser.Scene {
       }).setOrigin(0.5);
       
       // Store reference for animation
-      (buddy as any).skillIcon = skillIcon;
+      const buddyWithData = buddy as Phaser.GameObjects.Sprite & BuddyData;
+      buddyWithData.skillIcon = skillIcon;
     }
     
     // Show buddy name in HUD
@@ -1153,30 +1197,38 @@ export class WorldScene extends Phaser.Scene {
     // Add collision for zone transitions
     const transitionZones = this.physics.add.group();
     this.children.list.forEach(child => {
-      if ((child as any).isTransition) {
+      const zone = child as Phaser.GameObjects.Zone & WorldItemZone;
+      if (zone.isTransition) {
         transitionZones.add(child);
       }
     });
     
     this.physics.add.overlap(this.player, transitionZones, (player, zone) => {
-      this.triggerZoneTransition((zone as any).targetZone);
+      const transitionZone = zone as Phaser.GameObjects.Zone & WorldItemZone;
+      if (transitionZone.targetZone) {
+        this.triggerZoneTransition(transitionZone.targetZone);
+      }
     });
     
     // Add collision for boss encounter zones
     const bossZones = this.physics.add.group();
     this.children.list.forEach(child => {
-      if ((child as any).isBossEncounter) {
+      const zone = child as Phaser.GameObjects.Zone & WorldItemZone;
+      if (zone.isBossEncounter) {
         bossZones.add(child);
       }
     });
     
     this.physics.add.overlap(this.player, bossZones, (player, zone) => {
-      this.triggerBossEncounter((zone as any).bossId);
+      const bossZone = zone as Phaser.GameObjects.Zone & WorldItemZone;
+      if (bossZone.bossId) {
+        this.triggerBossEncounter(bossZone.bossId);
+      }
     });
     
     // Village safe zone - heal player
-    const villageZone = this.add.zone(this.villageX, this.villageY, 80, 80);
-    (villageZone as any).isSafeZone = true;
+    const villageZone = this.add.zone(this.villageX, this.villageY, 80, 80) as Phaser.GameObjects.Zone & SafeZoneData;
+    villageZone.isSafeZone = true;
     this.physics.add.existing(villageZone);
     this.physics.add.overlap(this.player, villageZone, () => {
       this.handleSafeZone();
@@ -1323,9 +1375,9 @@ export class WorldScene extends Phaser.Scene {
   }
   
   private collectItem(zone: Phaser.GameObjects.Zone): void {
-    const itemType = (zone as any).itemType;
-    const emoji = (zone as any).emoji;
-    const collectText = (zone as any).collectText;
+    const zoneData = zone as Phaser.GameObjects.Zone & WorldItemZone;
+    const itemType = zoneData.itemType;
+    const emoji = zoneData.emoji || '?';
     
     if (!itemType) return;
     
@@ -1336,10 +1388,9 @@ export class WorldScene extends Phaser.Scene {
       audioManager.playPickup();
       
       // Show pickup notification
-      this.showItemPickupNotification(emoji, itemType);
+      this.showItemPickupNotification(emoji || '?', itemType);
       
       // Remove item from world
-      collectText?.destroy();
       zone.destroy();
       
       // Remove from worldItems array
