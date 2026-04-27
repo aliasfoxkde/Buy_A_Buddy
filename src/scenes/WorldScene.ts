@@ -61,6 +61,7 @@ export class WorldScene extends Phaser.Scene {
   // Combat trigger
   private encounterCooldown: boolean = false;
   private encounterZones: Phaser.GameObjects.Zone[] = [];
+  private visitedZones: Set<string> = new Set();
   private safeZoneIndicator!: Phaser.GameObjects.Container;
   private villageX: number = 80;
   private villageY: number = 400;
@@ -1193,6 +1194,12 @@ export class WorldScene extends Phaser.Scene {
   private triggerZoneTransition(targetZone: string): void {
     if (this.encounterCooldown) return;
     this.encounterCooldown = true;
+    
+    // Track zone for explorer achievement
+    if (!this.visitedZones.has(targetZone)) {
+      this.visitedZones.add(targetZone);
+      achievementSystem.onZoneEnter(targetZone);
+    }
     
     // Show transition message
     this.showNotification(`Entering ${targetZone}...`);

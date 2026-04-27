@@ -4,6 +4,7 @@
 
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
+import { achievementSystem } from '../systems/AchievementSystem';
 import { audioManager } from '../audio/AudioManager';
 
 interface ShopItem {
@@ -436,6 +437,13 @@ export class ShopScene extends Phaser.Scene {
     
     audioManager.playSound('success');
     this.showMessage('Purchase complete!', 0x22c55e);
+    
+    // Track for shop achievement
+    let itemCount = 0;
+    this.cart.forEach(qty => { itemCount += qty; });
+    if (itemCount > 0) {
+      achievementSystem.onShopPurchase(itemCount);
+    }
     
     // Refresh display
     this.scene.restart({ shopType: this.shopType });
