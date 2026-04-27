@@ -164,6 +164,30 @@ export class WorldScene extends Phaser.Scene {
         }
       }
     });
+    
+    // Listen for player heal events (from dialogue)
+    gameSystems.eventBus.on('player:heal', (event: { type: string; payload: any }) => {
+      const amount = event.payload?.amount || 50;
+      if (gameSystems.player) {
+        gameSystems.player.heal(amount);
+        this.showNotification(`Healed for ${amount} HP!`);
+      }
+    });
+    
+    // Listen for shop open events (from dialogue)
+    gameSystems.eventBus.on('npc:open_shop', (event: { type: string; payload: any }) => {
+      const shopId = event.payload?.shopId || 'general_store';
+      this.scene.pause();
+      this.scene.launch('ShopScene', { shopType: shopId });
+    });
+    
+    // Listen for player buff events (from dialogue)
+    gameSystems.eventBus.on('player:buff', (event: { type: string; payload: any }) => {
+      const buffType = event.payload?.buffType || 'strength';
+      const duration = event.payload?.duration || 30;
+      this.showNotification(`Buffed with ${buffType} for ${duration}s!`);
+      // Buffs would be applied through the buff system
+    });
   }
 
   private initTutorial(): void {

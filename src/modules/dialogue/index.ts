@@ -31,9 +31,10 @@ export interface DialogueNode {
   condition?: () => boolean;
   effect?: () => void;
   action?: {
-    type: 'give_item' | 'take_item' | 'start_quest' | 'complete_quest' | 'change_flag' | 'play_sound';
+    type: 'give_item' | 'take_item' | 'start_quest' | 'complete_quest' | 'change_flag' | 'play_sound' | 'heal_player' | 'open_shop' | 'buff_player';
     target: string;
     quantity?: number;
+    value?: number;
   };
 }
 
@@ -175,6 +176,15 @@ export class DialogueSystem {
         break;
       case 'play_sound':
         this.eventBus.emit('audio:play', { sound: action.target });
+        break;
+      case 'heal_player':
+        this.eventBus.emit('player:heal', { amount: action.value || 50 });
+        break;
+      case 'open_shop':
+        this.eventBus.emit('npc:open_shop', { shopId: action.target });
+        break;
+      case 'buff_player':
+        this.eventBus.emit('player:buff', { buffType: action.target, duration: action.value || 30 });
         break;
     }
   }

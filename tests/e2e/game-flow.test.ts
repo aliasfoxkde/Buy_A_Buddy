@@ -5,7 +5,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Buy a Buddy Game Flow', () => {
-  const baseUrl = 'https://c85a8b34.buy-a-buddy.pages.dev';
+  const baseUrl = 'https://38c43758.buy-a-buddy.pages.dev';
   
   test.beforeEach(async ({ page }) => {
     await page.goto(baseUrl);
