@@ -160,6 +160,8 @@ export type GameEventType =
   | 'storage:load_start'
   | 'storage:load_complete'
   | 'storage:load_error'
+  | 'story:event'
+  | 'story:act_complete'
   | 'storage:cleared'
   | 'buff:apply'
   | 'buff:tick'

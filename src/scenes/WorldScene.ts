@@ -169,6 +169,16 @@ export class WorldScene extends Phaser.Scene {
     // Initialize quests
     this.initQuests();
     
+    // Setup story system notification callback
+    gameSystems.story.setNotificationCallback((text) => this.showNotification(text));
+    
+    // Show current act narrative
+    const currentAct = gameSystems.story.getCurrentAct();
+    if (currentAct && currentAct.currentQuestIndex === 0) {
+      this.showNotification(`📖 ACT 1: ${currentAct.name}
+${currentAct.narrative}`);
+    }
+    
     // Listen for battle end events
     this.setupBattleEndListener();
     

@@ -18,6 +18,7 @@ import { EventSystem } from '../modules/events';
 import { NPCSystem } from '../modules/npc';
 import { AISystem, DEFAULT_AI_CONFIGS } from '../modules/ai';
 import { TutorialSystem } from '../modules/tutorial';
+import { getStorySystem } from '../modules/story';
 
 /**
  * Central Game Manager
@@ -42,6 +43,7 @@ export class GameSystems {
   npcs: NPCSystem;
   ai: AISystem;
   tutorial: TutorialSystem;
+  story: ReturnType<typeof getStorySystem>;
   
   // Player entities
   player: CombatEntity | null = null;
@@ -72,6 +74,7 @@ export class GameSystems {
     this.npcs = new NPCSystem(this.eventBus);
     this.ai = new AISystem(this.eventBus);
     this.tutorial = new TutorialSystem(this.eventBus);
+    this.story = getStorySystem(this.eventBus);
     
     this.combat = new CombatSystem(this.eventBus);
     
