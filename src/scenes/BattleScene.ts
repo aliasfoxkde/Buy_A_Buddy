@@ -977,6 +977,11 @@ export class BattleScene extends Phaser.Scene {
     // Clear all timers
     this.time.removeAllEvents();
     
+    // Clean up particle system
+    if (this.particleSystem) {
+      this.particleSystem.destroy();
+    }
+    
     // Destroy UI elements if they exist
     if (this.uiElements) {
       this.uiElements.playerHp?.destroy();

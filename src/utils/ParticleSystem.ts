@@ -222,4 +222,14 @@ export class ParticleSystem {
       onComplete: () => text.destroy()
     });
   }
+  
+  /**
+   * Clean up all particle emitters
+   */
+  public destroy(): void {
+    this.particles.forEach(emitter => {
+      emitter.destroy();
+    });
+    this.particles.clear();
+  }
 }
