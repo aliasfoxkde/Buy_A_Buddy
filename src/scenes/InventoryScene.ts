@@ -140,6 +140,9 @@ export class InventoryScene extends Phaser.Scene {
     
     const startX = x - 250;
     
+    // Get equipped items
+    const equipped = gameSystems.inventory.getEquipment();
+    
     for (let i = 0; i < 7; i++) {
       const slotX = startX + (i % 4) * 130;
       const slotY = y + Math.floor(i / 4) * 130;
@@ -155,15 +158,38 @@ export class InventoryScene extends Phaser.Scene {
         color: '#888'
       }).setOrigin(0.5);
       
-      const icon = this.add.text(0, 0, '—', {
+      // Check if slot has item
+      const slot = equipped[i];
+      let iconText = '—';
+      let iconColor = '#444';
+      
+      if (slot?.item) {
+        iconText = this.getItemEmoji(slot.item.id);
+        iconColor = '#fff';
+      }
+      
+      const icon = this.add.text(0, 0, iconText, {
         fontSize: '32px',
         fontFamily: 'Arial, sans-serif',
-        color: '#444'
+        color: iconColor
       }).setOrigin(0.5);
       
       container.add([bg, label, icon]);
       container.setSize(100, 100);
       container.setInteractive({ useHandCursor: true });
+      
+      // Add tooltip for equipment slots
+      container.on('pointerover', (pointer: Phaser.Input.Pointer) => {
+        if (slot?.item) {
+          this.tooltip.showItemTooltip(slot.item.id, pointer.x, pointer.y, { slot: i });
+        } else {
+          this.tooltip.showInfoTooltip(slotNames[i] + ' (Empty)', pointer.x, pointer.y);
+        }
+      });
+      
+      container.on('pointerout', () => {
+        this.tooltip.hide();
+      });
       
       this.equipmentSlots.push(container);
     }
