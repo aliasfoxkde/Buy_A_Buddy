@@ -4,7 +4,7 @@
 
 import { test, expect } from '@playwright/test';
 
-const GAME_URL = 'https://1b82f3dc.buy-a-buddy.pages.dev';
+const GAME_URL = 'https://f50e0759.buy-a-buddy.pages.dev';
 
 test.describe('Save/Load System', () => {
   test('should have localStorage available', async ({ page }) => {
