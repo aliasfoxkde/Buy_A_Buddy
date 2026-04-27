@@ -126,10 +126,45 @@ export class WorldScene extends Phaser.Scene {
     // Initialize quests
     this.initQuests();
     
+    // Listen for battle end events
+    this.setupBattleEndListener();
+    
     // Show tutorial hints for new players
     this.showTutorialHints();
   }
-  
+
+  wake(sleepData?: any): void {
+    // Called when scene resumes after being paused (e.g., after battle)
+    console.log('WorldScene waking up');
+    
+    // Resume exploration music
+    this.startExplorationMusic();
+    
+    // Reset encounter cooldown
+    this.encounterCooldown = false;
+  }
+
+  private setupBattleEndListener(): void {
+    // Listen for battle end events
+    gameSystems.eventBus.on('battle:end', (event: { type: string; payload: any; timestamp: number }) => {
+      const { victory, enemyId, goldEarned } = event.payload || {};
+      console.log('Battle ended:', event.payload);
+      
+      if (victory && enemyId) {
+        // Track enemy kill for quest progress
+        this.trackEnemyKill(enemyId);
+        
+        // Update kill tracking for stats
+        gameSystems.trackKill(enemyId);
+        
+        // Show victory notification
+        if (goldEarned) {
+          this.showNotification(`Victory! +${goldEarned} Gold`);
+        }
+      }
+    });
+  }
+
   private initTutorial(): void {
     // Only show tutorial for new players
     if (TutorialOverlay.wasCompleted()) return;
@@ -1195,7 +1230,11 @@ export class WorldScene extends Phaser.Scene {
     
     this.time.delayedCall(800, () => {
       this.scene.pause();
-      this.scene.launch('BattleScene', { enemyId: bossId, isBoss: true });
+      this.scene.launch('BattleScene', { 
+        enemyId: bossId, 
+        isBoss: true,
+        sourceScene: 'WorldScene'
+      });
     });
   }
   
@@ -1330,7 +1369,7 @@ export class WorldScene extends Phaser.Scene {
     this.time.delayedCall(500, () => {
       // Start battle scene
       this.scene.pause();
-      this.scene.launch('BattleScene');
+      this.scene.launch('BattleScene', { sourceScene: 'WorldScene' });
       
       // Reset cooldown after returning from battle
       this.time.delayedCall(3000, () => {

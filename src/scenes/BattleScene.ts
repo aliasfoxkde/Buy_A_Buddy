@@ -755,6 +755,15 @@ export class BattleScene extends Phaser.Scene {
     // Return to world
     this.cameras.main.fadeOut(300);
     this.time.delayedCall(500, () => {
+      // Emit battle end event with data
+      gameSystems.eventBus.emit('battle:end', { 
+        victory: true,
+        enemyId: this.currentEnemy?.id,
+        enemyName: this.currentEnemy?.name,
+        goldEarned: scaleEnemyStats(this.currentEnemy!, gameSystems.getPlayerStats()?.level || 1).goldReward,
+        xpEarned: scaleEnemyStats(this.currentEnemy!, gameSystems.getPlayerStats()?.level || 1).xpReward
+      });
+      
       this.scene.stop();
       this.scene.resume('WorldScene');
     });
@@ -905,6 +914,13 @@ export class BattleScene extends Phaser.Scene {
     
     // Return to world
     this.time.delayedCall(2000, () => {
+      // Emit battle end event with data
+      gameSystems.eventBus.emit('battle:end', { 
+        victory: false,
+        enemyId: this.currentEnemy?.id,
+        enemyName: this.currentEnemy?.name
+      });
+      
       this.scene.stop();
       this.scene.resume('WorldScene');
     });
