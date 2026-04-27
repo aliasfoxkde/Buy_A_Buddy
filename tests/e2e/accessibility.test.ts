@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Accessibility', () => {
   test('should support keyboard navigation', async ({ page }) => {
-    await page.goto('https://fe0d66c7.buy-a-buddy.pages.dev');
+    await page.goto('https://8c08d91f.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     // Tab through buttons
@@ -22,7 +22,7 @@ test.describe('Accessibility', () => {
   });
 
   test.skip('should have visible focus indicators', async ({ page }) => {
-    await page.goto('https://fe0d66c7.buy-a-buddy.pages.dev');
+    await page.goto('https://8c08d91f.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     // Focus on game
@@ -39,7 +39,7 @@ test.describe('Accessibility', () => {
   });
 
   test.skip('should respond to all game controls via keyboard', async ({ page }) => {
-    await page.goto('https://fe0d66c7.buy-a-buddy.pages.dev');
+    await page.goto('https://8c08d91f.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     // Start game
@@ -65,7 +65,7 @@ test.describe('Accessibility', () => {
   });
 
   test('should have adequate color contrast', async ({ page }) => {
-    await page.goto('https://fe0d66c7.buy-a-buddy.pages.dev');
+    await page.goto('https://8c08d91f.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     // Check text contrast
@@ -92,7 +92,7 @@ test.describe('Accessibility', () => {
     // Set reduced motion preference
     await page.emulateMedia({ reducedMotion: 'reduce' });
     
-    await page.goto('https://fe0d66c7.buy-a-buddy.pages.dev');
+    await page.goto('https://8c08d91f.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     // Animations should be reduced or disabled
@@ -101,7 +101,7 @@ test.describe('Accessibility', () => {
   });
 
   test('should handle screen reader announcements', async ({ page }) => {
-    await page.goto('https://fe0d66c7.buy-a-buddy.pages.dev');
+    await page.goto('https://8c08d91f.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     // ARIA live regions should exist for dynamic content
@@ -115,7 +115,7 @@ test.describe('Accessibility', () => {
   });
 
   test('should have proper heading hierarchy', async ({ page }) => {
-    await page.goto('https://fe0d66c7.buy-a-buddy.pages.dev');
+    await page.goto('https://8c08d91f.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     // Check for headings
@@ -133,7 +133,7 @@ test.describe('Accessibility', () => {
   });
 
   test('should have accessible buttons', async ({ page }) => {
-    await page.goto('https://fe0d66c7.buy-a-buddy.pages.dev');
+    await page.goto('https://8c08d91f.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     // Buttons should have accessible names
@@ -154,7 +154,7 @@ test.describe('Accessibility', () => {
   test.skip('should handle zoom up to 200%', async ({ page }) => {
     await page.setViewportSize({ width: 640, height: 360 }); // 50% zoom equivalent
     
-    await page.goto('https://fe0d66c7.buy-a-buddy.pages.dev');
+    await page.goto('https://8c08d91f.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     // UI should remain usable
@@ -166,7 +166,7 @@ test.describe('Accessibility', () => {
   });
 
   test('should not trap keyboard focus', async ({ page }) => {
-    await page.goto('https://fe0d66c7.buy-a-buddy.pages.dev');
+    await page.goto('https://8c08d91f.buy-a-buddy.pages.dev');
     await page.waitForTimeout(2000);
     
     // Tab through elements

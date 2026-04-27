@@ -597,17 +597,45 @@ export class WorldScene extends Phaser.Scene {
   private createEncounterZones(): void {
     // Create encounter zones throughout the world with varied enemy types
     const encounterTypes = [
+      // Easy zones
       { x: 600, y: 400, enemy: 'goblin', icon: '👺' },
+      { x: 800, y: 350, enemy: 'slime', icon: '🟢' },
+      
+      // Medium zones
       { x: 1000, y: 200, enemy: 'wolf', icon: '🐺' },
+      { x: 1100, y: 450, enemy: 'bat', icon: '🦇' },
+      { x: 1300, y: 300, enemy: 'spider', icon: '🕷️' },
       { x: 1400, y: 500, enemy: 'skeleton', icon: '💀' },
-      { x: 1600, y: 300, enemy: 'slime', icon: '🟢' },
-      { x: 1900, y: 450, enemy: 'orc', icon: '👹' }
+      
+      // Hard zones
+      { x: 1600, y: 350, enemy: 'orc', icon: '👹' },
+      { x: 1700, y: 500, enemy: 'troll', icon: '🧌' },
+      { x: 1800, y: 200, enemy: 'fire_elemental', icon: '🔥' },
+      { x: 1900, y: 450, enemy: 'ice_golem', icon: '❄️' },
+      
+      // Elite zones
+      { x: 2000, y: 300, enemy: 'thunder_bird', icon: '⚡' },
+      { x: 2100, y: 400, enemy: 'venom_scorpion', icon: '🦂' },
+      { x: 2200, y: 250, enemy: 'shadow_lord', icon: '👤' },
+      { x: 2300, y: 350, enemy: 'holy_knight', icon: '⚔️' },
+      
+      // Boss zones
+      { x: 2450, y: 300, enemy: 'slime_boss', icon: '👾' },
+      { x: 2500, y: 400, enemy: 'ancient_dragon', icon: '🐉' }
     ];
     
     for (const pos of encounterTypes) {
+      // Difficulty-based colors
+      const isBoss = pos.enemy.includes('boss') || pos.enemy.includes('dragon');
+      const isElite = pos.enemy.includes('shadow_lord') || pos.enemy.includes('holy_knight') || pos.enemy.includes('thunder');
+      const isHard = pos.enemy.includes('orc') || pos.enemy.includes('fire_') || pos.enemy.includes('ice_') || pos.enemy.includes('troll');
+      
+      const baseColor = isBoss ? 0xff8800 : isElite ? 0xaa00ff : isHard ? 0xff4444 : 0x44aa44;
+      const borderColor = isBoss ? 0xffaa00 : isElite ? 0xdd66ff : isHard ? 0xff6666 : 0x66cc66;
+      
       // Pulsing danger circle with enemy icon
-      const indicator = this.add.circle(pos.x, pos.y, 45, 0xff0000, 0.2);
-      indicator.setStrokeStyle(3, 0xff4444);
+      const indicator = this.add.circle(pos.x, pos.y, 45, baseColor, 0.25);
+      indicator.setStrokeStyle(3, borderColor);
       
       // Inner icon
       const icon = this.add.text(pos.x, pos.y, pos.icon, {
@@ -634,13 +662,14 @@ export class WorldScene extends Phaser.Scene {
         ease: 'Sine.easeInOut'
       });
       
-      // Enemy type label with background
+      // Enemy type label with background (color matches difficulty)
+      const labelColor = isBoss ? '#ffaa00' : isElite ? '#dd66ff' : isHard ? '#ff6666' : '#66cc66';
       const labelBg = this.add.rectangle(pos.x, pos.y - 65, 100, 25, 0x1a1a2e, 0.9);
-      labelBg.setStrokeStyle(1, 0xef4444);
+      labelBg.setStrokeStyle(1, borderColor);
       const label = this.add.text(pos.x, pos.y - 65, `${pos.icon} ${pos.enemy.toUpperCase()}`, {
         fontSize: '11px',
         fontFamily: 'Arial Black, sans-serif',
-        color: '#ef4444'
+        color: labelColor
       }).setOrigin(0.5);
       
       // Add zone
