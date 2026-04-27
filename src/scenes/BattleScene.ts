@@ -497,6 +497,24 @@ export class BattleScene extends Phaser.Scene {
     } else if (skill.type === 'defense' && skill.defenseBonus) {
       this.addBattleLog(`${skill.name}! Defense up!`);
       // Defense would be applied during enemy turn
+      this.particleSystem.shieldEffect(350, 300);
+    } else if (skill.type === 'buff' && skill.damage) {
+      // Buff skill - increase attack
+      this.addBattleLog(`${skill.name}! Attack increased! 💪`);
+    } else if (skill.type === 'debuff' && skill.effect) {
+      // Debuff skill
+      this.addBattleLog(`${skill.name}! Enemy weakened! 💀`);
+    }
+    
+    // Apply elemental effects (burn, freeze, stun, poison)
+    if (skill.effect) {
+      this.applyEffect(skill.effect, skill.name);
+    }
+    
+    // Handle regeneration (heal over time)
+    if (skill.type === 'heal' && skill.healOverTime) {
+      this.addBattleLog(`${skill.name}! Regenerating... 💚`);
+      // Would apply heal over time through buff system
     }
     
     // Set cooldown
@@ -686,6 +704,37 @@ export class BattleScene extends Phaser.Scene {
     this.isPlayerTurn = false;
     this.updateTurnIndicator();
     this.checkBattleEnd();
+  }
+  
+  private applyEffect(effect: string, skillName: string): void {
+    const effectMessages: Record<string, string> = {
+      burn: '🔥 The enemy is burning!',
+      freeze: '❄️ The enemy is frozen!',
+      stun: '⚡ The enemy is stunned!',
+      poison: '🧪 The enemy is poisoned!',
+      slow: '🐌 The enemy is slowed!',
+      weaken: '💀 The enemy is weakened!'
+    };
+    
+    const message = effectMessages[effect] || `${effect} applied!`;
+    this.addBattleLog(message);
+    
+    // Show effect icon on enemy
+    const effectIcon = this.add.text(950, 200, effect === 'burn' ? '🔥' : 
+                                        effect === 'freeze' ? '❄️' :
+                                        effect === 'stun' ? '⚡' :
+                                        effect === 'poison' ? '🧪' : '💀', {
+      fontSize: '24px'
+    }).setOrigin(0.5).setDepth(50);
+    
+    // Float and fade effect
+    this.tweens.add({
+      targets: effectIcon,
+      y: 150,
+      alpha: 0,
+      duration: 1000,
+      onComplete: () => effectIcon.destroy()
+    });
   }
   
   private useItem(): void {
