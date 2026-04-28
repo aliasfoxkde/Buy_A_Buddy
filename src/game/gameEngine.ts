@@ -52,8 +52,7 @@ export function createGameConfig(): GameConfig {
       autoCenter: Phaser.Scale.CENTER_BOTH,
       width: 1280,
       height: 720,
-      resizeInterval: 0,
-      expandParent: true
+      resizeInterval: 0
     },
     scene: [
       BootScene,
