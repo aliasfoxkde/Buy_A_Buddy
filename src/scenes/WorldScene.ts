@@ -170,10 +170,10 @@ export class WorldScene extends Phaser.Scene {
     this.initQuests();
     
     // Setup story system notification callback
-    gameSystems.story.setNotificationCallback((text) => this.showNotification(text));
+    if (gameSystems.story) gameSystems.story.setNotificationCallback((text) => this.showNotification(text));
     
     // Show current act narrative
-    const currentAct = gameSystems.story.getCurrentAct();
+    const currentAct = gameSystems.story && gameSystems.story.getCurrentAct();
     if (currentAct && currentAct.currentQuestIndex === 0) {
       this.showNotification(`📖 ACT 1: ${currentAct.name}
 ${currentAct.narrative}`);

@@ -4,7 +4,7 @@
 
 import { test, expect } from '@playwright/test';
 
-const GAME_URL = 'https://6c3f4401.buy-a-buddy.pages.dev';
+const GAME_URL = 'https://dfc903f8.buy-a-buddy.pages.dev';
 
 test.describe('World Scene', () => {
   test.beforeEach(async ({ page }) => {
