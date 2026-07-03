@@ -8,7 +8,7 @@
 
 ### High Priority
 1. **Add Unit Tests** - 60% of modules untested (achievements, buffs, crafting, dialogue, npc, storage, story, tutorial, world, ai)
-2. **Fix `any` Type Warnings** - 59 warnings in event handlers, scene data
+2. **Fix `any` Type Warnings** - Was 59 warnings, now ~11 remaining in other files
 3. **Implement Code Splitting** - Lazy-load WorldScene, BattleScene (1.7MB bundle)
 4. **Implement Breeding System** - Not found despite being in Phase 2
 5. **Complete Idle Farm Mechanics** - No idle income or farming plots found

@@ -54,6 +54,70 @@ interface SafeZoneData {
   shopType?: string;
 }
 
+/** Sleep data passed to wake() when scene resumes */
+interface SleepData {
+  returnFrom?: string;
+  [key: string]: unknown;
+}
+
+/** WASD keys configuration */
+interface WASDKeys {
+  W: Phaser.Input.Keyboard.Key;
+  A: Phaser.Input.Keyboard.Key;
+  S: Phaser.Input.Keyboard.Key;
+  D: Phaser.Input.Keyboard.Key;
+}
+
+/** Base event structure */
+interface GameEvent {
+  type: string;
+  timestamp?: number;
+}
+
+/** Battle end event payload */
+interface BattleEndPayload {
+  victory?: boolean;
+  enemyId?: string;
+  goldEarned?: number;
+  rewards?: {
+    gold?: number;
+    experience?: number;
+    items?: string[];
+  };
+}
+
+interface BattleEndEvent extends GameEvent {
+  payload: BattleEndPayload;
+}
+
+/** Player heal event payload */
+interface PlayerHealPayload {
+  amount?: number;
+}
+
+interface PlayerHealEvent extends GameEvent {
+  payload: PlayerHealPayload;
+}
+
+/** NPC open shop event payload */
+interface NpcOpenShopPayload {
+  shopId?: string;
+}
+
+interface NpcOpenShopEvent extends GameEvent {
+  payload: NpcOpenShopPayload;
+}
+
+/** Player buff event payload */
+interface PlayerBuffPayload {
+  buffType?: string;
+  duration?: number;
+}
+
+interface PlayerBuffEvent extends GameEvent {
+  payload: PlayerBuffPayload;
+}
+
 export class WorldScene extends Phaser.Scene {
   private player!: Phaser.GameObjects.Sprite;
   private buddies: Phaser.GameObjects.Sprite[] = [];
@@ -181,7 +245,7 @@ ${currentAct.narrative}`);
     this.showTutorialHints();
   }
 
-  wake(_sleepData?: any): void {
+  wake(_sleepData?: SleepData): void {
     // Called when scene resumes after being paused (e.g., after battle)
     console.log('WorldScene waking up');
     
@@ -194,7 +258,7 @@ ${currentAct.narrative}`);
 
   private setupBattleEndListener(): void {
     // Listen for battle end events
-    gameSystems.eventBus.on('battle:end', (event: { type: string; payload: any; timestamp: number }) => {
+    gameSystems.eventBus.on('battle:end', (event: BattleEndEvent) => {
       const { victory, enemyId, goldEarned } = event.payload || {};
       console.log('Battle ended:', event.payload);
       
@@ -213,7 +277,7 @@ ${currentAct.narrative}`);
     });
     
     // Listen for player heal events (from dialogue)
-    gameSystems.eventBus.on('player:heal', (event: { type: string; payload: any }) => {
+    gameSystems.eventBus.on('player:heal', (event: PlayerHealEvent) => {
       const amount = event.payload?.amount || 50;
       if (gameSystems.player) {
         gameSystems.player.heal(amount);
@@ -222,14 +286,14 @@ ${currentAct.narrative}`);
     });
     
     // Listen for shop open events (from dialogue)
-    gameSystems.eventBus.on('npc:open_shop', (event: { type: string; payload: any }) => {
+    gameSystems.eventBus.on('npc:open_shop', (event: NpcOpenShopEvent) => {
       const shopId = event.payload?.shopId || 'general_store';
       this.scene.pause();
       this.scene.launch('ShopScene', { shopType: shopId });
     });
     
     // Listen for player buff events (from dialogue)
-    gameSystems.eventBus.on('player:buff', (event: { type: string; payload: any }) => {
+    gameSystems.eventBus.on('player:buff', (event: PlayerBuffEvent) => {
       const buffType = event.payload?.buffType || 'strength';
       const duration = event.payload?.duration || 30;
       this.showNotification(`Buffed with ${buffType} for ${duration}s!`);
@@ -1123,7 +1187,7 @@ ${currentAct.narrative}`);
       A: Phaser.Input.Keyboard.KeyCodes.A,
       S: Phaser.Input.Keyboard.KeyCodes.S,
       D: Phaser.Input.Keyboard.KeyCodes.D
-    }) as any;
+    }) as WASDKeys;
     
     // Number keys for skills
     for (let i = 1; i <= 6; i++) {

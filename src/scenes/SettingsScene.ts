@@ -203,7 +203,7 @@ export class SettingsScene extends Phaser.Scene {
     const thumb = this.add.circle(x - 75 + (value * 150), y, 12, 0xa855f7);
     thumb.setInteractive({ draggable: true, useHandCursor: true });
     
-    thumb.on('drag', (_: any, dragX: number) => {
+    thumb.on('drag', (_: unknown, dragX: number) => {
       const newX = Math.max(x - 75, Math.min(x + 75, dragX));
       thumb.setX(newX);
       const newValue = (newX - (x - 75)) / 150;

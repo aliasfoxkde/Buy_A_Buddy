@@ -266,7 +266,7 @@ export class AchievementSystem {
     this.saveProgress();
   }
   
-  private getStat(key: string): any {
+  private getStat(key: string): unknown {
     try {
       const saved = localStorage.getItem(`buyabuddy_achievement_${key}`);
       return saved ? JSON.parse(saved) : null;
@@ -275,7 +275,7 @@ export class AchievementSystem {
     }
   }
   
-  private setStat(key: string, value: any): void {
+  private setStat(key: string, value: unknown): void {
     localStorage.setItem(`buyabuddy_achievement_${key}`, JSON.stringify(value));
   }
   

@@ -3,6 +3,7 @@
  */
 
 import Phaser from 'phaser';
+import { Entity } from '../core';
 import { gameSystems } from '../systems/GameSystems';
 import { audioManager } from '../audio/AudioManager';
 import { VisualEffects } from '../utils/VisualEffects';
@@ -15,9 +16,15 @@ import { getRandomEnemy, getEnemy, scaleEnemyStats, EnemyType } from '../data/en
 import { getClassSkills, type Skill } from '../data/skills';
 import { BATTLE_CONFIG } from '../config/constants';
 
+/** Data passed to BattleScene when started */
+interface BattleSceneData {
+  isBoss?: boolean;
+  enemyId?: string;
+}
+
 export class BattleScene extends Phaser.Scene {
-  private playerEntity: any = null;
-  private enemyEntity: any = null;
+  private playerEntity: Entity | null = null;
+  private enemyEntity: Entity | null = null;
   private currentEnemy!: EnemyType;
   
   private uiElements: {
@@ -122,7 +129,7 @@ export class BattleScene extends Phaser.Scene {
     this.createSkillPanel(width, height);
     
     // Listen for player level up
-    gameSystems.eventBus.on('entity:levelUp', (event: any) => {
+    gameSystems.eventBus.on('entity:levelUp', (event: { entity: Entity }) => {
       if (event.entity === gameSystems.player) {
         const stats = gameSystems.getPlayerStats();
         this.levelUpUI.showLevelUp(stats.level, {
@@ -162,7 +169,7 @@ export class BattleScene extends Phaser.Scene {
     
     // Listen for achievement unlocks
     const achievementPopup = new AchievementPopup(this);
-    gameSystems.eventBus.on('achievement:unlock', (event: any) => {
+    gameSystems.eventBus.on('achievement:unlock', (event: { achievement: { name: string; description: string; icon: string } }) => {
       achievementPopup.show({
         name: event.achievement.name,
         description: event.achievement.description,
@@ -180,9 +187,10 @@ export class BattleScene extends Phaser.Scene {
   
   private initializeBattle(): void {
     // Get scene data (passed from WorldScene)
-    const sceneData = this.scene.settings.data as any || {};
-    const isBoss = sceneData.isBoss || false;
-    const specifiedEnemyId = sceneData.enemyId || null;
+    const sceneData = this.scene.settings.data as BattleSceneData | undefined;
+    const battleSceneData = sceneData || {};
+    const isBoss = battleSceneData.isBoss || false;
+    const specifiedEnemyId = battleSceneData.enemyId || null;
     
     // Get player stats from game systems
     const stats = gameSystems.getPlayerStats();
@@ -246,7 +254,7 @@ export class BattleScene extends Phaser.Scene {
       this.addBattleLog('Battle started!');
     });
     
-    gameSystems.eventBus.on('battle:end', (event: any) => {
+    gameSystems.eventBus.on('battle:end', (event: { payload: { victory: boolean } }) => {
       if (event.payload?.victory) {
         this.isBattleOver = true;
         this.addBattleLog('VICTORY!');

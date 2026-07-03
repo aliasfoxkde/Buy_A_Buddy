@@ -10,6 +10,7 @@ import {
   type GameStateDTO,
 
   type ValidationResult,
+  type ValidationError,
   validateId,
   validateRarity,
 
@@ -191,8 +192,8 @@ router.get('/buddies', (req: Request, res: Response) => {
 });
 
 // Validation helper
-function validateAction(action: any): ValidationResult {
-  const errors: any[] = [];
+function validateAction(action: unknown): ValidationResult {
+  const errors: ValidationError[] = [];
   
   if (!action || !action.type) {
     errors.push({ field: 'type', message: 'Action type is required', code: 'MISSING_FIELD' });

@@ -128,15 +128,15 @@ export class StorySystem {
   }
 
   private setupEventListeners(): void {
-    this.eventBus.on('quest:complete', (event: any) => {
+    this.eventBus.on('quest:complete', (event: { payload?: { questId?: string } }) => {
       this.onQuestComplete(event.payload?.questId);
     });
 
-    this.eventBus.on('quest:start', (event: any) => {
+    this.eventBus.on('quest:start', (event: { payload?: { questId?: string } }) => {
       this.onQuestStarted(event.payload?.questId);
     });
 
-    this.eventBus.on('battle:end', (event: any) => {
+    this.eventBus.on('battle:end', (event: { payload?: { victory?: boolean; enemyId?: string } }) => {
       this.onBattleEnd(event.payload);
     });
   }
@@ -166,7 +166,7 @@ export class StorySystem {
     }
   }
 
-  private onBattleEnd(payload: any): void {
+  private onBattleEnd(payload: { victory?: boolean; enemyId?: string }): void {
     if (payload.victory && payload.enemyId) {
       // Check for enemy kill events
       for (const [eventId, worldEvent] of this.worldEvents) {

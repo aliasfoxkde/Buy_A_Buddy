@@ -139,7 +139,7 @@ export class ScreenTransition {
         (color >> 8) & 0xff,
         color & 0xff,
         true,
-        (cam: any, progress: number) => {
+        (cam: Phaser.Cameras.Scene2D.Camera, progress: number) => {
           if (progress === 1) resolve();
         }
       );

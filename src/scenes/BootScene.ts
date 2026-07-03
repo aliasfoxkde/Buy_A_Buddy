@@ -60,7 +60,7 @@ export class BootScene extends Phaser.Scene {
   
   private loadAudioSettings(): void {
     // Load and apply saved settings from localStorage
-    const settings = gameSystems.storage.loadSettings() as any;
+    const settings = gameSystems.storage.loadSettings<Record<string, unknown>>();
     if (settings) {
       if (settings.masterVolume !== undefined) {
         audioManager.setMasterVolume(settings.masterVolume);
@@ -153,7 +153,7 @@ export class BootScene extends Phaser.Scene {
       this.drawProgressBar(percent);
     });
     
-    this.load.on('fileprogress', (file: any) => {
+    this.load.on('fileprogress', (file: { key: string }) => {
       this.loadingText.setText(`Loading: ${file.key}`);
     });
     

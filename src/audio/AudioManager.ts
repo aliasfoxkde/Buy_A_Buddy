@@ -159,7 +159,7 @@ class AudioManager {
     if (this.context) return;
     
     try {
-      this.context = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.context = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
       
       // Create gain nodes for volume control
       this.masterGain = this.context.createGain();

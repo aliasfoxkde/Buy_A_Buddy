@@ -154,7 +154,7 @@ export class StatsScene extends Phaser.Scene {
     return Math.floor(100 * Math.pow(1.5, level - 1));
   }
   
-  private getProgressData(): any {
+  private getProgressData(): { enemiesDefeated: number; questsCompleted: number; highestLevel: number; totalGoldEarned: number; totalDamageDealt: number; totalHealingDone: number } {
     try {
       const saved = localStorage.getItem('buyabuddy_progress');
       if (saved) {

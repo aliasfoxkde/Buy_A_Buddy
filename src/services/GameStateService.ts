@@ -2,12 +2,38 @@
 // GAME STATE SERVICE - Central state management
 // ==========================================
 
-import { 
-  type GameState, 
-  type Buddy, 
-  createInitialGameState 
+import {
+  type GameState,
+  type Buddy,
+  createInitialGameState
 } from '../game/types';
-import { getSpawnCost, getBuddyUpgradeCost, getPlotUpgradeCost, rollRarity } from '../config/constants';
+import { getSpawnCost, getBuddyUpgradeCost, getPlotUpgradeCost, rollRarity, type RarityType } from '../config/constants';
+import { type GameAction, type ActionResult, ErrorCode } from '../api/types';
+
+interface AddBuddyAction {
+  type: 'ADD_BUDDY';
+  payload: {
+    id?: string;
+    name: string;
+    rarity?: RarityType;
+    level?: number;
+    xp?: number;
+    baseIncome?: number;
+    stats?: { attack: number; defense: number; speed: number; hp: number };
+    traits?: string[];
+  };
+}
+
+interface BuddyData {
+  id?: string;
+  name: string;
+  rarity?: RarityType;
+  level?: number;
+  xp?: number;
+  baseIncome?: number;
+  stats?: { attack: number; defense: number; speed: number; hp: number };
+  traits?: string[];
+}
 
 export class GameStateService {
   private static instance: GameStateService;
@@ -45,10 +71,8 @@ export class GameStateService {
   }
 
   // Process game actions
-  processAction(action: any): ActionResult {
+  processAction(action: GameAction | AddBuddyAction): ActionResult {
     switch (action.type) {
-      case 'ADD_BUDDY':
-        return this.addBuddy(action.payload);
       case 'SPAWN_BUDDY':
         return this.spawnBuddy(action.forcedRarity);
       case 'ASSIGN_BUDDY':
@@ -61,23 +85,25 @@ export class GameStateService {
         return this.upgradePlot(action.plotId);
       case 'BREED_BUDDIES':
         return this.breedBuddies(action.parent1Id, action.parent2Id);
+      case 'ADD_BUDDY':
+        return this.addBuddy(action.payload);
       default:
-        return { action, success: false, error: 'Unknown action type', errorCode: 'INVALID_REQUEST' as any };
+        return { action: action as GameAction, success: false, error: 'Unknown action type', errorCode: ErrorCode.INVALID_REQUEST };
     }
   }
 
   private spawnBuddy(forcedRarity?: string): ActionResult {
     const cost = getSpawnCost(this.state.buddies.length);
     if (this.state.player.coins < cost) {
-      return { 
-        action: { type: 'SPAWN_BUDDY' }, 
-        success: false, 
+      return {
+        action: { type: 'SPAWN_BUDDY' },
+        success: false,
         error: 'Insufficient funds',
-        errorCode: 'INSUFFICIENT_FUNDS' as any 
+        errorCode: ErrorCode.INSUFFICIENT_FUNDS
       };
     }
 
-    const rarity = forcedRarity ? forcedRarity as any : rollRarity();
+    const rarity = forcedRarity ? forcedRarity as RarityType : rollRarity();
     const names = this.getNamesForRarity(rarity);
     const name = names[Math.floor(Math.random() * names.length)];
 
@@ -106,7 +132,7 @@ export class GameStateService {
     return { action: { type: 'SPAWN_BUDDY' }, success: true, result: buddy };
   }
 
-  private addBuddy(buddyData: any): ActionResult {
+  private addBuddy(buddyData: BuddyData): ActionResult {
     // Add a pre-defined buddy (from character select or tutorial)
     const buddy: Buddy = {
       id: buddyData.id || `buddy-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
@@ -128,16 +154,16 @@ export class GameStateService {
     this.state.buddies.push(buddy);
     this.notify();
 
-    return { action: { type: 'ADD_BUDDY' }, success: true, result: buddy };
+    return { action: { type: 'ADD_BUDDY' } as GameAction, success: true, result: buddy };
   }
 
   private assignBuddy(buddyId: string, plotId: string): ActionResult {
     const buddy = this.state.buddies.find(b => b.id === buddyId);
     const plot = this.state.plots.find(p => p.id === plotId);
 
-    if (!buddy) return { action: { type: 'ASSIGN_BUDDY' }, success: false, error: 'Buddy not found' };
-    if (!plot) return { action: { type: 'ASSIGN_BUDDY' }, success: false, error: 'Plot not found' };
-    if (plot.buddyId) return { action: { type: 'ASSIGN_BUDDY' }, success: false, error: 'Plot occupied' };
+    if (!buddy) return { action: { type: 'ASSIGN_BUDDY' } as GameAction, success: false, error: 'Buddy not found' };
+    if (!plot) return { action: { type: 'ASSIGN_BUDDY' } as GameAction, success: false, error: 'Plot not found' };
+    if (plot.buddyId) return { action: { type: 'ASSIGN_BUDDY' } as GameAction, success: false, error: 'Plot occupied' };
 
     // Unassign from previous plot
     if (buddy.workPlotId) {
@@ -150,12 +176,12 @@ export class GameStateService {
     plot.buddyId = buddyId;
     this.notify();
 
-    return { action: { type: 'ASSIGN_BUDDY' }, success: true, result: { buddy, plot } };
+    return { action: { type: 'ASSIGN_BUDDY' } as GameAction, success: true, result: { buddy, plot } };
   }
 
   private unassignBuddy(buddyId: string): ActionResult {
     const buddy = this.state.buddies.find(b => b.id === buddyId);
-    if (!buddy) return { action: { type: 'UNASSIGN_BUDDY' }, success: false, error: 'Buddy not found' };
+    if (!buddy) return { action: { type: 'UNASSIGN_BUDDY' } as GameAction, success: false, error: 'Buddy not found' };
 
     if (buddy.workPlotId) {
       const plot = this.state.plots.find(p => p.id === buddy.workPlotId);
@@ -166,16 +192,16 @@ export class GameStateService {
     buddy.workPlotId = null;
     this.notify();
 
-    return { action: { type: 'UNASSIGN_BUDDY' }, success: true, result: buddy };
+    return { action: { type: 'UNASSIGN_BUDDY' } as GameAction, success: true, result: buddy };
   }
 
   private upgradeBuddy(buddyId: string): ActionResult {
     const buddy = this.state.buddies.find(b => b.id === buddyId);
-    if (!buddy) return { action: { type: 'UPGRADE_BUDDY' }, success: false, error: 'Buddy not found' };
+    if (!buddy) return { action: { type: 'UPGRADE_BUDDY' } as GameAction, success: false, error: 'Buddy not found' };
 
     const cost = getBuddyUpgradeCost(buddy.level);
     if (this.state.player.coins < cost) {
-      return { action: { type: 'UPGRADE_BUDDY' }, success: false, error: 'Insufficient funds', errorCode: 'INSUFFICIENT_FUNDS' as any };
+      return { action: { type: 'UPGRADE_BUDDY' } as GameAction, success: false, error: 'Insufficient funds', errorCode: ErrorCode.INSUFFICIENT_FUNDS };
     }
 
     this.state.player.coins -= cost;
@@ -185,16 +211,16 @@ export class GameStateService {
     buddy.stats.hp += 10;
     this.notify();
 
-    return { action: { type: 'UPGRADE_BUDDY' }, success: true, result: { buddy, cost } };
+    return { action: { type: 'UPGRADE_BUDDY' } as GameAction, success: true, result: { buddy, cost } };
   }
 
   private upgradePlot(plotId: string): ActionResult {
     const plot = this.state.plots.find(p => p.id === plotId);
-    if (!plot) return { action: { type: 'UPGRADE_PLOT' }, success: false, error: 'Plot not found' };
+    if (!plot) return { action: { type: 'UPGRADE_PLOT' } as GameAction, success: false, error: 'Plot not found' };
 
     const cost = getPlotUpgradeCost(plot.level);
     if (this.state.player.coins < cost) {
-      return { action: { type: 'UPGRADE_PLOT' }, success: false, error: 'Insufficient funds', errorCode: 'INSUFFICIENT_FUNDS' as any };
+      return { action: { type: 'UPGRADE_PLOT' } as GameAction, success: false, error: 'Insufficient funds', errorCode: ErrorCode.INSUFFICIENT_FUNDS };
     }
 
     this.state.player.coins -= cost;
@@ -202,25 +228,25 @@ export class GameStateService {
     plot.multiplier = 1 + (plot.level - 1) * 0.5;
     this.notify();
 
-    return { action: { type: 'UPGRADE_PLOT' }, success: true, result: { plot, cost } };
+    return { action: { type: 'UPGRADE_PLOT' } as GameAction, success: true, result: { plot, cost } };
   }
 
   private breedBuddies(parent1Id: string, parent2Id: string): ActionResult {
     const parent1 = this.state.buddies.find(b => b.id === parent1Id);
     const parent2 = this.state.buddies.find(b => b.id === parent2Id);
 
-    if (!parent1 || !parent2) return { action: { type: 'BREED_BUDDIES' }, success: false, error: 'Parent not found' };
-    if (parent1.rarity !== parent2.rarity) return { action: { type: 'BREED_BUDDIES' }, success: false, error: 'Parents must be same rarity' };
-    if (parent1.isWorking || parent2.isWorking) return { action: { type: 'BREED_BUDDIES' }, success: false, error: 'Parents must not be working' };
+    if (!parent1 || !parent2) return { action: { type: 'BREED_BUDDIES' } as GameAction, success: false, error: 'Parent not found' };
+    if (parent1.rarity !== parent2.rarity) return { action: { type: 'BREED_BUDDIES' } as GameAction, success: false, error: 'Parents must be same rarity' };
+    if (parent1.isWorking || parent2.isWorking) return { action: { type: 'BREED_BUDDIES' } as GameAction, success: false, error: 'Parents must not be working' };
 
     const cost = 500;
     if (this.state.player.coins < cost) {
-      return { action: { type: 'BREED_BUDDIES' }, success: false, error: 'Insufficient funds', errorCode: 'INSUFFICIENT_FUNDS' as any };
+      return { action: { type: 'BREED_BUDDIES' } as GameAction, success: false, error: 'Insufficient funds', errorCode: ErrorCode.INSUFFICIENT_FUNDS };
     }
 
     // Determine offspring rarity
     const roll = Math.random();
-    let offspringRarity = parent1.rarity as any;
+    let offspringRarity: RarityType = parent1.rarity;
     if (roll < 0.2 && parent1.rarity === 'common') offspringRarity = 'rare';
     else if (roll < 0.3 && parent1.rarity === 'rare') offspringRarity = 'epic';
     else if (roll < 0.2 && parent1.rarity === 'epic') offspringRarity = 'legendary';
@@ -250,11 +276,11 @@ export class GameStateService {
     this.state.statistics.buddiesBred++;
     this.notify();
 
-    return { action: { type: 'BREED_BUDDIES' }, success: true, result: offspring };
+    return { action: { type: 'BREED_BUDDIES' } as GameAction, success: true, result: offspring };
   }
 
-  private getNamesForRarity(rarity: string): string[] {
-    const names: Record<string, string[]> = {
+  private getNamesForRarity(rarity: RarityType): string[] {
+    const names: Record<RarityType, string[]> = {
       common: ['Pip', 'Dot', 'Zap', 'Gloop', 'Nib', 'Tink', 'Mop', 'Flo'],
       rare: ['Sparkle', 'Frosty', 'Twirl', 'Glim', 'Shimmer', 'Breeze', 'Nova'],
       epic: ['Cosmic', 'Pixel', 'Prism', 'Neon', 'Vortex', 'Pulse', 'Flux'],
@@ -276,12 +302,4 @@ export class GameStateService {
     }
     return total;
   }
-}
-
-export interface ActionResult {
-  action: any;
-  success: boolean;
-  result?: any;
-  error?: string;
-  errorCode?: string;
 }

@@ -105,9 +105,15 @@
 ### Remaining (Non-blocking)
 | Issue | Status | Notes |
 |-------|--------|-------|
-| 59 lint warnings | ⚠️ Warning | explicit any types (not errors) |
+| ~11 lint warnings | ⚠️ Warning | explicit any types in other files |
 | Chunk size warning | ⚠️ Warning | 1.7MB > 600KB, non-critical |
 | Firefox/Safari browsers | ⏳ Not installed | Only Chromium available |
+
+### 2026-07-03 Task: Fix any Type Warnings in GameSystems.ts
+- [x] Create interfaces for event payloads (QuestComplete, EntityDeath, LevelUp, etc.)
+- [x] Create PlayerStats, ProgressData, Zone, NPC interfaces
+- [x] Replace all `any` types with proper interfaces
+- [x] Verify with lint check - 0 warnings for GameSystems.ts
 
 ---
 

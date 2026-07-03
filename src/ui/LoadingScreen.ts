@@ -127,7 +127,7 @@ export class SceneTransition {
   /**
    * Fade transition to another scene
    */
-  public fadeTo(sceneKey: string, data?: any, duration: number = 300): void {
+  public fadeTo(sceneKey: string, data?: unknown, duration: number = 300): void {
     const camera = this.scene.cameras.main;
     camera.fadeOut(duration, 0, 0, 0);
     

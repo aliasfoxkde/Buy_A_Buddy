@@ -78,7 +78,7 @@ export class SaveLoadScene extends Phaser.Scene {
     
     // Create slot data from saved games
     for (let i = 0; i < 6; i++) {
-      const saveData = savedGames[i] as any;
+      const saveData = savedGames[i] as Record<string, unknown> | null;
       
       if (saveData && saveData.player) {
         this.slots.push({
@@ -333,7 +333,7 @@ export class SaveLoadScene extends Phaser.Scene {
     };
     
     // Save to storage
-    const success = gameSystems.storage.saveGame(saveData as any, slotIndex);
+    const success = gameSystems.storage.saveGame(saveData as Record<string, unknown>, slotIndex);
     
     if (success) {
       this.showMessage('Game saved!', 0x22c55e);
@@ -435,7 +435,7 @@ export class SaveLoadScene extends Phaser.Scene {
       experience: 0,
       inventory: gameSystems.inventory.getInventory(),
       quests: []
-    } as any, 0);
+    }, 0);
     
     if (success) {
       this.showMessage('Auto-saved!', 0x22c55e);

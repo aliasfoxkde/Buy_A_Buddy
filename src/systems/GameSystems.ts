@@ -3,15 +3,15 @@
  * Connects Phaser scenes to game modules
  */
 
-import { EventBus } from '../core';
+import { EventBus, Entity } from '../core';
 import { CombatSystem, CombatEntity } from '../modules/combat';
 import { InventorySystem, ItemDatabase } from '../modules/inventory';
-import { QuestSystem } from '../modules/quests';
+import { QuestSystem, QuestReward } from '../modules/quests';
 import { DialogueSystem } from '../modules/dialogue';
 import { SkillSystem } from '../modules/skills';
 import { CraftingSystem } from '../modules/crafting';
 import { AchievementSystem } from '../modules/achievements';
-import { WorldSystem } from '../modules/world';
+import { WorldSystem, Zone, NPC, Vector2 } from '../modules/world';
 import { StorageSystem } from '../modules/storage';
 import { BuffSystem, BuffableEntityImpl } from '../modules/buffs';
 import { EventSystem } from '../modules/events';
@@ -19,6 +19,67 @@ import { NPCSystem } from '../modules/npc';
 import { AISystem } from '../modules/ai';
 import { TutorialSystem } from '../modules/tutorial';
 import { getStorySystem } from '../modules/story';
+
+// ==========================================
+// EVENT PAYLOAD INTERFACES
+// ==========================================
+
+interface QuestCompletePayload {
+  questId: string;
+  rewards: QuestReward;
+}
+
+interface EntityDeathPayload {
+  entity: Entity;
+  killer?: Entity;
+}
+
+interface EntityLevelUpPayload {
+  entity: Entity;
+}
+
+interface WorldItemCollectedPayload {
+  itemId: string;
+  position: Vector2;
+}
+
+interface DialogueStartPayload {
+  npcId: string;
+  dialogueId?: string;
+}
+
+interface BattleEndPayload {
+  victory: boolean;
+}
+
+// ==========================================
+// PROGRESS & STATS INTERFACES
+// ==========================================
+
+export interface PlayerStats {
+  name: string;
+  level: number;
+  experience: number;
+  experienceToNextLevel: number;
+  health: number;
+  maxHealth: number;
+  mana: number;
+  maxMana: number;
+  attack: number;
+  defense: number;
+  speed: number;
+  luck: number;
+  gold: number;
+}
+
+export interface ProgressData {
+  enemiesDefeated: number;
+  questsCompleted: number;
+  highestLevel: number;
+  totalGoldEarned: number;
+  totalDamageDealt: number;
+  totalHealingDone: number;
+}
 
 /**
  * Central Game Manager
@@ -173,7 +234,7 @@ export class GameSystems {
    */
   private setupEventListeners(): void {
     // Quest completion gives rewards
-    this.eventBus.on('quest:complete', (event: any) => {
+    this.eventBus.on('quest:complete', (event: QuestCompletePayload) => {
       const { rewards } = event.payload;
       if (rewards) {
         if (rewards.gold) this.inventory.addGold(rewards.gold);
@@ -194,7 +255,7 @@ export class GameSystems {
     });
     
     // Enemy death gives experience
-    this.eventBus.on('entity:death', (event: any) => {
+    this.eventBus.on('entity:death', (event: EntityDeathPayload) => {
       const { entity } = event.payload;
       if (entity.team === 'enemy' && this.player) {
         const expReward = Math.floor(10 + entity.stats.level * 5);
@@ -206,7 +267,7 @@ export class GameSystems {
     });
     
     // Level up triggers events
-    this.eventBus.on('entity:levelUp', (event: any) => {
+    this.eventBus.on('entity:levelUp', (event: EntityLevelUpPayload) => {
       const { entity } = event.payload;
       if (entity.id === 'player') {
         this.skills.learnSkill('player', 'skill_power_strike');
@@ -214,18 +275,18 @@ export class GameSystems {
     });
     
     // World item collection
-    this.eventBus.on('world:item_collected', (event: any) => {
+    this.eventBus.on('world:item_collected', (event: WorldItemCollectedPayload) => {
       const { itemId } = event.payload;
       this.inventory.addItem(itemId, 1);
     });
     
     // Dialogue NPC interaction
-    this.eventBus.on('dialogue:start', (_event: any) => {
+    this.eventBus.on('dialogue:start', (_event: DialogueStartPayload) => {
       // Could start quest or give item
     });
     
     // Combat victory
-    this.eventBus.on('battle:end', (event: any) => {
+    this.eventBus.on('battle:end', (event: BattleEndPayload) => {
       const { victory } = event.payload;
       if (victory) {
         this.eventBus.emit('achievement:unlock', { id: 'ach_first_blood' });
@@ -285,7 +346,7 @@ export class GameSystems {
   /**
    * Get player stats for UI
    */
-  getPlayerStats(): any {
+  getPlayerStats(): PlayerStats {
     if (!this.player) return null;
     
     return {
@@ -349,7 +410,7 @@ export class GameSystems {
     }
   }
   
-  private getProgressData(): any {
+  private getProgressData(): ProgressData {
     try {
       const saved = localStorage.getItem('buyabuddy_progress');
       return saved ? JSON.parse(saved) : {
@@ -372,21 +433,21 @@ export class GameSystems {
     }
   }
   
-  private saveProgressData(data: any): void {
+  private saveProgressData(data: ProgressData): void {
     localStorage.setItem('buyabuddy_progress', JSON.stringify(data));
   }
   
   /**
    * Get current zone info
    */
-  getCurrentZone(): any {
+  getCurrentZone(): Zone {
     return this.world.getCurrentZone();
   }
   
   /**
    * Get nearby NPCs
    */
-  getNearbyNPCs(): any[] {
+  getNearbyNPCs(): NPC[] {
     if (!this.player) return [];
     const pos = this.player.position;
     return this.world.getNPCs().filter(npc => {
@@ -436,6 +497,15 @@ export interface SpriteFrame {
   y: number;
   width: number;
   height: number;
+}
+
+export interface SpriteConfigType {
+  key: string;
+  path: string;
+  cols: number;
+  rows: number;
+  cellWidth: number;
+  cellHeight: number;
 }
 
 export class SpriteConfig {
@@ -501,7 +571,7 @@ export class SpriteConfig {
   
   // Get frame position for sprite
   static getFrame(key: string, row: number, col: number): SpriteFrame {
-    let config: any;
+    let config: SpriteConfigType;
     
     switch (key) {
       case 'characters':

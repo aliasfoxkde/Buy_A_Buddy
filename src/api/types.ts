@@ -2,7 +2,7 @@
 // API RESPONSE TYPES
 // ==========================================
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -22,7 +22,7 @@ export interface PaginatedResponse<T> extends ApiResponse<T[]> {
 
 export interface ErrorResponse extends ApiResponse<null> {
   errorCode: ErrorCode;
-  details?: any;
+  details?: unknown;
 }
 
 export enum ErrorCode {
@@ -244,7 +244,7 @@ export interface BattleActionAction {
 export interface ActionResult {
   action: GameAction;
   success: boolean;
-  result?: any;
+  result?: unknown;
   error?: string;
   errorCode?: ErrorCode;
   newState?: GameStateDTO;

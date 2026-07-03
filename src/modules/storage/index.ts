@@ -110,7 +110,7 @@ export class StorageSystem {
       this.eventBus.emit('storage:save_start', {});
       
       // Get current game state from event
-      const saveHandler = (event: any) => {
+      const saveHandler = (event: { payload?: { state?: { toJSON: () => { version: string; }; playTime: number; player: { stats: { level: number } } } } }) => {
         const state = event.payload?.state;
         if (!state) return;
         

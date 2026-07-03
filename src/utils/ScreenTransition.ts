@@ -16,7 +16,7 @@ export class ScreenTransition {
   /**
    * Fade out and transition to another scene
    */
-  public fadeTo(sceneKey: string, data?: any): void {
+  public fadeTo(sceneKey: string, data?: unknown): void {
     const camera = this.scene.cameras.main;
     
     camera.fadeOut(this.duration, 0, 0, 0);
@@ -29,7 +29,7 @@ export class ScreenTransition {
   /**
    * Fade out and launch (overlay) another scene
    */
-  public fadeLaunch(sceneKey: string, data?: any): void {
+  public fadeLaunch(sceneKey: string, data?: unknown): void {
     const camera = this.scene.cameras.main;
     
     camera.fadeOut(this.duration, 0, 0, 0);
