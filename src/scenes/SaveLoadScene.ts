@@ -73,13 +73,13 @@ export class SaveLoadScene extends Phaser.Scene {
   private loadSlots(): void {
     // Get saved games from storage
     const savedGames = gameSystems.storage.getAllSaves();
-    
+
     this.slots = [];
-    
+
     // Create slot data from saved games
     for (let i = 0; i < 6; i++) {
-      const saveData = savedGames[i] as Record<string, unknown> | null;
-      
+      const saveData = savedGames[i] as { timestamp?: number; player?: { name?: string; stats?: { level?: number }; playTime?: number }; zone?: string } | null;
+
       if (saveData && saveData.player) {
         this.slots.push({
           slotId: i,

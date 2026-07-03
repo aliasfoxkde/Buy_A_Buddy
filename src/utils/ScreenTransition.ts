@@ -22,7 +22,7 @@ export class ScreenTransition {
     camera.fadeOut(this.duration, 0, 0, 0);
     
     this.scene.time.delayedCall(this.duration + 50, () => {
-      this.scene.scene.start(sceneKey, data);
+      this.scene.scene.start(sceneKey, data as object | undefined);
     });
   }
   
@@ -36,7 +36,7 @@ export class ScreenTransition {
     
     this.scene.time.delayedCall(this.duration + 50, () => {
       this.scene.scene.pause();
-      this.scene.scene.launch(sceneKey, data);
+      this.scene.scene.launch(sceneKey, data as object | undefined);
     });
   }
   

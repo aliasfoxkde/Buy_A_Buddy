@@ -132,7 +132,7 @@ export class SceneTransition {
     camera.fadeOut(duration, 0, 0, 0);
     
     this.scene.time.delayedCall(duration + 50, () => {
-      this.scene.scene.start(sceneKey, data);
+      this.scene.scene.start(sceneKey, data as object | undefined);
     });
   }
   

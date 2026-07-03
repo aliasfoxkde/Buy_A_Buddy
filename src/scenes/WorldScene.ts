@@ -15,6 +15,7 @@ import { TutorialOverlay, getDefaultTutorialSteps } from '../ui/TutorialOverlay'
 import { ScreenTransition } from '../ui/ScreenTransitions';
 import { achievementSystem } from '../systems/AchievementSystem';
 import { Minimap } from '../ui/Minimap';
+import { GameEvent } from '../core';
 
 /**
  * Extended zone data interfaces
@@ -68,12 +69,6 @@ interface WASDKeys {
   D: Phaser.Input.Keyboard.Key;
 }
 
-/** Base event structure */
-interface GameEvent {
-  type: string;
-  timestamp?: number;
-}
-
 /** Battle end event payload */
 interface BattleEndPayload {
   victory?: boolean;
@@ -86,17 +81,9 @@ interface BattleEndPayload {
   };
 }
 
-interface BattleEndEvent extends GameEvent {
-  payload: BattleEndPayload;
-}
-
 /** Player heal event payload */
 interface PlayerHealPayload {
   amount?: number;
-}
-
-interface PlayerHealEvent extends GameEvent {
-  payload: PlayerHealPayload;
 }
 
 /** NPC open shop event payload */
@@ -104,18 +91,10 @@ interface NpcOpenShopPayload {
   shopId?: string;
 }
 
-interface NpcOpenShopEvent extends GameEvent {
-  payload: NpcOpenShopPayload;
-}
-
 /** Player buff event payload */
 interface PlayerBuffPayload {
   buffType?: string;
   duration?: number;
-}
-
-interface PlayerBuffEvent extends GameEvent {
-  payload: PlayerBuffPayload;
 }
 
 export class WorldScene extends Phaser.Scene {
@@ -258,44 +237,48 @@ ${currentAct.narrative}`);
 
   private setupBattleEndListener(): void {
     // Listen for battle end events
-    gameSystems.eventBus.on('battle:end', (event: BattleEndEvent) => {
-      const { victory, enemyId, goldEarned } = event.payload || {};
-      console.log('Battle ended:', event.payload);
-      
+    gameSystems.eventBus.on('battle:end', (event: GameEvent) => {
+      const payload = event.payload as BattleEndPayload | undefined;
+      const { victory, enemyId, goldEarned } = payload || {};
+      console.log('Battle ended:', payload);
+
       if (victory && enemyId) {
         // Track enemy kill for quest progress
         this.trackEnemyKill(enemyId);
-        
+
         // Update kill tracking for stats
         gameSystems.trackKill(enemyId);
-        
+
         // Show victory notification
         if (goldEarned) {
           this.showNotification(`Victory! +${goldEarned} Gold`);
         }
       }
     });
-    
+
     // Listen for player heal events (from dialogue)
-    gameSystems.eventBus.on('player:heal', (event: PlayerHealEvent) => {
-      const amount = event.payload?.amount || 50;
+    gameSystems.eventBus.on('player:heal', (event: GameEvent) => {
+      const payload = event.payload as PlayerHealPayload | undefined;
+      const amount = payload?.amount || 50;
       if (gameSystems.player) {
         gameSystems.player.heal(amount);
         this.showNotification(`Healed for ${amount} HP!`);
       }
     });
-    
+
     // Listen for shop open events (from dialogue)
-    gameSystems.eventBus.on('npc:open_shop', (event: NpcOpenShopEvent) => {
-      const shopId = event.payload?.shopId || 'general_store';
+    gameSystems.eventBus.on('npc:open_shop', (event: GameEvent) => {
+      const payload = event.payload as NpcOpenShopPayload | undefined;
+      const shopId = payload?.shopId || 'general_store';
       this.scene.pause();
       this.scene.launch('ShopScene', { shopType: shopId });
     });
-    
+
     // Listen for player buff events (from dialogue)
-    gameSystems.eventBus.on('player:buff', (event: PlayerBuffEvent) => {
-      const buffType = event.payload?.buffType || 'strength';
-      const duration = event.payload?.duration || 30;
+    gameSystems.eventBus.on('player:buff', (event: GameEvent) => {
+      const payload = event.payload as PlayerBuffPayload | undefined;
+      const buffType = payload?.buffType || 'strength';
+      const duration = payload?.duration || 30;
       this.showNotification(`Buffed with ${buffType} for ${duration}s!`);
       // Buffs would be applied through the buff system
     });

@@ -3,7 +3,7 @@
  */
 
 import Phaser from 'phaser';
-import { Entity } from '../core';
+import { Entity, GameEvent } from '../core';
 import { gameSystems } from '../systems/GameSystems';
 import { audioManager } from '../audio/AudioManager';
 import { VisualEffects } from '../utils/VisualEffects';
@@ -129,9 +129,11 @@ export class BattleScene extends Phaser.Scene {
     this.createSkillPanel(width, height);
     
     // Listen for player level up
-    gameSystems.eventBus.on('entity:levelUp', (event: { entity: Entity }) => {
-      if (event.entity === gameSystems.player) {
+    gameSystems.eventBus.on('entity:levelUp', (event: GameEvent) => {
+      const entity = (event.payload as { entity: Entity })?.entity;
+      if (entity === gameSystems.player) {
         const stats = gameSystems.getPlayerStats();
+        if (!stats) return;
         this.levelUpUI.showLevelUp(stats.level, {
           hp: 10,
           attack: 2,
@@ -169,12 +171,15 @@ export class BattleScene extends Phaser.Scene {
     
     // Listen for achievement unlocks
     const achievementPopup = new AchievementPopup(this);
-    gameSystems.eventBus.on('achievement:unlock', (event: { achievement: { name: string; description: string; icon: string } }) => {
-      achievementPopup.show({
-        name: event.achievement.name,
-        description: event.achievement.description,
-        icon: event.achievement.icon
-      });
+    gameSystems.eventBus.on('achievement:unlock', (event: GameEvent) => {
+      const achievement = (event.payload as { achievement: { name: string; description: string; icon: string } })?.achievement;
+      if (achievement) {
+        achievementPopup.show({
+          name: achievement.name,
+          description: achievement.description,
+          icon: achievement.icon
+        });
+      }
     });
   }
   
@@ -254,8 +259,9 @@ export class BattleScene extends Phaser.Scene {
       this.addBattleLog('Battle started!');
     });
     
-    gameSystems.eventBus.on('battle:end', (event: { payload: { victory: boolean } }) => {
-      if (event.payload?.victory) {
+    gameSystems.eventBus.on('battle:end', (event: GameEvent) => {
+      const payload = (event.payload as { victory?: boolean }) || {};
+      if (payload.victory) {
         this.isBattleOver = true;
         this.addBattleLog('VICTORY!');
         this.time.delayedCall(2000, () => this.endBattle(true));

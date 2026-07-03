@@ -196,9 +196,9 @@ export class AchievementSystem {
    */
   public onShopPurchase(itemCount: number): void {
     // Track total items purchased
-    const purchased = this.getStat('shop_items_purchased') || 0;
+    const purchased = (this.getStat('shop_items_purchased') as number) || 0;
     this.setStat('shop_items_purchased', purchased + itemCount);
-    
+
     if (purchased + itemCount >= 10) {
       this.unlock('shopper');
     }
@@ -208,11 +208,11 @@ export class AchievementSystem {
    * Handle zone visit
    */
   public onZoneEnter(zoneId: string): void {
-    const visited = this.getStat('zones_visited') || [];
+    const visited = (this.getStat('zones_visited') as string[]) || [];
     if (!visited.includes(zoneId)) {
       visited.push(zoneId);
       this.setStat('zones_visited', visited);
-      
+
       if (visited.length >= 3) {
         this.unlock('explorer');
       }

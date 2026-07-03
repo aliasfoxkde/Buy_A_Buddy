@@ -71,7 +71,7 @@ export class StatsScene extends Phaser.Scene {
       { label: 'Defense', value: stats.defense.toString() },
       { label: 'Speed', value: stats.speed.toString() },
       { label: 'Luck', value: stats.luck.toString() },
-      { label: 'Crit %', value: `${Math.round(stats.critChance * 100)}%` }
+      { label: 'Crit %', value: `${Math.round(stats.luck / 100 * 100)}%` }
     ];
     
     yOffset = 140;

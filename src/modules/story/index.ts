@@ -3,7 +3,7 @@
  */
 
 // gameSystems import removed - unused
-import { EventBus } from '../../core';
+import { EventBus, GameEvent } from '../../core';
 
 export interface Act {
   id: string;
@@ -128,16 +128,16 @@ export class StorySystem {
   }
 
   private setupEventListeners(): void {
-    this.eventBus.on('quest:complete', (event: { payload?: { questId?: string } }) => {
-      this.onQuestComplete(event.payload?.questId);
+    this.eventBus.on('quest:complete', (event: GameEvent) => {
+      this.onQuestComplete((event.payload as { questId?: string })?.questId);
     });
 
-    this.eventBus.on('quest:start', (event: { payload?: { questId?: string } }) => {
-      this.onQuestStarted(event.payload?.questId);
+    this.eventBus.on('quest:start', (event: GameEvent) => {
+      this.onQuestStarted((event.payload as { questId?: string })?.questId);
     });
 
-    this.eventBus.on('battle:end', (event: { payload?: { victory?: boolean; enemyId?: string } }) => {
-      this.onBattleEnd(event.payload);
+    this.eventBus.on('battle:end', (event: GameEvent) => {
+      this.onBattleEnd(event.payload as { victory?: boolean; enemyId?: string });
     });
   }
 

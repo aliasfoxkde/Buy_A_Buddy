@@ -3,7 +3,7 @@
  * Connects Phaser scenes to game modules
  */
 
-import { EventBus, Entity } from '../core';
+import { EventBus, Entity, Vector2, GameEvent } from '../core';
 import { CombatSystem, CombatEntity } from '../modules/combat';
 import { InventorySystem, ItemDatabase } from '../modules/inventory';
 import { QuestSystem, QuestReward } from '../modules/quests';
@@ -11,7 +11,7 @@ import { DialogueSystem } from '../modules/dialogue';
 import { SkillSystem } from '../modules/skills';
 import { CraftingSystem } from '../modules/crafting';
 import { AchievementSystem } from '../modules/achievements';
-import { WorldSystem, Zone, NPC, Vector2 } from '../modules/world';
+import { WorldSystem, Zone, NPC } from '../modules/world';
 import { StorageSystem } from '../modules/storage';
 import { BuffSystem, BuffableEntityImpl } from '../modules/buffs';
 import { EventSystem } from '../modules/events';
@@ -41,11 +41,6 @@ interface EntityLevelUpPayload {
 interface WorldItemCollectedPayload {
   itemId: string;
   position: Vector2;
-}
-
-interface DialogueStartPayload {
-  npcId: string;
-  dialogueId?: string;
 }
 
 interface BattleEndPayload {
@@ -234,8 +229,9 @@ export class GameSystems {
    */
   private setupEventListeners(): void {
     // Quest completion gives rewards
-    this.eventBus.on('quest:complete', (event: QuestCompletePayload) => {
-      const { rewards } = event.payload;
+    this.eventBus.on('quest:complete', (event: GameEvent) => {
+      const payload = event.payload as QuestCompletePayload;
+      const { rewards } = payload;
       if (rewards) {
         if (rewards.gold) this.inventory.addGold(rewards.gold);
         if (rewards.experience && this.player) {
@@ -248,46 +244,50 @@ export class GameSystems {
         }
       }
     });
-    
+
     // Inventory changes trigger achievements
     this.eventBus.on('inventory:change', () => {
       // Check collection achievements
     });
-    
+
     // Enemy death gives experience
-    this.eventBus.on('entity:death', (event: EntityDeathPayload) => {
-      const { entity } = event.payload;
-      if (entity.team === 'enemy' && this.player) {
+    this.eventBus.on('entity:death', (event: GameEvent) => {
+      const payload = event.payload as EntityDeathPayload;
+      const { entity } = payload;
+      if ((entity as { team?: string }).team === 'enemy' && this.player) {
         const expReward = Math.floor(10 + entity.stats.level * 5);
         this.player.gainExperience(expReward);
-        
+
         const goldReward = Math.floor(5 + entity.stats.level * 2);
         this.inventory.addGold(goldReward);
       }
     });
-    
+
     // Level up triggers events
-    this.eventBus.on('entity:levelUp', (event: EntityLevelUpPayload) => {
-      const { entity } = event.payload;
+    this.eventBus.on('entity:levelUp', (event: GameEvent) => {
+      const payload = event.payload as EntityLevelUpPayload;
+      const { entity } = payload;
       if (entity.id === 'player') {
         this.skills.learnSkill('player', 'skill_power_strike');
       }
     });
-    
+
     // World item collection
-    this.eventBus.on('world:item_collected', (event: WorldItemCollectedPayload) => {
-      const { itemId } = event.payload;
+    this.eventBus.on('world:item_collected', (event: GameEvent) => {
+      const payload = event.payload as WorldItemCollectedPayload;
+      const { itemId } = payload;
       this.inventory.addItem(itemId, 1);
     });
-    
+
     // Dialogue NPC interaction
-    this.eventBus.on('dialogue:start', (_event: DialogueStartPayload) => {
+    this.eventBus.on('dialogue:start', (_event: GameEvent) => {
       // Could start quest or give item
     });
-    
+
     // Combat victory
-    this.eventBus.on('battle:end', (event: BattleEndPayload) => {
-      const { victory } = event.payload;
+    this.eventBus.on('battle:end', (event: GameEvent) => {
+      const payload = event.payload as BattleEndPayload;
+      const { victory } = payload;
       if (victory) {
         this.eventBus.emit('achievement:unlock', { id: 'ach_first_blood' });
       }
@@ -346,7 +346,7 @@ export class GameSystems {
   /**
    * Get player stats for UI
    */
-  getPlayerStats(): PlayerStats {
+  getPlayerStats(): PlayerStats | null {
     if (!this.player) return null;
     
     return {
@@ -440,7 +440,7 @@ export class GameSystems {
   /**
    * Get current zone info
    */
-  getCurrentZone(): Zone {
+  getCurrentZone(): Zone | undefined {
     return this.world.getCurrentZone();
   }
   

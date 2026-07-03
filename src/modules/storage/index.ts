@@ -2,7 +2,7 @@
  * Storage System Module - Save/Load, LocalStorage, Cloud
  */
 
-import { EventBus, SaveData, GameState, generateId, EntityStats } from '../../core'; // eslint complaining about 'any' in storage
+import { EventBus, SaveData, GameState, generateId, EntityStats, GameEvent } from '../../core'; // eslint complaining about 'any' in storage
 
 export type StorageBackend = 'local' | 'cloud' | 'indexeddb';
 export type StorageKey = 'save' | 'settings' | 'achievements' | 'statistics';
@@ -110,8 +110,8 @@ export class StorageSystem {
       this.eventBus.emit('storage:save_start', {});
       
       // Get current game state from event
-      const saveHandler = (event: { payload?: { state?: { toJSON: () => { version: string; }; playTime: number; player: { stats: { level: number } } } } }) => {
-        const state = event.payload?.state;
+      const saveHandler = (event: GameEvent) => {
+        const state = (event.payload as { state?: { toJSON: () => { version: string; }; playTime: number; player: { stats: { level: number } } } })?.state;
         if (!state) return;
         
         const id = slotId || this.saveSlots[0]?.id || 'quicksave';

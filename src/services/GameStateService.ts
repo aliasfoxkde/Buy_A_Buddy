@@ -154,7 +154,7 @@ export class GameStateService {
     this.state.buddies.push(buddy);
     this.notify();
 
-    return { action: { type: 'ADD_BUDDY' } as GameAction, success: true, result: buddy };
+    return { action: { type: 'ADD_BUDDY' } as unknown as GameAction, success: true, result: buddy };
   }
 
   private assignBuddy(buddyId: string, plotId: string): ActionResult {

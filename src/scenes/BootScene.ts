@@ -60,7 +60,7 @@ export class BootScene extends Phaser.Scene {
   
   private loadAudioSettings(): void {
     // Load and apply saved settings from localStorage
-    const settings = gameSystems.storage.loadSettings<Record<string, unknown>>();
+    const settings = gameSystems.storage.loadSettings<Record<string, number>>();
     if (settings) {
       if (settings.masterVolume !== undefined) {
         audioManager.setMasterVolume(settings.masterVolume);

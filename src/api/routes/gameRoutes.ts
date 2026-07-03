@@ -194,56 +194,59 @@ router.get('/buddies', (req: Request, res: Response) => {
 // Validation helper
 function validateAction(action: unknown): ValidationResult {
   const errors: ValidationError[] = [];
-  
-  if (!action || !action.type) {
+
+  // Cast to a type with the properties we need to check
+  const act = action as { type?: string; forcedRarity?: string; buddyId?: string; plotId?: string; parent1Id?: string; parent2Id?: string } | null;
+
+  if (!act || !act.type) {
     errors.push({ field: 'type', message: 'Action type is required', code: 'MISSING_FIELD' });
     return { valid: false, errors };
   }
-  
-  switch (action.type) {
+
+  switch (act.type) {
     case 'SPAWN_BUDDY':
-      if (action.forcedRarity && !validateRarity(action.forcedRarity)) {
+      if (act.forcedRarity && !validateRarity(act.forcedRarity)) {
         errors.push({ field: 'forcedRarity', message: 'Invalid rarity', code: 'INVALID_VALUE' });
       }
       break;
-      
+
     case 'ASSIGN_BUDDY':
-      if (!action.buddyId || !validateId(action.buddyId)) {
+      if (!act.buddyId || !validateId(act.buddyId)) {
         errors.push({ field: 'buddyId', message: 'Invalid buddy ID', code: 'INVALID_ID' });
       }
-      if (!action.plotId || !validateId(action.plotId)) {
+      if (!act.plotId || !validateId(act.plotId)) {
         errors.push({ field: 'plotId', message: 'Invalid plot ID', code: 'INVALID_ID' });
       }
       break;
-      
+
     case 'UNASSIGN_BUDDY':
-      if (!action.buddyId || !validateId(action.buddyId)) {
+      if (!act.buddyId || !validateId(act.buddyId)) {
         errors.push({ field: 'buddyId', message: 'Invalid buddy ID', code: 'INVALID_ID' });
       }
       break;
-      
+
     case 'UPGRADE_BUDDY':
-      if (!action.buddyId || !validateId(action.buddyId)) {
+      if (!act.buddyId || !validateId(act.buddyId)) {
         errors.push({ field: 'buddyId', message: 'Invalid buddy ID', code: 'INVALID_ID' });
       }
       break;
-      
+
     case 'UPGRADE_PLOT':
-      if (!action.plotId || !validateId(action.plotId)) {
+      if (!act.plotId || !validateId(act.plotId)) {
         errors.push({ field: 'plotId', message: 'Invalid plot ID', code: 'INVALID_ID' });
       }
       break;
-      
+
     case 'BREED_BUDDIES':
-      if (!action.parent1Id || !validateId(action.parent1Id)) {
+      if (!act.parent1Id || !validateId(act.parent1Id)) {
         errors.push({ field: 'parent1Id', message: 'Invalid parent ID', code: 'INVALID_ID' });
       }
-      if (!action.parent2Id || !validateId(action.parent2Id)) {
+      if (!act.parent2Id || !validateId(act.parent2Id)) {
         errors.push({ field: 'parent2Id', message: 'Invalid parent ID', code: 'INVALID_ID' });
       }
       break;
   }
-  
+
   return { valid: errors.length === 0, errors };
 }
 
