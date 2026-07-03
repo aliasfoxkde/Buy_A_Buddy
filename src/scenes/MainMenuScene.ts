@@ -230,8 +230,7 @@ export class MainMenuScene extends Phaser.Scene {
     this.input.keyboard?.on('keydown-ENTER', () => {
       const btn = this.buttons[this.selectedIndex];
       if (btn) {
-        const bg = btn.getAt(0) as Phaser.GameObjects.Rectangle;
-        bg.emit('pointerdown');
+        btn.emit('pointerdown');
       }
     });
   }
