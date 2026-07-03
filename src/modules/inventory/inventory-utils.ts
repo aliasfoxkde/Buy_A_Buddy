@@ -149,12 +149,13 @@ export function sortInventory(
           comparison = infoA.name.localeCompare(infoB.name);
         }
         break;
-      case 'rarity':
+      case 'rarity': {
         const rarityOrder = ['common', 'uncommon', 'rare', 'epic', 'legendary'];
         const rarityA = rarityOrder.indexOf(infoA.rarity);
         const rarityB = rarityOrder.indexOf(infoB.rarity);
         comparison = rarityA - rarityB;
         break;
+      }
       case 'quantity':
         comparison = (infoB.quantity || 1) - (infoA.quantity || 1);
         break;

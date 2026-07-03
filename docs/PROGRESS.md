@@ -103,7 +103,7 @@
 ### Remaining (Non-blocking)
 | Issue | Status | Notes |
 |-------|--------|-------|
-| 100 lint errors | ⚠️ Warning | Unused vars/imports, doesn't block build |
+| 98 lint errors | ⚠️ Warning | Unused vars/params (auto-fixed what possible) |
 | 60 lint warnings | ⚠️ Warning | explicit any types |
 | Chunk size warning | ⚠️ Warning | 1.7MB > 600KB, non-critical |
 | Playwright browsers | ⏳ Pending | Need `npx playwright install chromium` |

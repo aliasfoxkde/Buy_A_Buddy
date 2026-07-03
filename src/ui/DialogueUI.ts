@@ -270,12 +270,13 @@ export class DialogueUI {
       case 'open_weapon_shop':
         this.scene.scene.launch('ShopScene', { shopType: 'weapon_shop' });
         break;
-      case 'rest':
+      case 'rest': {
         // Heal player
         const stats = gameSystems.getPlayerStats();
         if (stats) {
           // Would update via game systems
         }
+      }
         break;
       default:
         console.log('Unknown action:', action);
