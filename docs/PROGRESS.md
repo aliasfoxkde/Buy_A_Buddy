@@ -93,22 +93,20 @@
 
 ## 🐛 Known Issues
 
-### 2026-07-03 Audit
-- ESLint config missing (v9 flat config required) - ✅ FIXED
-- 2 failing unit tests (gold value mismatch) - ✅ FIXED
-- Chunk size warning (1.7MB > 600KB limit) - ⚠️ Pending (non-critical)
-- No E2E tests implemented - ✅ Tests exist, need playwright browsers
+### 2026-07-03 Audit - FIXES COMPLETED ✅
+| Issue | Status |
+|-------|--------|
+| ESLint config missing | ✅ FIXED - Created eslint.config.js |
+| 2 failing unit tests | ✅ FIXED - Updated gold value to 200 |
+| Deploy to Cloudflare | ✅ FIXED - Deployed to b6ff49ba.buy-a-buddy.pages.dev |
 
-### Fixes Completed
-- [x] Create eslint.config.js
-- [x] Fix gold value test (100 → 200)
-- [x] Deploy to Cloudflare Pages
-
-### Fixes In Progress
-- [ ] Run lint and fix remaining errors
-- [ ] Configure Vite code splitting
-- [ ] Install playwright browsers
-- [ ] Run E2E tests
+### Remaining (Non-blocking)
+| Issue | Status | Notes |
+|-------|--------|-------|
+| 100 lint errors | ⚠️ Warning | Unused vars/imports, doesn't block build |
+| 60 lint warnings | ⚠️ Warning | explicit any types |
+| Chunk size warning | ⚠️ Warning | 1.7MB > 600KB, non-critical |
+| Playwright browsers | ⏳ Pending | Need `npx playwright install chromium` |
 
 ---
 

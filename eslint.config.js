@@ -42,6 +42,8 @@ export default [
         performance: 'readonly',
         CustomEvent: 'readonly',
         Event: 'readonly',
+        btoa: 'readonly',
+        atob: 'readonly',
       },
     },
     plugins: {
