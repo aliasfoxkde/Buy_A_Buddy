@@ -98,15 +98,16 @@
 |-------|--------|
 | ESLint config missing | ✅ FIXED - Created eslint.config.js |
 | 2 failing unit tests | ✅ FIXED - Updated gold value to 200 |
-| Deploy to Cloudflare | ✅ FIXED - Deployed to b6ff49ba.buy-a-buddy.pages.dev |
+| E2E testing suite | ✅ WORKING - Chromium: 30 passed, 3 skipped |
+| Deploy to Cloudflare | ✅ FIXED - Deployed to e3e27e05.buy-a-buddy.pages.dev |
 
 ### Remaining (Non-blocking)
 | Issue | Status | Notes |
 |-------|--------|-------|
-| 98 lint errors | ⚠️ Warning | Unused vars/params (auto-fixed what possible) |
+| ~91 lint errors | ⚠️ Warning | Unused vars/imports (require manual cleanup) |
 | 60 lint warnings | ⚠️ Warning | explicit any types |
 | Chunk size warning | ⚠️ Warning | 1.7MB > 600KB, non-critical |
-| Playwright browsers | ⏳ Pending | Need `npx playwright install chromium` |
+| Firefox/Safari browsers | ⏳ Not installed | Only Chromium available |
 
 ---
 
