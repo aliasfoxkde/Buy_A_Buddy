@@ -93,7 +93,22 @@
 
 ## 🐛 Known Issues
 
-None currently tracked.
+### 2026-07-03 Audit
+- ESLint config missing (v9 flat config required) - ✅ FIXED
+- 2 failing unit tests (gold value mismatch) - ✅ FIXED
+- Chunk size warning (1.7MB > 600KB limit) - ⚠️ Pending (non-critical)
+- No E2E tests implemented - ✅ Tests exist, need playwright browsers
+
+### Fixes Completed
+- [x] Create eslint.config.js
+- [x] Fix gold value test (100 → 200)
+- [x] Deploy to Cloudflare Pages
+
+### Fixes In Progress
+- [ ] Run lint and fix remaining errors
+- [ ] Configure Vite code splitting
+- [ ] Install playwright browsers
+- [ ] Run E2E tests
 
 ---
 

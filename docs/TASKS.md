@@ -7,9 +7,12 @@
 ## 🔴 Current Tasks
 
 ### High Priority
-1. **Battle System UI** - Create battle scene with turn-based combat UI
-2. **Quest System UI** - Create quest panel and objective tracking
-3. **World Map Scene** - Full RPG exploration with player movement
+1. **ESLint config** - Create eslint.config.js for ESLint v9
+2. **Fix failing tests** - Update gold value expectation (100 → 200)
+3. **Fix linting errors** - Run lint and fix all issues
+4. **Configure code splitting** - Reduce chunk size warning
+5. **Build E2E test suite** - Create Playwright E2E tests
+6. **Deploy to Cloudflare Pages** - Fix and redeploy
 
 ### Medium Priority
 1. **Animation System** - Sprite animations for buddies (idle, attack, etc.)

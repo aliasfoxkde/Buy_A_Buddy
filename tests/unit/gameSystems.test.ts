@@ -97,7 +97,7 @@ describe('GameState', () => {
 
   it('should have default inventory', () => {
     expect(state.inventory.slots.length).toBe(24);
-    expect(state.inventory.gold).toBe(100);
+    expect(state.inventory.gold).toBe(200);
   });
 
   it('should serialize to JSON', () => {
