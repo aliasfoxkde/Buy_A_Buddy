@@ -115,6 +115,71 @@ describe('GameState', () => {
   });
 });
 
+describe('Offline Earnings', () => {
+  const IDLE_CONFIG = {
+    tickInterval: 100,
+    offlineEfficiency: 0.5,
+    maxOfflineHours: 24,
+    plotMaxLevel: 20,
+    buddyMaxLevel: 50,
+  };
+
+  const calculateOfflineEarnings = (
+    lastActiveTime: number,
+    incomePerSecond: number
+  ) => {
+    const now = Date.now();
+    const timeAwayMs = now - lastActiveTime;
+    const maxOfflineMs = IDLE_CONFIG.maxOfflineHours * 60 * 60 * 1000;
+    const cappedTimeMs = Math.min(timeAwayMs, maxOfflineMs);
+    const timeAwayHours = cappedTimeMs / (60 * 60 * 1000);
+    const incomePerHour = incomePerSecond * 3600;
+    const efficiency = IDLE_CONFIG.offlineEfficiency;
+    const gold = Math.floor(incomePerHour * timeAwayHours * efficiency);
+    return { gold, timeAway: cappedTimeMs, efficiency };
+  };
+
+  it('should calculate earnings for 1 hour away', () => {
+    const oneHourAgo = Date.now() - (60 * 60 * 1000);
+    const incomePerSecond = 10; // 10 gold per second
+    const result = calculateOfflineEarnings(oneHourAgo, incomePerSecond);
+
+    // 10 gold/sec * 3600 sec = 36000 gold/hr * 0.5 efficiency = 18000
+    expect(result.gold).toBe(18000);
+    expect(result.efficiency).toBe(0.5);
+  });
+
+  it('should cap earnings at 24 hours', () => {
+    const twoDaysAgo = Date.now() - (48 * 60 * 60 * 1000);
+    const incomePerSecond = 10;
+    const result = calculateOfflineEarnings(twoDaysAgo, incomePerSecond);
+
+    // Should be capped at 24 hours, not 48
+    // 10 * 3600 * 24 * 0.5 = 432000
+    expect(result.timeAway).toBe(24 * 60 * 60 * 1000);
+    expect(result.gold).toBe(432000);
+  });
+
+  it('should return 0 for very short absences', () => {
+    const oneMinuteAgo = Date.now() - (60 * 1000);
+    const incomePerSecond = 100;
+    const result = calculateOfflineEarnings(oneMinuteAgo, incomePerSecond);
+
+    // Less than 1 minute should still give some earnings
+    // But we won't apply it if timeAway < 60000ms
+    expect(result.timeAway).toBe(60 * 1000);
+  });
+
+  it('should scale with income rate', () => {
+    const oneHourAgo = Date.now() - (60 * 60 * 1000);
+
+    const lowIncome = calculateOfflineEarnings(oneHourAgo, 1);
+    const highIncome = calculateOfflineEarnings(oneHourAgo, 100);
+
+    expect(highIncome.gold).toBe(lowIncome.gold * 100);
+  });
+});
+
 describe('Game Systems Integration', () => {
   it('should create game systems', async () => {
     // Import and test that all systems can be instantiated

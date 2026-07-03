@@ -7,7 +7,7 @@ import {
   type Buddy,
   createInitialGameState
 } from '../game/types';
-import { getSpawnCost, getBuddyUpgradeCost, getPlotUpgradeCost, rollRarity, type RarityType } from '../config/constants';
+import { getSpawnCost, getBuddyUpgradeCost, getPlotUpgradeCost, rollRarity, IDLE_CONFIG, type RarityType } from '../config/constants';
 import { type GameAction, type ActionResult, ErrorCode } from '../api/types';
 
 interface AddBuddyAction {
@@ -39,6 +39,7 @@ export class GameStateService {
   private static instance: GameStateService;
   private state: GameState;
   private listeners: Set<(state: GameState) => void> = new Set();
+  private lastOfflineEarnings: { gold: number; timeAway: number; efficiency: number } | null = null;
 
   private constructor() {
     this.state = createInitialGameState('Player');
@@ -301,5 +302,72 @@ export class GameStateService {
       }
     }
     return total;
+  }
+
+  /**
+   * Calculate offline earnings when player returns
+   * @returns Offline earnings result with amount and time details
+   */
+  calculateOfflineEarnings(): { gold: number; timeAway: number; efficiency: number } {
+    const now = Date.now();
+    const lastActive = this.state.lastActiveTime || this.state.lastSaved;
+    const timeAwayMs = now - lastActive;
+
+    // Cap at max offline hours
+    const maxOfflineMs = IDLE_CONFIG.maxOfflineHours * 60 * 60 * 1000;
+    const cappedTimeMs = Math.min(timeAwayMs, maxOfflineMs);
+    const timeAwayHours = cappedTimeMs / (60 * 60 * 1000);
+
+    // Calculate income per hour
+    const incomePerSecond = this.getIncomePerSecond();
+    const incomePerHour = incomePerSecond * 3600;
+
+    // Apply offline efficiency (50% by default)
+    const efficiency = IDLE_CONFIG.offlineEfficiency;
+
+    // Calculate total earnings
+    const gold = Math.floor(incomePerHour * timeAwayHours * efficiency);
+
+    return {
+      gold,
+      timeAway: cappedTimeMs,
+      efficiency
+    };
+  }
+
+  /**
+   * Apply offline earnings to game state
+   * Call this when player loads a save
+   * Returns the offline earnings that were calculated
+   */
+  applyOfflineEarnings(): { gold: number; timeAway: number; efficiency: number } | null {
+    const { gold, timeAway, efficiency } = this.calculateOfflineEarnings();
+
+    if (gold > 0 && timeAway > 60000) { // Only if away > 1 minute
+      this.state.player.coins += gold;
+      this.state.statistics.totalCoinsEarned += gold;
+
+      // Store for UI to retrieve later
+      this.lastOfflineEarnings = { gold, timeAway, efficiency };
+    }
+
+    // Update last active time
+    this.state.lastActiveTime = Date.now();
+
+    return this.lastOfflineEarnings;
+  }
+
+  /**
+   * Get the last offline earnings (for UI display)
+   */
+  getLastOfflineEarnings(): { gold: number; timeAway: number; efficiency: number } | null {
+    return this.lastOfflineEarnings;
+  }
+
+  /**
+   * Clear the last offline earnings (after shown to player)
+   */
+  clearLastOfflineEarnings(): void {
+    this.lastOfflineEarnings = null;
   }
 }

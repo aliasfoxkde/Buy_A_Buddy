@@ -238,6 +238,7 @@ export interface RegionTheme {
 export interface GameState {
   version: number;
   lastSaved: number;
+  lastActiveTime: number; // Track last active time for offline earnings
   player: Player;
   buddies: Buddy[];
   plots: WorkPlot[];
@@ -357,6 +358,7 @@ export function createInitialGameState(playerName: string): GameState {
   return {
     version: 1,
     lastSaved: Date.now(),
+    lastActiveTime: Date.now(),
     player: createPlayer(playerName),
     buddies: [],
     plots: [

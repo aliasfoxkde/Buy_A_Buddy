@@ -46,6 +46,33 @@ export default defineConfig({
         drop_debugger: !isDev,
       },
     },
+    // Enable code splitting - this automatically splits vendor chunks
+    rollupOptions: {
+      output: {
+        // Split vendor chunks logically
+        manualChunks: (id) => {
+          // Vendor chunk for phaser
+          if (id.includes('phaser')) {
+            return 'vendor-phaser';
+          }
+          // Core game systems in one chunk
+          if (id.includes('/src/systems/') || id.includes('/src/core/')) {
+            return 'core-systems';
+          }
+          // Data modules together
+          if (id.includes('/src/data/')) {
+            return 'game-data';
+          }
+          // Scene-specific code
+          if (id.includes('/src/scenes/')) {
+            const sceneName = id.split('/src/scenes/')[1]?.split('.')[0];
+            if (sceneName && ['WorldScene', 'BattleScene', 'ShopScene'].includes(sceneName)) {
+              return `scene-${sceneName.toLowerCase()}`;
+            }
+          }
+        },
+      },
+    },
   },
   server: {
     port: 5173,
