@@ -3,7 +3,7 @@
  * Step-by-step guided tutorial with hints and tooltips
  */
 
-import { EventBus, Vector2, generateId } from '../../core';
+import { EventBus, Vector2 } from '../../core';
 
 export type TutorialStepType = 
   | 'text'           // Simple text display

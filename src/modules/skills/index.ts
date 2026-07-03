@@ -2,7 +2,7 @@
  * Skills System Module
  */
 
-import { EventBus, EntityStats, generateId } from '../../core';
+import { EventBus, EntityStats } from '../../core';
 
 export type SkillType = 'active' | 'passive' | 'toggle';
 export type SkillTarget = 'self' | 'single_enemy' | 'single_ally' | 'all_enemies' | 'all_allies' | 'area';
@@ -188,7 +188,7 @@ export class SkillSystem {
 
   update(deltaTime: number): void {
     // Reduce cooldowns
-    for (const [entityId, activeList] of this.activeSkills) {
+    this.activeSkills.forEach((activeList, _entityId) => {
       for (const skill of activeList) {
         if (skill.currentCooldown > 0) {
           skill.currentCooldown = Math.max(0, skill.currentCooldown - deltaTime);
@@ -197,7 +197,7 @@ export class SkillSystem {
           }
         }
       }
-    }
+    });
   }
 
   getCooldown(entityId: string, skillId: string): number {

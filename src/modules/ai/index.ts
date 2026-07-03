@@ -3,7 +3,7 @@
  * Enemy AI behaviors including patrol, chase, attack, and flee
  */
 
-import { EventBus, Vector2, generateId, distance } from '../../core';
+import { EventBus, Vector2, distance } from '../../core';
 
 export type AIState = 'idle' | 'patrol' | 'chase' | 'attack' | 'flee' | 'wander' | 'guard';
 

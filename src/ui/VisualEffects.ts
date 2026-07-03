@@ -6,13 +6,6 @@ import Phaser from 'phaser';
 
 export type FloatingTextStyle = 'damage' | 'heal' | 'xp' | 'gold' | 'critical' | 'miss' | 'levelup';
 
-interface FloatingTextConfig {
-  x: number;
-  y: number;
-  text: string;
-  style: FloatingTextStyle;
-  duration?: number;
-}
 
 /**
  * Create floating damage/heal numbers
@@ -64,7 +57,6 @@ export function createFloatingText(
 
   // Determine direction based on style
   const direction = style === 'heal' || style === 'xp' || style === 'gold' ? -1 : 1;
-  const startY = y;
   const endY = y + direction * 80;
 
   // Fade and float animation
@@ -292,7 +284,6 @@ export function createCoinPickup(
 ): void {
   // Spawn multiple coins that fly to the gold counter
   const coinCount = Math.min(amount, 10);
-  const amountPerCoin = Math.ceil(amount / coinCount);
   
   for (let i = 0; i < coinCount; i++) {
     scene.time.delayedCall(i * 50, () => {

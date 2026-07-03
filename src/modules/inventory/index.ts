@@ -2,7 +2,7 @@
  * Inventory System Module
  */
 
-import { EventBus, InventoryData, InventorySlot, generateId } from '../../core';
+import { EventBus, InventoryData } from '../../core';
 import { calculateSetBonuses } from '../../data/equipmentSets';
 
 export type ItemType = 
@@ -203,7 +203,7 @@ export class ItemDatabase {
       icon: 'potion_red',
       sellPrice: 10,
       buyPrice: 25,
-      useEffect: (userId) => {
+      useEffect: (_userId) => {
         // Heal effect handled by game
       }
     });

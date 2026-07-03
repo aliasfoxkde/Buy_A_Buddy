@@ -2,7 +2,7 @@
  * World System Module - Zones, NPCs, and Map
  */
 
-import { EventBus, Vector2, generateId, clamp } from '../../core';
+import { EventBus, Vector2, clamp, generateId } from '../../core';
 
 export interface Zone {
   id: string;
@@ -27,7 +27,7 @@ export interface WorldItem {
   collectedBy?: string;
 }
 
-export interface NPC extends NPCState {}
+export type NPC = NPCState;
 
 export interface NPCState {
   id: string;
@@ -293,9 +293,9 @@ export class WorldSystem {
 
   update(deltaTime: number): void {
     // Update NPC AI
-    for (const [id, ai] of this.npcAIs) {
+    this.npcAIs.forEach((ai, _id) => {
       ai.update(deltaTime);
-    }
+    });
 
     // Check for nearby items
     for (const item of this.worldItems) {

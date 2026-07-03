@@ -8,11 +8,11 @@ import {
   errorResponse,
   ErrorCode,
   type GameStateDTO,
-  type ActionResult,
+
   type ValidationResult,
   validateId,
   validateRarity,
-  validatePositiveNumber,
+
 } from '../types';
 import { GameStateService } from '../../services/GameStateService';
 

@@ -12,7 +12,7 @@ import { ParticleSystem } from '../utils/ParticleSystem';
 import { AchievementPopup } from '../ui/Notifications';
 import { achievementSystem } from '../systems/AchievementSystem';
 import { getRandomEnemy, getEnemy, scaleEnemyStats, EnemyType } from '../data/enemies';
-import { SKILLS, getClassSkills, type Skill } from '../data/skills';
+import { getClassSkills, type Skill } from '../data/skills';
 import { BATTLE_CONFIG } from '../config/constants';
 
 export class BattleScene extends Phaser.Scene {
@@ -61,7 +61,6 @@ export class BattleScene extends Phaser.Scene {
   
   create(): void {
     // Get scene data (passed from WorldScene)
-    const sceneData = this.scene.settings.data as any || {};
     
     const { width, height } = this.scale;
     
@@ -706,7 +705,7 @@ export class BattleScene extends Phaser.Scene {
     this.checkBattleEnd();
   }
   
-  private applyEffect(effect: string, skillName: string): void {
+  private applyEffect(effect: string, _skillName: string): void {
     const effectMessages: Record<string, string> = {
       burn: '🔥 The enemy is burning!',
       freeze: '❄️ The enemy is frozen!',

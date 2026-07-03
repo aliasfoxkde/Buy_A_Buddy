@@ -16,7 +16,7 @@ export class AchievementPopup {
    * Show achievement unlocked popup
    */
   public show(achievement: { name: string; description: string; icon: string }): void {
-    const { width, height } = this.scene.scale;
+    const { width } = this.scene.scale;
     
     // Create container
     this.container = this.scene.add.container(width + 200, 100);

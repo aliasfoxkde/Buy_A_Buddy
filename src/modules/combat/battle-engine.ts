@@ -2,8 +2,8 @@
  * Battle Engine - Enhanced combat system
  */
 
-import { calculateDamage, calculateElementalEffectiveness, calculateCritical, type Element, type Rarity } from './combat-mechanics';
-import { getEnemy, ENEMIES, type EnemyDefinition } from '../../data/enemies';
+import { calculateDamage, calculateElementalEffectiveness, type Element } from './combat-mechanics';
+import { getEnemy, type EnemyDefinition } from '../../data/enemies';
 
 export interface CombatEntity {
   id: string;

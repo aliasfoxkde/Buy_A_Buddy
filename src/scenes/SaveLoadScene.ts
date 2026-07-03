@@ -155,7 +155,7 @@ export class SaveLoadScene extends Phaser.Scene {
     
     // Level badge
     if (slot.level > 0) {
-      const levelBadge = this.add.rectangle(150, -50, 60, 30, 0x22c55e);
+      this.add.rectangle(150, -50, 60, 30, 0x22c55e);
       this.add.text(150, -50, `LV ${slot.level}`, {
         fontSize: '14px',
         fontFamily: 'Arial Black, sans-serif',

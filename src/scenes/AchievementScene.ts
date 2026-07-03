@@ -19,7 +19,7 @@ export class AchievementScene extends Phaser.Scene {
     this.add.rectangle(width / 2, height / 2, width, height, 0x1a1a2e, 0.95);
     
     // Title
-    const title = this.add.text(width / 2, 50, '🏆 ACHIEVEMENTS', {
+    this.add.text(width / 2, 50, '🏆 ACHIEVEMENTS', {
       fontSize: '36px',
       fontFamily: 'Arial Black, sans-serif',
       color: '#fbbf24'
@@ -29,7 +29,7 @@ export class AchievementScene extends Phaser.Scene {
     const unlocked = achievementSystem.getUnlockedAchievements().length;
     const total = achievementSystem.getAllAchievements().length;
     
-    const statsText = this.add.text(width / 2, 95, `${unlocked}/${total} Unlocked`, {
+    this.add.text(width / 2, 95, `${unlocked}/${total} Unlocked`, {
       fontSize: '18px',
       fontFamily: 'Arial, sans-serif',
       color: '#aaa'
@@ -42,7 +42,7 @@ export class AchievementScene extends Phaser.Scene {
     const closeBtn = this.add.rectangle(width - 60, height - 50, 100, 50, 0xef4444);
     closeBtn.setInteractive({ useHandCursor: true });
     
-    const closeText = this.add.text(width - 60, height - 50, 'CLOSE', {
+    this.add.text(width - 60, height - 50, 'CLOSE', {
       fontSize: '18px',
       fontFamily: 'Arial Black, sans-serif',
       color: '#fff'
@@ -62,7 +62,7 @@ export class AchievementScene extends Phaser.Scene {
     });
   }
   
-  private createAchievementList(startX: number, startY: number, width: number): void {
+  private createAchievementList(startX: number, startY: number, _width: number): void {
     const achievements = achievementSystem.getAllAchievements();
     const cardWidth = 350;
     const cardHeight = 80;
@@ -155,7 +155,7 @@ export class AchievementScene extends Phaser.Scene {
   }
   
   private showUnlockNotification(achievement: Achievement): void {
-    const { width, height } = this.scale;
+    const { width } = this.scale;
     
     const notification = this.add.container(width / 2, 150);
     notification.setDepth(200);

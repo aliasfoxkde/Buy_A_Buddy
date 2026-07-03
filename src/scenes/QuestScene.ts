@@ -4,7 +4,6 @@
 
 import Phaser from 'phaser';
 import { gameSystems } from '../systems/GameSystems';
-import { QUESTS, type Quest } from '../data/quests';
 
 export class QuestScene extends Phaser.Scene {
   private questContainers: Phaser.GameObjects.Container[] = [];
@@ -82,7 +81,7 @@ export class QuestScene extends Phaser.Scene {
     this.displayQuests(tabIndex);
   }
   
-  private displayQuests(tabIndex: number = 0): void {
+  private displayQuests(_tabIndex: number = 0): void {
     // Clear existing
     for (const container of this.questContainers) {
       container.destroy();

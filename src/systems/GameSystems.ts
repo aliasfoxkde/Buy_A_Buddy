@@ -4,7 +4,7 @@
  */
 
 import { EventBus } from '../core';
-import { CombatSystem, CombatEntity, CombatBuff } from '../modules/combat';
+import { CombatSystem, CombatEntity } from '../modules/combat';
 import { InventorySystem, ItemDatabase } from '../modules/inventory';
 import { QuestSystem } from '../modules/quests';
 import { DialogueSystem } from '../modules/dialogue';
@@ -16,7 +16,7 @@ import { StorageSystem } from '../modules/storage';
 import { BuffSystem, BuffableEntityImpl } from '../modules/buffs';
 import { EventSystem } from '../modules/events';
 import { NPCSystem } from '../modules/npc';
-import { AISystem, DEFAULT_AI_CONFIGS } from '../modules/ai';
+import { AISystem } from '../modules/ai';
 import { TutorialSystem } from '../modules/tutorial';
 import { getStorySystem } from '../modules/story';
 
@@ -220,8 +220,7 @@ export class GameSystems {
     });
     
     // Dialogue NPC interaction
-    this.eventBus.on('dialogue:start', (event: any) => {
-      const { npcId } = event.payload;
+    this.eventBus.on('dialogue:start', (_event: any) => {
       // Could start quest or give item
     });
     
@@ -308,7 +307,7 @@ export class GameSystems {
   
   // ===== Progress Tracking =====
   
-  trackKill(enemyId: string): void {
+  trackKill(_enemyId: string): void {
     try {
       const progress = this.getProgressData();
       progress.enemiesDefeated = (progress.enemiesDefeated || 0) + 1;

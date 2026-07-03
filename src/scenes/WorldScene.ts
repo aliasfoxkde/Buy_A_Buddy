@@ -3,10 +3,10 @@
  */
 
 import Phaser from 'phaser';
-import { gameSystems, SpriteConfig } from '../systems/GameSystems';
+import { gameSystems } from '../systems/GameSystems';
 import { DialogueUI } from '../ui/DialogueUI';
 import { audioManager } from '../audio/AudioManager';
-import { getCharacterFrame, getBuddyFrame, getNPCFrame, getTileFrame } from '../utils/spriteUtils';
+import { getCharacterFrame, getBuddyFrame, getNPCFrame } from '../utils/spriteUtils';
 import { VisualEffects } from '../utils/VisualEffects';
 import { MobileControls } from '../ui/MobileControls';
 import { QUESTS, type Quest } from '../data/quests';
@@ -15,7 +15,6 @@ import { TutorialOverlay, getDefaultTutorialSteps } from '../ui/TutorialOverlay'
 import { ScreenTransition } from '../ui/ScreenTransitions';
 import { achievementSystem } from '../systems/AchievementSystem';
 import { Minimap } from '../ui/Minimap';
-import { getDialogue } from '../data/dialogue';
 
 /**
  * Extended zone data interfaces
@@ -47,10 +46,6 @@ interface BossZoneData {
   bossId: string;
 }
 
-interface TransitionZoneData {
-  isTransition: boolean;
-  targetZone: string;
-}
 
 interface SafeZoneData {
   isSafeZone: boolean;
@@ -117,7 +112,7 @@ export class WorldScene extends Phaser.Scene {
   }
   
   create(): void {
-    const { width, height } = this.scale;
+    const { width } = this.scale;
     
     // Background color
     this.cameras.main.setBackgroundColor('#1a1a2e');
@@ -186,7 +181,7 @@ ${currentAct.narrative}`);
     this.showTutorialHints();
   }
 
-  wake(sleepData?: any): void {
+  wake(_sleepData?: any): void {
     // Called when scene resumes after being paused (e.g., after battle)
     console.log('WorldScene waking up');
     
@@ -404,8 +399,6 @@ ${currentAct.narrative}`);
   private createWorld(): void {
     // Create ground tiles
     const tileSize = 128;
-    const worldWidth = 20 * tileSize;
-    const worldHeight = 15 * tileSize;
     
     // Generate random terrain
     for (let y = 0; y < 15; y++) {
@@ -527,7 +520,7 @@ ${currentAct.narrative}`);
       });
       
       // Add name above
-      const nameText = this.add.text(npc.position.x, npc.position.y - 70, npc.name, {
+      this.add.text(npc.position.x, npc.position.y - 70, npc.name, {
         fontSize: '14px',
         fontFamily: 'Arial, sans-serif',
         color: '#fff',
@@ -536,7 +529,7 @@ ${currentAct.narrative}`);
       }).setOrigin(0.5);
       
       // Interaction indicator
-      const indicator = this.add.text(npc.position.x, npc.position.y - 50, 'E', {
+      this.add.text(npc.position.x, npc.position.y - 50, 'E', {
         fontSize: '12px',
         fontFamily: 'Arial Black, sans-serif',
         color: '#ffff00'
@@ -676,7 +669,7 @@ ${currentAct.narrative}`);
       const labelColor = isBoss ? '#ffaa00' : isElite ? '#dd66ff' : isHard ? '#ff6666' : '#66cc66';
       const labelBg = this.add.rectangle(pos.x, pos.y - 65, 100, 25, 0x1a1a2e, 0.9);
       labelBg.setStrokeStyle(1, borderColor);
-      const label = this.add.text(pos.x, pos.y - 65, `${pos.icon} ${pos.enemy.toUpperCase()}`, {
+      this.add.text(pos.x, pos.y - 65, `${pos.icon} ${pos.enemy.toUpperCase()}`, {
         fontSize: '11px',
         fontFamily: 'Arial Black, sans-serif',
         color: labelColor
@@ -876,7 +869,6 @@ ${currentAct.narrative}`);
   }
   
   private createUI(): void {
-    const { width, height } = this.scale;
     
     // HUD container
     const hudContainer = this.add.container(0, 0);
@@ -1033,19 +1025,10 @@ ${currentAct.narrative}`);
     // Skill icons and names for the hotbar
     const skillIcons = ['⚔️', '🛡️', '💚', '🔥', '⚡', '💥'];
     const skillNames = ['Attack', 'Defend', 'Heal', 'Fire', 'Lightning', 'Explosion'];
-    const skillDescs = [
-      'Basic melee attack',
-      'Raise defense temporarily',
-      'Restore health',
-      'Fire damage attack',
-      'Lightning damage',
-      'Area explosion damage'
-    ];
     
     for (let i = 0; i < 6; i++) {
       const icon = skillIcons[i] || '❓';
       const name = skillNames[i];
-      const desc = skillDescs[i];
       
       const btn = this.add.rectangle(
         width / 2 - 150 + i * 60,
@@ -1206,11 +1189,6 @@ ${currentAct.narrative}`);
   
   private setupCollisions(): void {
     // Player collision with world bounds
-    const worldWidth = 20 * 128;
-    const worldHeight = 15 * 128;
-    
-    // Invisible walls
-    const walls = this.physics.add.staticGroup();
     
     // Add collision between player and NPCs
     for (const [id, npc] of this.npcs) {
@@ -1278,7 +1256,6 @@ ${currentAct.narrative}`);
   }
   
   private createAchievementButton(): void {
-    const { width } = this.scale;
     
     // Achievement hint button (top-left, small)
     const btnBg = this.add.rectangle(50, 40, 30, 30, 0xfbbf24, 0.8);

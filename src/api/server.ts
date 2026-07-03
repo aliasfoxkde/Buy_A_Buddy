@@ -12,7 +12,7 @@ import dotenv from 'dotenv';
 import gameRoutes from './routes/gameRoutes';
 import healthRoutes from './routes/healthRoutes';
 import debugRoutes from './routes/debugRoutes';
-import { apiSpec, tags } from './docs/openapi';
+import { apiSpec } from './docs/openapi';
 
 // Load environment
 dotenv.config();

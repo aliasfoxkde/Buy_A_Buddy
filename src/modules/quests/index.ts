@@ -2,7 +2,7 @@
  * Quest System Module
  */
 
-import { EventBus, QuestData, QuestObjective, generateId } from '../../core';
+import { EventBus, QuestData } from '../../core';
 
 export type QuestType = 'kill' | 'collect' | 'talk' | 'explore' | 'escort' | 'deliver';
 export type QuestStatus = 'available' | 'active' | 'completed' | 'failed';

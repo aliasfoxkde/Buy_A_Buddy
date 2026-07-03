@@ -2,7 +2,7 @@
  * Buff/Debuff System Module
  */
 
-import { EventBus, generateId } from '../../core';
+import { EventBus} from '../../core';
 
 export type BuffType = 
   | 'poison'      // Damage over time
@@ -100,7 +100,7 @@ export class BuffSystem {
       onApply: (target) => {
         this.eventBus.emit('buff:apply', { entity: target.id, buff: 'poison' });
       },
-      onTick: (target, tick) => {
+      onTick: (target, _tick) => {
         // Damage is applied through the entity
         this.eventBus.emit('buff:tick', { entity: target.id, buff: 'poison', damage: 5 });
         return 5; // Return damage amount
@@ -123,7 +123,7 @@ export class BuffSystem {
       stackable: true,
       maxStacks: 3,
       icon: 'fire',
-      onTick: (target, tick) => {
+      onTick: (target, _tick) => {
         this.eventBus.emit('buff:tick', { entity: target.id, buff: 'burn', damage: 8 });
         return 8;
       }
@@ -146,7 +146,7 @@ export class BuffSystem {
         this.eventBus.emit('buff:apply', { entity: target.id, buff: 'freeze' });
         // Disable movement
       },
-      onRemove: (target) => {
+      onRemove: (_target) => {
         // Re-enable movement
       }
     });
@@ -239,7 +239,7 @@ export class BuffSystem {
       stackable: true,
       maxStacks: 3,
       icon: 'heal',
-      onTick: (target, tick) => {
+      onTick: (target, _tick) => {
         this.eventBus.emit('buff:tick', { entity: target.id, buff: 'regen', heal: 10 });
         return -10; // Negative = heal
       }

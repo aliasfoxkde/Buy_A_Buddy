@@ -21,7 +21,7 @@ export class AmbientSound {
       this.masterGain = this.audioContext.createGain();
       this.masterGain.gain.value = 0.15;
       this.masterGain.connect(this.audioContext.destination);
-    } catch (e) {
+    } catch {
       console.warn('Web Audio API not supported');
     }
   }
@@ -231,7 +231,7 @@ export class AmbientSound {
       try {
         osc.stop();
         osc.disconnect();
-      } catch (e) {
+      } catch {
         // Already stopped
       }
     }
@@ -240,7 +240,7 @@ export class AmbientSound {
     for (const gain of this.gains) {
       try {
         gain.disconnect();
-      } catch (e) {
+      } catch {
         // Already disconnected
       }
     }

@@ -78,7 +78,7 @@ export class QuestTracker {
     if (!questDef) return;
     
     // Quest name
-    const questName = this.scene.add.text(
+    this.scene.add.text(
       this.config.x,
       this.config.y + 5,
       questDef.name,
@@ -224,7 +224,7 @@ export class Minimap {
   /**
    * Add marker for position
    */
-  addMarker(x: number, y: number, type: 'npc' | 'enemy' | 'treasure' | 'waypoint', label?: string): void {
+  addMarker(x: number, y: number, type: 'npc' | 'enemy' | 'treasure' | 'waypoint', _label?: string): void {
     const mapX = this.config.x + (x - 400) * 0.05;
     const mapY = this.config.y + (y - 300) * 0.05;
     
@@ -290,7 +290,7 @@ export class HUDManager {
    * Create all HUD elements
    */
   create(): void {
-    const { width, height } = this.scene.scale;
+    const { width } = this.scene.scale;
     
     // Quest tracker (top-left)
     this.questTracker = new QuestTracker(this.scene, {

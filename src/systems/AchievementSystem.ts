@@ -259,10 +259,10 @@ export class AchievementSystem {
    * Reset all achievements
    */
   public reset(): void {
-    for (const [id, achievement] of this.achievements) {
+    this.achievements.forEach((achievement, _id) => {
       achievement.unlocked = false;
       achievement.unlockedAt = undefined;
-    }
+    });
     this.saveProgress();
   }
   

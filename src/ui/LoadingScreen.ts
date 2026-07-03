@@ -72,7 +72,6 @@ export class LoadingScreen {
   public setProgress(percent: number): void {
     if (!this.progressBar) return;
     
-    const barWidth = 290;
     this.progressBar.setScale(percent / 100, 1);
     this.progressText.setText(`${Math.floor(percent)}%`);
   }

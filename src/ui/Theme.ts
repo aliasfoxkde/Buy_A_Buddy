@@ -88,7 +88,7 @@ export function colorToHex(color: number): string {
 }
 
 // Helper for alpha
-export function withAlpha(color: number, alpha: number): number {
+export function withAlpha(color: number, _alpha: number): number {
   // Phaser uses 0xRRGGBB format, alpha is separate
   return color;
 }

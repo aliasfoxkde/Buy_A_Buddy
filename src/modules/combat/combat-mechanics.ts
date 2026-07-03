@@ -2,7 +2,7 @@
  * Combat Mechanics - Critical Hits & Elemental System
  */
 
-import { clamp } from '../../core';
+// clamp imported but unused - keeping for future use
 
 export type Element = 'physical' | 'fire' | 'ice' | 'lightning' | 'dark' | 'light';
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';

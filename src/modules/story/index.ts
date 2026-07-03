@@ -2,7 +2,7 @@
  * Story System - Narrative progression and world state
  */
 
-import { gameSystems } from '../../systems/GameSystems';
+// gameSystems import removed - unused
 import { EventBus } from '../../core';
 
 export interface Act {
@@ -193,7 +193,7 @@ export class StorySystem {
   }
 
   private advanceActProgress(questId: string): void {
-    for (const [actId, act] of this.acts) {
+    this.acts.forEach((act, _actId) => {
       const questIndex = act.quests.indexOf(questId);
       if (questIndex !== -1) {
         act.currentQuestIndex = questIndex;
@@ -203,9 +203,9 @@ export class StorySystem {
           act.completed = true;
           this.advanceToNextAct();
         }
-        break;
+        return;
       }
-    }
+    });
   }
 
   private advanceToNextAct(): void {

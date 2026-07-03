@@ -40,7 +40,7 @@ export class MobileControls {
   }
 
   private create(): void {
-    const { height, width } = this.scene.scale;
+    const { height } = this.scene.scale;
     this.joystickY = height - 150;
 
     // Joystick base (semi-transparent with border)

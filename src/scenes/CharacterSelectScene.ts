@@ -3,7 +3,7 @@
  */
 
 import Phaser from 'phaser';
-import { gameSystems, SpriteConfig } from '../systems/GameSystems';
+import { gameSystems } from '../systems/GameSystems';
 
 export class CharacterSelectScene extends Phaser.Scene {
   private characterSprites: Phaser.GameObjects.Sprite[] = [];

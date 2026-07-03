@@ -2,7 +2,7 @@
  * Achievements System Module
  */
 
-import { EventBus, generateId } from '../../core';
+import { EventBus} from '../../core';
 
 export type AchievementCategory = 'combat' | 'exploration' | 'collection' | 'social' | 'crafting' | 'mastery';
 

@@ -2,7 +2,7 @@
  * Combat System Module
  */
 
-import { Entity, EntityStats, EventBus, calculateDamage, calculateExperienceReward, generateId, Hitbox, Vector2, rectIntersects, clamp } from '../../core';
+import { Entity, EntityStats, EventBus, calculateDamage, generateId, Vector2 } from '../../core';
 
 export type DamageType = 'physical' | 'magic' | 'fire' | 'ice' | 'lightning' | 'dark' | 'light';
 
@@ -96,7 +96,7 @@ export class CombatEntity extends Entity {
     }
   }
 
-  render(ctx: CanvasRenderingContext2D): void {
+  render(_ctx: CanvasRenderingContext2D): void {
     // Render entity sprite
     // This will be implemented by subclasses or the sprite manager
   }

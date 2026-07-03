@@ -3,7 +3,6 @@
  */
 
 import Phaser from 'phaser';
-import { gameSystems } from '../systems/GameSystems';
 import { ParticleSystem } from '../utils/ParticleSystem';
 
 export class LevelUpUI {

@@ -2,7 +2,7 @@
  * Storage System Module - Save/Load, LocalStorage, Cloud
  */
 
-import { EventBus, SaveData, GameState, generateId, EntityStats } from '../../core';
+import { EventBus, SaveData, GameState, generateId, EntityStats } from '../../core'; // eslint complaining about 'any' in storage
 
 export type StorageBackend = 'local' | 'cloud' | 'indexeddb';
 export type StorageKey = 'save' | 'settings' | 'achievements' | 'statistics';

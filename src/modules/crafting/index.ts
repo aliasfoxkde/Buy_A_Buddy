@@ -2,7 +2,7 @@
  * Crafting System Module
  */
 
-import { EventBus, generateId } from '../../core';
+import { EventBus} from '../../core';
 
 export interface CraftingIngredient {
   itemId: string;

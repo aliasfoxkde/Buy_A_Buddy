@@ -104,7 +104,7 @@ export class InventoryScene extends Phaser.Scene {
     btn.setStrokeStyle(2, 0xfbbf24);
     btn.setInteractive({ useHandCursor: true });
     
-    const btnText = this.add.text(x, y, '🎯 SET BONUSES', {
+    this.add.text(x, y, '🎯 SET BONUSES', {
       fontSize: '16px',
       fontFamily: 'Arial Black, sans-serif',
       color: '#fbbf24'

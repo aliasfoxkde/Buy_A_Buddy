@@ -3,7 +3,7 @@
  */
 
 import Phaser from 'phaser';
-import { gameSystems, SpriteConfig } from '../systems/GameSystems';
+import { gameSystems } from '../systems/GameSystems';
 import { audioManager } from '../audio/AudioManager';
 
 export class BootScene extends Phaser.Scene {

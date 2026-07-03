@@ -253,13 +253,10 @@ export class ShopScene extends Phaser.Scene {
     // ... would need to track and destroy
     
     let displayY = y - 140;
-    let total = 0;
     
     this.cart.forEach((qty, index) => {
       if (qty > 0 && this.shopItems[index]) {
         const item = this.shopItems[index];
-        total += item.price * qty;
-        
         this.add.text(x - 120, displayY, `${item.icon} ${item.name} x${qty}`, {
           fontSize: '14px',
           fontFamily: 'Arial, sans-serif',
@@ -350,7 +347,7 @@ export class ShopScene extends Phaser.Scene {
     return this.shopItems.filter(item => item.type === selectedType);
   }
   
-  private filterItems(type: string): void {
+  private filterItems(_type: string): void {
     // Clear and recreate items grid
     for (const container of this.itemContainers) {
       container.destroy();

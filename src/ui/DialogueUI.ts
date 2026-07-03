@@ -79,7 +79,7 @@ export class DialogueUI {
       speaker: dialogue.lines[0]?.speaker || npcId,
       text: greetingLines,
       options: dialogue.branches ? 
-        Object.entries(dialogue.branches).map(([key, branch]) => ({
+        Object.entries(dialogue.branches).map(([_key, branch]) => ({
           text: branch.text,
           nextNode: branch.next || 'end'
         })) :
@@ -88,7 +88,7 @@ export class DialogueUI {
     
     // Add branch dialogues
     if (dialogue.branches) {
-      for (const [key, branch] of Object.entries(dialogue.branches)) {
+      Object.entries(dialogue.branches).forEach(([_key, branch]) => {
         if (branch.next) {
           const nextDialogue = getDialogue(branch.next);
           if (nextDialogue) {
@@ -100,7 +100,7 @@ export class DialogueUI {
             });
           }
         }
-      }
+      });
     }
   }
   

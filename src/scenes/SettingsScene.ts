@@ -3,7 +3,6 @@
  */
 
 import Phaser from 'phaser';
-import { gameSystems } from '../systems/GameSystems';
 
 export class SettingsScene extends Phaser.Scene {
   private masterVolume: number = 1.0;

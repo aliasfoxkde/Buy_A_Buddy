@@ -5,7 +5,6 @@
 import { 
   type GameState, 
   type Buddy, 
-  type WorkPlot,
   createInitialGameState 
 } from '../game/types';
 import { getSpawnCost, getBuddyUpgradeCost, getPlotUpgradeCost, rollRarity } from '../config/constants';

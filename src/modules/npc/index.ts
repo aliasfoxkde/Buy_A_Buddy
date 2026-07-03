@@ -3,7 +3,7 @@
  * NPC behaviors, schedules, shops, and quest giver logic
  */
 
-import { EventBus, Vector2, generateId } from '../../core';
+import { EventBus, Vector2} from '../../core';
 
 export type NPCBehavior = 'idle' | 'patrol' | 'follow' | 'wander' | 'shopkeeper' | 'quest_giver' | 'guard';
 export type NPCScheduleActivity = 'sleep' | 'wake' | 'work' | 'eat' | 'socialize' | 'worship' | 'patrol' | 'idle';

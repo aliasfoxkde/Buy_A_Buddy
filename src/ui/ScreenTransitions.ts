@@ -193,10 +193,11 @@ export class ScreenTransition {
    * Level up effect - gold pulse
    */
   public levelUpFlash(): Promise<void> {
-    return new Promise(async (resolve) => {
-      await this.colorFlash(0xfbbf24, 200);
-      this.scene.time.delayedCall(100, () => {
-        this.colorFlash(0x22c55e, 200).then(() => resolve());
+    return new Promise((resolve) => {
+      this.colorFlash(0xfbbf24, 200).then(() => {
+        this.scene.time.delayedCall(100, () => {
+          this.colorFlash(0x22c55e, 200).then(() => resolve());
+        });
       });
     });
   }
