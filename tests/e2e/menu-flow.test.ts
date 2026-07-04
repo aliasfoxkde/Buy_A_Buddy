@@ -5,7 +5,7 @@
 import { test, expect } from '@playwright/test';
 
 // Use deployed URL for testing
-const GAME_URL = 'https://fc36ccf1.buy-a-buddy.pages.dev';
+const GAME_URL = 'https://0aea4eb7.buy-a-buddy.pages.dev';
 
 /**
  * Helper to click a Phaser button via internal event emission
