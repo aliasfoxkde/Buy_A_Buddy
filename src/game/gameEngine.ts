@@ -84,11 +84,14 @@ export function createGameConfig(): GameConfig {
 export function startGame(): Phaser.Game {
   const config = createGameConfig();
   const game = new Phaser.Game(config);
-  
+
+  // Expose for debugging
+  (window as any).phaserGame = game;
+
   // Handle window resize
   window.addEventListener('resize', () => {
     game.scale.refresh();
   });
-  
+
   return game;
 }

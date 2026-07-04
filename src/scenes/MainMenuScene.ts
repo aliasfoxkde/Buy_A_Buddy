@@ -197,11 +197,10 @@ export class MainMenuScene extends Phaser.Scene {
         }
       });
     });
-    
-    this.buttons.push(container);
+
     return container;
   }
-  
+
   private updateButtonSelection(): void {
     this.buttons.forEach((btn, index) => {
       const bg = btn.getAt(0) as Phaser.GameObjects.Rectangle;
