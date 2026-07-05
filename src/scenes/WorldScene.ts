@@ -109,6 +109,10 @@ export class WorldScene extends Phaser.Scene {
   
   private speed: number = 150;
   private playerVelocity: Phaser.Math.Vector2 = new Phaser.Math.Vector2();
+
+  // Point-and-click movement
+  private moveTarget: Phaser.Math.Vector2 | null = null;
+  private clickIndicator!: Phaser.GameObjects.Arc;
   
   // UI elements
   private healthBar!: Phaser.GameObjects.Rectangle;
@@ -1196,6 +1200,14 @@ ${currentAct.narrative}`);
       // Bottom-left corner click opens menu
       if (pointer.x < 80 && pointer.y > this.scale.height - 80) {
         this.openMenu();
+        return;
+      }
+
+      // Point-and-click movement - click anywhere else to move
+      // Only if not clicking on UI elements
+      if (pointer.y > 100) { // Above the HUD area
+        this.moveTarget = new Phaser.Math.Vector2(pointer.x, pointer.y);
+        this.showClickIndicator(pointer.x, pointer.y);
       }
     });
   }
@@ -1203,6 +1215,33 @@ ${currentAct.narrative}`);
   private openMenu(): void {
     this.scene.pause();
     this.scene.launch('MenuScene');
+  }
+
+  private showClickIndicator(x: number, y: number): void {
+    // Remove old indicator
+    if (this.clickIndicator) {
+      this.clickIndicator.destroy();
+    }
+
+    // Create a ring indicator at click position
+    this.clickIndicator = this.add.circle(x, y, 15, 0x22c55e, 0.3);
+    this.clickIndicator.setStrokeStyle(3, 0x22c55e);
+    this.clickIndicator.setDepth(5);
+
+    // Animate it expanding and fading
+    this.tweens.add({
+      targets: this.clickIndicator,
+      scaleX: 1.5,
+      scaleY: 1.5,
+      alpha: 0,
+      duration: 400,
+      ease: 'Power2',
+      onComplete: () => {
+        if (this.clickIndicator) {
+          this.clickIndicator.destroy();
+        }
+      }
+    });
   }
   
   private openInventory(): void {
@@ -1559,22 +1598,44 @@ ${currentAct.narrative}`);
   
   private updatePlayerMovement(): void {
     this.playerVelocity.set(0, 0);
-    
-    // WASD / Arrow keys
-    if (this.cursors.left.isDown || this.wasd.A.isDown) {
-      this.playerVelocity.x = -this.speed;
-      this.player.setFlipX(true);
-    } else if (this.cursors.right.isDown || this.wasd.D.isDown) {
-      this.playerVelocity.x = this.speed;
-      this.player.setFlipX(false);
+
+    // Point-and-click movement (takes priority if target is set)
+    if (this.moveTarget) {
+      const dx = this.moveTarget.x - this.player.x;
+      const dy = this.moveTarget.y - this.player.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist < 10) {
+        // Arrived at target
+        this.moveTarget = null;
+      } else {
+        // Move towards target
+        const dirX = dx / dist;
+        const dirY = dy / dist;
+        this.playerVelocity.x = dirX * this.speed;
+        this.playerVelocity.y = dirY * this.speed;
+
+        // Face direction
+        if (dirX < -0.2) this.player.setFlipX(true);
+        if (dirX > 0.2) this.player.setFlipX(false);
+      }
+    } else {
+      // WASD / Arrow keys (only when not clicking to move)
+      if (this.cursors.left.isDown || this.wasd.A.isDown) {
+        this.playerVelocity.x = -this.speed;
+        this.player.setFlipX(true);
+      } else if (this.cursors.right.isDown || this.wasd.D.isDown) {
+        this.playerVelocity.x = this.speed;
+        this.player.setFlipX(false);
+      }
+
+      if (this.cursors.up.isDown || this.wasd.W.isDown) {
+        this.playerVelocity.y = -this.speed;
+      } else if (this.cursors.down.isDown || this.wasd.S.isDown) {
+        this.playerVelocity.y = this.speed;
+      }
     }
-    
-    if (this.cursors.up.isDown || this.wasd.W.isDown) {
-      this.playerVelocity.y = -this.speed;
-    } else if (this.cursors.down.isDown || this.wasd.S.isDown) {
-      this.playerVelocity.y = this.speed;
-    }
-    
+
     // Mobile controls (virtual joystick)
     if (this.mobileControls && this.mobileControls.isTouchDevice()) {
       const joystick = this.mobileControls.getOutput();
